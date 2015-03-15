@@ -12,7 +12,7 @@ namespace DotGame
     /// </summary>
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Vector2 : IEquatable<Vector2>
+    public struct Vector3 : IEquatable<Vector3>
     {
         /// <summary>
         /// Die X-Komponente des Vektors.
@@ -24,55 +24,67 @@ namespace DotGame
         /// </summary>
         public float Y;
 
+        /// <summary>
+        /// Die Z-Komponente des Vektors.
+        /// </summary>
+        public float Z;
+
         #region Konstanten
         /// <summary>
-        /// Die Größte des Vector2-Structs in Bytes.
+        /// Die Größte des Vector3-Structs in Bytes.
         /// </summary>
         public static int SizeInBytes { get { return sizeInBytes; } }
 
         /// <summary>
-        /// Vector2(0, 0).
+        /// Vector3(0, 0, 0).
         /// </summary>
-        public static Vector2 Zero { get { return zero; } }
+        public static Vector3 Zero { get { return zero; } }
         /// <summary>
-        /// Vector2(1, 0).
+        /// Vector3(1, 0, 0).
         /// </summary>
-        public static Vector2 UnitX { get { return unitX; } }
+        public static Vector3 UnitX { get { return unitX; } }
         /// <summary>
-        /// Vector2(0, 1).
+        /// Vector3(0, 1, 0).
         /// </summary>
-        public static Vector2 UnitY { get { return unitY; } }
+        public static Vector3 UnitY { get { return unitY; } }
         /// <summary>
-        /// Vector2(1, 1).
+        /// Vector3(0, 0, 1).
         /// </summary>
-        public static Vector2 One { get { return one; } }
+        public static Vector3 UnitZ { get { return unitY; } }
+        /// <summary>
+        /// Vector3(1, 1, 1).
+        /// </summary>
+        public static Vector3 One { get { return one; } }
 
         private static readonly int sizeInBytes = Marshal.SizeOf(typeof(Vector2));
-        private static readonly Vector2 zero = new Vector2(0);
-        private static readonly Vector2 unitX = new Vector2(1, 0);
-        private static readonly Vector2 unitY = new Vector2(0, 1);
-        private static readonly Vector2 one = new Vector2(1, 1);
+        private static readonly Vector3 zero = new Vector3(0);
+        private static readonly Vector3 unitX = new Vector3(1, 0, 0);
+        private static readonly Vector3 unitY = new Vector3(0, 1, 0);
+        private static readonly Vector3 one = new Vector3(3, 1, 0);
         #endregion
 
         /// <summary>
         /// Erstellt einen Vektor und setzt alle Komponenten auf value.
         /// </summary>
-        /// <param name="value">Der Wert für X und Y.</param>
-        public Vector2(float value)
+        /// <param name="value">Der Wert für X, Y und Z.</param>
+        public Vector3(float value)
         {
             this.X = value;
             this.Y = value;
+            this.Z = value;
         }
 
         /// <summary>
-        /// Erstellt einen Vektor und setzt die X und die Y Komponente.
+        /// Erstellt einen Vektor und setzt die X, Y und Z Komponenten.
         /// </summary>
-        /// <param name="x">die X Komponente.</param>
-        /// <param name="y">die Y Komponente.</param>
-        public Vector2(float x, float y)
+        /// <param name="x">Die X Komponente.</param>
+        /// <param name="y">Die Y Komponente.</param>
+        /// <param name="z">Die Z Komponente.</param>
+        public Vector3(float x, float y, float z)
         {
             this.X = x;
             this.Y = y;
+            this.Z = z;
         }
 
         /// <summary>
@@ -81,7 +93,7 @@ namespace DotGame
         /// <returns>Die Länge.</returns>
         public float Length()
         {
-            return (float)Math.Sqrt(LengthSquared()); 
+            return (float)Math.Sqrt(LengthSquared());
         }
 
         /// <summary>
@@ -90,7 +102,7 @@ namespace DotGame
         /// <returns>Die quadrierte Länge.</returns>
         public float LengthSquared()
         {
-            return X * X + Y * Y;
+            return X * X + Y * Y + Z * Z;
         }
 
         /// <summary>
@@ -101,57 +113,59 @@ namespace DotGame
             float length = Length();
             X /= length;
             Y /= length;
+            Z /= length;
         }
 
         #region Operatoren
-        public static bool operator ==(Vector2 value1, Vector2 value2)
+        public static bool operator ==(Vector3 value1, Vector3 value2)
         {
             return value1.X == value2.X
-                && value1.Y == value2.Y;
+                && value1.Y == value2.Y
+                && value1.Z == value2.Z;
         }
-        public static bool operator !=(Vector2 value1, Vector2 value2)
+        public static bool operator !=(Vector3 value1, Vector3 value2)
         {
             return !(value1 == value2);
         }
-        public static Vector2 operator +(Vector2 a)
+        public static Vector3 operator +(Vector3 a)
         {
             return a;
         }
-        public static Vector2 operator +(Vector2 a, Vector2 b)
+        public static Vector3 operator +(Vector3 a, Vector3 b)
         {
-            return new Vector2(a.X + b.X, a.Y + b.Y);
+            return new Vector3(a.X + b.X, a.Y + b.Y, b.Z + b.Y);
         }
-        public static Vector2 operator -(Vector2 a)
+        public static Vector3 operator -(Vector3 a)
         {
-            return new Vector2(-a.X, -a.Y);
+            return new Vector3(-a.X, -a.Y, -a.Z);
         }
-        public static Vector2 operator -(Vector2 a, Vector2 b)
+        public static Vector3 operator -(Vector3 a, Vector3 b)
         {
-            return new Vector2(a.X - b.X, a.Y - b.Y);
+            return new Vector3(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
-        public static Vector2 operator *(Vector2 a, Vector2 b)
+        public static Vector3 operator *(Vector3 a, Vector3 b)
         {
-            return new Vector2(a.X * b.X, a.Y * b.Y);
+            return new Vector3(a.X * b.X, a.Y * b.Y, a.Z * b.Z);
         }
-        public static Vector2 operator *(Vector2 a, float scalar)
+        public static Vector3 operator *(Vector3 a, float scalar)
         {
-            return new Vector2(a.X * scalar, a.Y * scalar);
+            return new Vector3(a.X * scalar, a.Y * scalar, a.Z * scalar);
         }
-        public static Vector2 operator /(Vector2 a, Vector2 b)
+        public static Vector3 operator /(Vector3 a, Vector3 b)
         {
-            return new Vector2(a.X / b.X, a.Y / b.Y);
+            return new Vector3(a.X / b.X, a.Y / b.Y, a.Z / b.Z);
         }
-        public static Vector2 operator /(Vector2 a, float scalar)
+        public static Vector3 operator /(Vector3 a, float scalar)
         {
-            return new Vector2(a.X / scalar, a.Y / scalar);
+            return new Vector3(a.X / scalar, a.Y / scalar, a.Z / scalar);
         }
-        public static Vector2 operator %(Vector2 a, Vector2 b)
+        public static Vector3 operator %(Vector3 a, Vector3 b)
         {
-            return new Vector2(a.X % b.X, a.Y % b.Y);
+            return new Vector3(a.X % b.X, a.Y % b.Y, a.Z % b.Z);
         }
-        public static Vector2 operator %(Vector2 a, float scalar)
+        public static Vector3 operator %(Vector3 a, float scalar)
         {
-            return new Vector2(a.X % scalar, a.Y % scalar);
+            return new Vector3(a.X % scalar, a.Y % scalar, a.Z % scalar);
         }
         #endregion
 
@@ -161,10 +175,10 @@ namespace DotGame
         /// </summary>
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
-        /// <returns>Das Minimum der Komponenten als Vector2.</returns>
-        public static Vector2 Min(Vector2 value1, Vector2 value2)
+        /// <returns>Das Minimum der Komponenten als Vector3.</returns>
+        public static Vector3 Min(Vector3 value1, Vector3 value2)
         {
-            Vector2 result;
+            Vector3 result;
             Min(ref value1, ref value2, out result);
             return result;
         }
@@ -174,11 +188,12 @@ namespace DotGame
         /// </summary>
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
-        /// <param name="result">Das Minimum der Komponenten als Vector2.</param>
-        public static void Min(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
+        /// <param name="result">Das Minimum der Komponenten als Vector3.</param>
+        public static void Min(ref Vector3 value1, ref Vector3 value2, out Vector3 result)
         {
             result.X = value1.X < value2.X ? value1.X : value2.X;
             result.Y = value1.Y < value2.Y ? value1.Y : value2.Y;
+            result.Z = value1.Z < value2.Z ? value1.Z : value2.Z;
         }
 
         /// <summary>
@@ -186,10 +201,10 @@ namespace DotGame
         /// </summary>
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
-        /// <returns>Das Maximum der Komponenten als Vector2.</returns>
-        public static Vector2 Max(Vector2 value1, Vector2 value2)
+        /// <returns>Das Maximum der Komponenten als Vector3.</returns>
+        public static Vector3 Max(Vector3 value1, Vector3 value2)
         {
-            Vector2 result;
+            Vector3 result;
             Max(ref value1, ref value2, out result);
             return result;
         }
@@ -199,11 +214,12 @@ namespace DotGame
         /// </summary>
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
-        /// <param name="result">Das Maximum der Komponenten als Vector2.</param>
-        public static void Max(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
+        /// <param name="result">Das Maximum der Komponenten als Vector3.</param>
+        public static void Max(ref Vector3 value1, ref Vector3 value2, out Vector3 result)
         {
             result.X = value1.X > value2.X ? value1.X : value2.X;
             result.Y = value1.Y > value2.Y ? value1.Y : value2.Y;
+            result.Z = value1.Z > value2.Z ? value1.Z : value2.Z;
         }
 
         /// <summary>
@@ -213,9 +229,9 @@ namespace DotGame
         /// <param name="min">Die untere Grenze.</param>
         /// <param name="max">Die obere Grenze.</param>
         /// <returns>Der Vektor im Bereich von min und max.</returns>
-        public static Vector2 Clamp(Vector2 value, Vector2 min, Vector2 max)
+        public static Vector3 Clamp(Vector3 value, Vector3 min, Vector3 max)
         {
-            Vector2 result;
+            Vector3 result;
             Clamp(ref value, ref min, ref max, out result);
             return result;
         }
@@ -227,10 +243,11 @@ namespace DotGame
         /// <param name="min">Die untere Grenze.</param>
         /// <param name="max">Die obere Grenze.</param>
         /// <returns>Der Vektor im Bereich von min und max.</returns>
-        public static void Clamp(ref Vector2 value, ref Vector2 min, ref Vector2 max, out Vector2 result)
+        public static void Clamp(ref Vector3 value, ref Vector3 min, ref Vector3 max, out Vector3 result)
         {
             result.X = value.X > min.X ? value.X < max.X ? value.X : max.X : min.X;
             result.Y = value.Y > min.Y ? value.Y < max.Y ? value.Y : max.Y : min.Y;
+            result.Z = value.Z > min.Z ? value.Z < max.Z ? value.Z : max.Z : min.Z;
         }
 
         /// <summary>
@@ -240,9 +257,9 @@ namespace DotGame
         /// <param name="value2">Der zweite Vektor.</param>
         /// <param name="amt">Der Gewichtungswert (0 = value1, 1 = value2).</param>
         /// <returns>Der interpolierte Wert.</returns>
-        public static Vector2 Lerp(Vector2 value1, Vector2 value2, float amt)
+        public static Vector3 Lerp(Vector3 value1, Vector3 value2, float amt)
         {
-            Vector2 result;
+            Vector3 result;
             Lerp(ref value1, ref value2, amt, out result);
             return result;
         }
@@ -254,11 +271,12 @@ namespace DotGame
         /// <param name="value2">Der zweite Vektor.</param>
         /// <param name="amt">Der Gewichtungswert (0 = value1, 1 = value2).</param>
         /// <returns>Der interpolierte Wert.</returns>
-        public static void Lerp(ref Vector2 value1, ref Vector2 value2, float amt, out Vector2 result)
+        public static void Lerp(ref Vector3 value1, ref Vector3 value2, float amt, out Vector3 result)
         {
             float namt = 1 - amt;
             result.X = namt * value1.X + amt * value2.X;
             result.Y = namt * value1.Y + amt * value2.Y;
+            result.Z = namt * value1.Z + amt * value2.Z;
         }
 
         /// <summary>
@@ -267,7 +285,7 @@ namespace DotGame
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
         /// <returns>Das Punktprodukt.</returns>
-        public static float Dot(Vector2 value1, Vector2 value2)
+        public static float Dot(Vector3 value1, Vector3 value2)
         {
             float result;
             Dot(ref value1, ref value2, out result);
@@ -280,9 +298,9 @@ namespace DotGame
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
         /// <returns>Das Punktprodukt.</returns>
-        public static void Dot(ref Vector2 value1, ref Vector2 value2, out float result)
+        public static void Dot(ref Vector3 value1, ref Vector3 value2, out float result)
         {
-            result = value1.X * value2.X + value1.Y * value2.Y;
+            result = value1.X * value2.X + value1.Y * value2.Y + value1.Z * value2.Z;
         }
 
         /// <summary>
@@ -291,7 +309,7 @@ namespace DotGame
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
         /// <returns>Der normalisierte Vektor.</returns>
-        public static Vector2 Normalize(Vector2 value)
+        public static Vector3 Normalize(Vector3 value)
         {
             return value / value.Length();
         }
@@ -302,7 +320,7 @@ namespace DotGame
         /// <param name="value1">Der erste Vektor.</param>
         /// <param name="value2">Der zweite Vektor.</param>
         /// <returns>Der normalisierte Vektor.</returns>
-        public static void Normalize(ref Vector2 value, out Vector2 result)
+        public static void Normalize(ref Vector3 value, out Vector3 result)
         {
             result = value / value.Length();
         }
@@ -315,15 +333,15 @@ namespace DotGame
         {
             if (obj == null)
                 return false;
-            if (obj is Vector2)
-                return Equals((Vector2)obj);
+            if (obj is Vector3)
+                return Equals((Vector3)obj);
             return false;
         }
 
         /// <inheritdoc/>
-        public bool Equals(Vector2 other)
+        public bool Equals(Vector3 other)
         {
-            return X == other.X && Y == other.Y;
+            return X == other.X && Y == other.Y && Z == other.Z;
         }
 
         /// <inheritdoc/>
@@ -334,6 +352,7 @@ namespace DotGame
                 int hash = 17;
                 hash = hash * 23 + X.GetHashCode();
                 hash = hash * 23 + Y.GetHashCode();
+                hash = hash * 23 + Z.GetHashCode();
                 return hash;
             }
         }
@@ -346,6 +365,8 @@ namespace DotGame
             builder.Append(X);
             builder.Append(", Y: ");
             builder.Append(Y);
+            builder.Append(", Z: ");
+            builder.Append(Z);
             builder.Append("]");
 
             return builder.ToString();

@@ -47,5 +47,17 @@ namespace DotGame.Common.Tests
             Assert.AreEqual(result1, vec1 - vec2);
             Assert.AreEqual(result2, vec2 - vec1);
         }
+
+        [TestMethod]
+        public void TestVector2Methods()
+        {
+            Vector2 vec1 = new Vector2(4, 4);
+            Vector2 vec2 = Vector2.UnitX * 3;
+
+            Assert.AreEqual(Vector2.Clamp(vec1, Vector2.Zero, Vector2.UnitY), Vector2.UnitY);
+            Assert.AreEqual(Vector2.Clamp(vec2, Vector2.One, new Vector2(3, 2)), new Vector2(3, 1));
+
+            Assert.AreEqual(Vector2.Dot(new Vector2(1, 0), new Vector2(0, 1)), 0);
+        }
     }
 }
