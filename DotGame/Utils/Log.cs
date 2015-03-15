@@ -7,21 +7,21 @@ using System.Threading.Tasks;
 namespace DotGame.Utils
 {
     /// <summary>
-    /// Stellt verschiedene Funktionen für den Log bereit
+    /// Stellt verschiedene Funktionen für den Log bereit.
     /// </summary>
     public static class Log
     {
         /// <summary>
-        /// das Level ab dem Nachrichten im Log angezeigt werden
+        /// Das Level ab dem Nachrichten im Log angezeigt werden.
         /// Standard: LogLevel.Verbose
         /// </summary>
         public static LogLevel LevelMinimum { get; set; }
 
         /// <summary>
-        /// Schreibt eine Nachricht in den Log
+        /// Schreibt eine Nachricht in den Log.
         /// </summary>
-        /// <param name="level">das Level für die Nachricht</param>
-        /// <param name="message">die Nachricht</param>
+        /// <param name="level">Das Level für die Nachricht</param>
+        /// <param name="message">Die Nachricht</param>
         public static void Write(LogLevel level, string message)
         {
             if (message == null)
@@ -32,11 +32,11 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Schreibt eine formattierte Nachricht in den Log
+        /// Schreibt eine formattierte Nachricht in den Log.
         /// </summary>
-        /// <param name="level">das Level für die Nachricht</param>
-        /// <param name="format">das Format der Nachricht</param>
-        /// <param name="args">die Argumente für das Format</param>
+        /// <param name="level">Das Level für die Nachricht</param>
+        /// <param name="format">Das Format der Nachricht</param>
+        /// <param name="args">Die Argumente für das Format</param>
         public static void Write(LogLevel level, string format, params object[] args)
         {
             if (format == null)
@@ -48,9 +48,9 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Ruft Log.Write(LogLevel.Verbose, message) auf
+        /// Ruft Log.Write(LogLevel.Verbose, message) auf.
         /// </summary>
-        /// <param name="message">die Nachricht</param>
+        /// <param name="message">Die Nachricht</param>
         public static void Verbose(string message)
         {
             if (message == null)
@@ -60,9 +60,9 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Ruft Log.Write(LogLevel.Debug, message) auf
+        /// Ruft Log.Write(LogLevel.Debug, message) auf.
         /// </summary>
-        /// <param name="message">die Nachricht</param>
+        /// <param name="message">Die Nachricht</param>
         public static void Debug(string message)
         {
             if (message == null)
@@ -72,9 +72,9 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Ruft Log.Write(LogLevel.Info, message) auf
+        /// Ruft Log.Write(LogLevel.Info, message) auf.
         /// </summary>
-        /// <param name="message">die Nachricht</param>
+        /// <param name="message">Die Nachricht</param>
         public static void Info(string message)
         {
             if (message == null)
@@ -84,9 +84,9 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Ruft Log.Write(LogLevel.Warning, message) auf
+        /// Ruft Log.Write(LogLevel.Warning, message) auf.
         /// </summary>
-        /// <param name="message">die Nachricht</param>
+        /// <param name="message">Die Nachricht</param>
         public static void Warning(string message)
         {
             if (message == null)
@@ -96,9 +96,9 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Ruft Log.Write(LogLevel.Error, message) auf
+        /// Ruft Log.Write(LogLevel.Error, message) auf.
         /// </summary>
-        /// <param name="message">die Nachricht</param>
+        /// <param name="message">Die Nachricht</param>
         public static void Error(string message)
         {
             if (message == null)
@@ -107,6 +107,74 @@ namespace DotGame.Utils
             Write(LogLevel.Error, message);
         }
 
-        // TODO (henrik1235) Überladungen für Verbose, Debug, Info, etc mit format + args einbauen
+        /// <summary>
+        /// Ruft Log.Write(LogLevel.Verbose, format, args) auf.
+        /// </summary>
+        /// <param name="message">Die Nachricht</param>
+        public static void Verbose(string format, params object[] args)
+        {
+            if (format == null)
+                throw new ArgumentNullException("format");
+            if (args == null)
+                throw new ArgumentNullException("args");
+
+            Write(LogLevel.Verbose, format, args);
+        }
+
+        /// <summary>
+        /// Ruft Log.Write(LogLevel.Debug, format, args) auf.
+        /// </summary>
+        /// <param name="message">Die Nachricht</param>
+        public static void Debug(string format, params object[] args)
+        {
+            if (format == null)
+                throw new ArgumentNullException("format");
+            if (args == null)
+                throw new ArgumentNullException("args");
+
+            Write(LogLevel.Debug, format, args);
+        }
+
+        /// <summary>
+        /// Ruft Log.Write(LogLevel.Info, format, args) auf.
+        /// </summary>
+        /// <param name="message">Die Nachricht</param>
+        public static void Info(string format, params object[] args)
+        {
+            if (format == null)
+                throw new ArgumentNullException("format");
+            if (args == null)
+                throw new ArgumentNullException("args");
+
+            Write(LogLevel.Info, format, args);
+        }
+
+        /// <summary>
+        /// Ruft Log.Write(LogLevel.Warning, format, args) auf.
+        /// </summary>
+        /// <param name="message">Die Nachricht</param>
+        public static void Warning(string format, params object[] args)
+        {
+            if (format == null)
+                throw new ArgumentNullException("format");
+            if (args == null)
+                throw new ArgumentNullException("args");
+
+            Write(LogLevel.Warning, format, args);
+        }
+
+        /// <summary>
+        /// Ruft Log.Write(LogLevel.Error, format, args) auf.
+        /// </summary>
+        /// <param name="message">Die Nachricht</param>
+        public static void Error(string format, params object[] args)
+        {
+            if (format == null)
+                throw new ArgumentNullException("format");
+            if (args == null)
+                throw new ArgumentNullException("args");
+
+            Write(LogLevel.Error, format, args);
+        }
     }
 }

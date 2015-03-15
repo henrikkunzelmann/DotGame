@@ -7,17 +7,17 @@ using System.Threading.Tasks;
 namespace DotGame.Graphics
 {
     /// <summary>
-    /// Stellt eine zweidimensionale Texture dar
+    /// Stellt eine zweidimensionale Texture dar.
     /// </summary>
     public interface ITexture2D : IDisposable
     {
         /// <summary>
-        /// die Breite der Texture
+        /// Die Breite der Texture.
         /// </summary>
         int Width { get; }
 
         /// <summary>
-        /// die Höhe der Texture
+        /// Die Höhe der Texture.
         /// </summary>
         int Height { get; }
     }

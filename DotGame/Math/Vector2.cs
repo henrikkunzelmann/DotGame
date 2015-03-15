@@ -15,28 +15,82 @@ namespace DotGame
     public struct Vector2 : IEquatable<Vector2>
     {
         /// <summary>
-        /// Die X-Komponente.
+        /// Die X-Komponente des Vektors.
         /// </summary>
         public float X;
 
         /// <summary>
-        /// Die Y-Komponente.
+        /// Die Y-Komponente des Vektors.
         /// </summary>
         public float Y;
 
+        public float Length
+        {
+            get { return (float)Math.Sqrt(LengthSquared); }
+        }
+
+        public float LengthSquared
+        {
+            get { return X * X + Y * Y; }
+        }
+
         #region Konstanten
+        /// <summary>
+        /// Die Größte des Vector2-Structs in Bytes.
+        /// </summary>
         public static int SizeInBytes { get { return sizeInBytes; } }
+
+        /// <summary>
+        /// Ein Vektor mit X und Y auf 0 gesetzt.
+        /// </summary>
         public static Vector2 Zero { get { return zero; } }
+        /// <summary>
+        /// Ein Vektor mit X auf 1 und Y auf 0 gesetzt.
+        /// </summary>
         public static Vector2 UnitX { get { return unitX; } }
+        /// <summary>
+        /// Ein Vektor mit X auf 0 und Y auf 1 gesetzt.
+        /// </summary>
         public static Vector2 UnitY { get { return unitY; } }
+        /// <summary>
+        /// Ein Vektor mit X und Y auf 1 gesetzt.
+        /// </summary>
         public static Vector2 One { get { return one; } }
 
-        private static int sizeInBytes = Marshal.SizeOf(new Vector2()); // Hardcode?
-        private static Vector2 zero = new Vector2(0);
-        private static Vector2 unitX = new Vector2(1, 0);
-        private static Vector2 unitY = new Vector2(0, 1);
-        private static Vector2 one = new Vector2(1, 1);
+        private static readonly int sizeInBytes = Marshal.SizeOf(typeof(Vector2));
+        private static readonly Vector2 zero = new Vector2(0);
+        private static readonly Vector2 unitX = new Vector2(1, 0);
+        private static readonly Vector2 unitY = new Vector2(0, 1);
+        private static readonly Vector2 one = new Vector2(1, 1);
         #endregion
+
+        /// <summary>
+        /// Erstellt einen Vektor und setzt die X und die Y Komponente auf den Wert value
+        /// </summary>
+        /// <param name="value">den Wert für X und Y</param>
+        public Vector2(float value)
+        {
+            this.X = value;
+            this.Y = value;
+        }
+
+        /// <summary>
+        /// Erstellt einen Vektor und setzt die X und die Y Komponente
+        /// </summary>
+        /// <param name="x">die X Komponente</param>
+        /// <param name="y">die Y Komponente</param>
+        public Vector2(float x, float y)
+        {
+            this.X = x;
+            this.Y = y;
+        }
+
+        public void Normalize()
+        {
+            float length = Length;
+            X /= length;
+            Y /= length;
+        }
 
         #region Operatoren
         public static bool operator ==(Vector2 value1, Vector2 value2)
@@ -91,24 +145,50 @@ namespace DotGame
         #endregion
 
         #region Statische Methoden
+        /// <summary>
+        /// Gibt das Minimum zweiter Vektoren zurück.
+        /// </summary>
+        /// <param name="value1">Der erste Vektor</param>
+        /// <param name="value2">Der zweite Vektor</param>
+        /// <returns>Das Minimum der X und Y Komponenten als Vector2.</returns>
         public static Vector2 Min(Vector2 value1, Vector2 value2)
         {
             Vector2 result;
             Min(ref value1, ref value2, out result);
             return result;
         }
+
+        /// <summary>
+        /// Gibt das Minimum zweiter Vektoren zurück.
+        /// </summary>
+        /// <param name="value1">Der erste Vektor</param>
+        /// <param name="value2">Der zweite Vektor</param>
+        /// <param name="result">Das Minimum der X und Y Komponenten als Vector2.</param>
         public static void Min(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
         {
             result.X = value1.X < value2.X ? value1.X : value2.X;
             result.Y = value1.Y < value2.Y ? value1.Y : value2.Y;
         }
 
+        /// <summary>
+        /// Gibt das Maximum zweiter Vektoren zurück.
+        /// </summary>
+        /// <param name="value1">Der erste Vektor</param>
+        /// <param name="value2">Der zweite Vektor</param>
+        /// <returns>Das Maximum der X und Y Komponenten als Vector2.</returns>
         public static Vector2 Max(Vector2 value1, Vector2 value2)
         {
             Vector2 result;
             Max(ref value1, ref value2, out result);
             return result;
         }
+
+        /// <summary>
+        /// Gibt das Maximum zweiter Vektoren zurück.
+        /// </summary>
+        /// <param name="value1">Der erste Vektor</param>
+        /// <param name="value2">Der zweite Vektor</param>
+        /// <param name="result">Das Maximum der X und Y Komponenten als Vector2.</param>
         public static void Max(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
         {
             result.X = value1.X > value2.X ? value1.X : value2.X;
@@ -152,39 +232,18 @@ namespace DotGame
             result = value1.X * value2.X + value1.Y * value2.Y;
         }
 
+        public static Vector2 Normalize(Vector2 value)
+        {
+            return value / value.Length;
+        }
+
+        public static void Normalize(ref Vector2 value, out Vector2 result)
+        {
+            result = value / value.Length;
+        }
+
         // TODO: Transform + noch mehr Methoden.
         #endregion
-
-        /// <summary>
-        /// Erstellt einen Vektor und setzt die X und die Y Komponente auf den Wert value
-        /// </summary>
-        /// <param name="value">den Wert für X und Y</param>
-        public Vector2(float value)
-        {
-            this.X = value;
-            this.Y = value;
-        }
-
-        /// <summary>
-        /// Erstellt einen Vektor und setzt die X und die Y Komponente
-        /// </summary>
-        /// <param name="X">die X Komponente</param>
-        /// <param name="Y">die Y Komponente</param>
-        public Vector2(float X, float Y)
-        {
-            this.X = X;
-            this.Y = Y;
-        }
-
-        public float Length()
-        {
-            return (float)Math.Sqrt(X * X + Y * Y);
-        }
-
-        public float LengthSquared()
-        {
-            return X * X + Y * Y;
-        }
 
         public override bool Equals(object obj)
         {

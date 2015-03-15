@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotGame.Graphics.OpenGL4
+namespace DotGame.OpenGL4
 {
     public class GraphicsDevice
     {

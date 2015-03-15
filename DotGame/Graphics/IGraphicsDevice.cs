@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DotGame.Graphics
 {
     /// <summary>
-    /// Stellt das GraphicsDevice dar, üblicherweise die GPU
+    /// Stellt das GraphicsDevice dar, üblicherweise die GPU.
     /// </summary>
     public interface IGraphicsDevice : IDisposable
     {

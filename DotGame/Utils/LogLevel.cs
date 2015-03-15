@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace DotGame.Utils
 {
     /// <summary>
-    /// Gibt die verschiedene Level für die Einträge an
+    /// Gibt die verschiedene Level für die Einträge an.
     /// </summary>
     public enum LogLevel
     {
