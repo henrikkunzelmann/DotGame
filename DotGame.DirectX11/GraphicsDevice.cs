@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotGame.DirectX
+namespace DotGame.DirectX11
 {
     public class GraphicsDevice
     {
