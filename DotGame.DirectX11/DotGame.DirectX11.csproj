@@ -58,13 +58,13 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\DotGame\DotGame.csproj">
-      <Project>{f797a1bf-58c2-47b8-a089-72b27295de1b}</Project>
-      <Name>DotGame</Name>
-    </ProjectReference>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
-    <None Include="packages.config" />
+    <ProjectReference Include="..\DotGame.Common\DotGame.Common.csproj">
+      <Project>{002fb72c-ea2d-4fda-9960-7c5eb47face6}</Project>
+      <Name>DotGame.Common</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SharpDX.2.6.3\build\SharpDX.targets" Condition="Exists('..\packages\SharpDX.2.6.3\build\SharpDX.targets')" />

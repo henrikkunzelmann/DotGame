@@ -24,16 +24,6 @@ namespace DotGame
         /// </summary>
         public float Y;
 
-        public float Length
-        {
-            get { return (float)Math.Sqrt(LengthSquared); }
-        }
-
-        public float LengthSquared
-        {
-            get { return X * X + Y * Y; }
-        }
-
         #region Konstanten
         /// <summary>
         /// Die Größte des Vector2-Structs in Bytes.
@@ -85,9 +75,19 @@ namespace DotGame
             this.Y = y;
         }
 
+        public float Length()
+        {
+            return (float)Math.Sqrt(LengthSquared()); 
+        }
+
+        public float LengthSquared()
+        {
+            return X * X + Y * Y;
+        }
+
         public void Normalize()
         {
-            float length = Length;
+            float length = Length();
             X /= length;
             Y /= length;
         }
@@ -234,12 +234,12 @@ namespace DotGame
 
         public static Vector2 Normalize(Vector2 value)
         {
-            return value / value.Length;
+            return value / value.Length();
         }
 
         public static void Normalize(ref Vector2 value, out Vector2 result)
         {
-            result = value / value.Length;
+            result = value / value.Length();
         }
 
         // TODO: Transform + noch mehr Methoden.

@@ -42,6 +42,12 @@
     <Compile Include="GraphicsDevice.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\DotGame.Common\DotGame.Common.csproj">
+      <Project>{002fb72c-ea2d-4fda-9960-7c5eb47face6}</Project>
+      <Name>DotGame.Common</Name>
+    </ProjectReference>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.
