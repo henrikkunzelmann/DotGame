@@ -3,23 +3,157 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
-namespace DotGame.Math
+namespace DotGame
 {
     /// <summary>
-    /// Ein Vektor mit zwei Komponenten
+    /// Ein Vektor mit zwei Komponenten.
     /// </summary>
-    public struct Vector2
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Vector2 : IEquatable<Vector2>
     {
         /// <summary>
-        /// Die X-Komponente
+        /// Die X-Komponente.
         /// </summary>
         public float X;
 
         /// <summary>
-        /// Die Y-Komponente
+        /// Die Y-Komponente.
         /// </summary>
         public float Y;
+
+        #region Konstanten
+        public static int SizeInBytes { get { return sizeInBytes; } }
+        public static Vector2 Zero { get { return zero; } }
+        public static Vector2 UnitX { get { return unitX; } }
+        public static Vector2 UnitY { get { return unitY; } }
+        public static Vector2 One { get { return one; } }
+
+        private static int sizeInBytes = Marshal.SizeOf(new Vector2()); // Hardcode?
+        private static Vector2 zero = new Vector2(0);
+        private static Vector2 unitX = new Vector2(1, 0);
+        private static Vector2 unitY = new Vector2(0, 1);
+        private static Vector2 one = new Vector2(1, 1);
+        #endregion
+
+        #region Operatoren
+        public static bool operator ==(Vector2 value1, Vector2 value2)
+        {
+            return value1.X == value2.X
+                && value1.Y == value2.Y;
+        }
+        public static bool operator !=(Vector2 value1, Vector2 value2)
+        {
+            return !(value1 == value2);
+        }
+        public static Vector2 operator +(Vector2 a)
+        {
+            return a;
+        }
+        public static Vector2 operator +(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.X + b.X, a.Y + b.Y);
+        }
+        public static Vector2 operator -(Vector2 a)
+        {
+            return new Vector2(-a.X, -a.Y);
+        }
+        public static Vector2 operator -(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.X - b.X, a.Y - b.Y);
+        }
+        public static Vector2 operator *(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.X * b.X, a.Y * b.Y);
+        }
+        public static Vector2 operator *(Vector2 a, float scalar)
+        {
+            return new Vector2(a.X * scalar, a.Y * scalar);
+        }
+        public static Vector2 operator /(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.X / b.X, a.Y / b.Y);
+        }
+        public static Vector2 operator /(Vector2 a, float scalar)
+        {
+            return new Vector2(a.X / scalar, a.Y / scalar);
+        }
+        public static Vector2 operator %(Vector2 a, Vector2 b)
+        {
+            return new Vector2(a.X % b.X, a.Y % b.Y);
+        }
+        public static Vector2 operator %(Vector2 a, float scalar)
+        {
+            return new Vector2(a.X % scalar, a.Y % scalar);
+        }
+        #endregion
+
+        #region Statische Methoden
+        public static Vector2 Min(Vector2 value1, Vector2 value2)
+        {
+            Vector2 result;
+            Min(ref value1, ref value2, out result);
+            return result;
+        }
+        public static void Min(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
+        {
+            result.X = value1.X < value2.X ? value1.X : value2.X;
+            result.Y = value1.Y < value2.Y ? value1.Y : value2.Y;
+        }
+
+        public static Vector2 Max(Vector2 value1, Vector2 value2)
+        {
+            Vector2 result;
+            Max(ref value1, ref value2, out result);
+            return result;
+        }
+        public static void Max(ref Vector2 value1, ref Vector2 value2, out Vector2 result)
+        {
+            result.X = value1.X > value2.X ? value1.X : value2.X;
+            result.Y = value1.Y > value2.Y ? value1.Y : value2.Y;
+        }
+
+        public static Vector2 Clamp(Vector2 value, Vector2 min, Vector2 max)
+        {
+            Vector2 result;
+            Clamp(ref value, ref min, ref max, out result);
+            return result;
+        }
+        public static void Clamp(ref Vector2 value, ref Vector2 min, ref Vector2 max, out Vector2 result)
+        {
+            result.X = value.X > min.X ? value.X < max.X ? value.X : max.X : min.X;
+            result.Y = value.Y > min.Y ? value.Y < max.Y ? value.Y : max.Y : min.Y;
+        }
+
+        public static Vector2 Lerp(Vector2 value1, Vector2 value2, float amt)
+        {
+            Vector2 result;
+            Lerp(ref value1, ref value2, amt, out result);
+            return result;
+        }
+        public static void Lerp(ref Vector2 value1, ref Vector2 value2, float amt, out Vector2 result)
+        {
+            float namt = 1 - amt;
+            result.X = namt * value1.X + amt * value2.X;
+            result.Y = namt * value1.Y + amt * value2.Y;
+        }
+
+        public static float Dot(Vector2 value1, Vector2 value2)
+        {
+            float result;
+            Dot(ref value1, ref value2, out result);
+            return result;
+        }
+
+        public static void Dot(ref Vector2 value1, ref Vector2 value2, out float result)
+        {
+            result = value1.X * value2.X + value1.Y * value2.Y;
+        }
+
+        // TODO: Transform + noch mehr Methoden.
+        #endregion
 
         /// <summary>
         /// Erstellt einen Vektor und setzt die X und die Y Komponente auf den Wert value
@@ -42,6 +176,16 @@ namespace DotGame.Math
             this.Y = Y;
         }
 
+        public float Length()
+        {
+            return (float)Math.Sqrt(X * X + Y * Y);
+        }
+
+        public float LengthSquared()
+        {
+            return X * X + Y * Y;
+        }
+
         public override bool Equals(object obj)
         {
             if (obj == null)
@@ -51,22 +195,32 @@ namespace DotGame.Math
             return false;
         }
 
-        public bool Equals(Vector2 vec)
+        public bool Equals(Vector2 other)
         {
-            return X == vec.X && Y == vec.Y;
+            return X == other.X && Y == other.Y;
         }
 
         public override int GetHashCode()
         {
-            int hash = 17;
-            hash = hash * 23 + X.GetHashCode();
-            hash = hash * 23 + Y.GetHashCode();
-            return hash;
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + X.GetHashCode();
+                hash = hash * 23 + Y.GetHashCode();
+                return hash;
+            }
         }
 
         public override string ToString()
         {
-            return string.Format("[X: {0}, Y: {1}]", X, Y);
+            var builder = new StringBuilder();
+            builder.Append("[X: ");
+            builder.Append(X);
+            builder.Append(", Y: ");
+            builder.Append(Y);
+            builder.Append("]");
+
+            return builder.ToString();
         }
     }
 }
