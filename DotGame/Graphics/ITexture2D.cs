@@ -14,11 +14,11 @@ namespace DotGame.Graphics
         /// <summary>
         /// die Breite der Texture
         /// </summary>
-        public int Width { get; }
+        int Width { get; }
 
         /// <summary>
         /// die Höhe der Texture
         /// </summary>
-        public int Height { get; }
+        int Height { get; }
     }
 }
