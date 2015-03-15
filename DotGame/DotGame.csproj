@@ -50,10 +50,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Graphics\Direct3D11\GraphicsDevice.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />
+    <Compile Include="Graphics\ITexture2D.cs" />
     <Compile Include="Graphics\Null\GraphicsDevice.cs" />
-    <Compile Include="Graphics\OpenGL\GraphicsDevice.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />

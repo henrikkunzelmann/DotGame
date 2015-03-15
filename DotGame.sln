@@ -5,6 +5,10 @@ VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame", "DotGame\DotGame.csproj", "{F797A1BF-58C2-47B8-A089-72B27295DE1B}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGameDirectX", "DotGameDirectX\DotGameDirectX.csproj", "{33A153EC-3217-464A-BF33-E6882CB643FC}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGameOpenGL", "DotGameOpenGL\DotGameOpenGL.csproj", "{73DB03A7-9890-4C33-A266-D6DF5C15ACCF}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -15,6 +19,14 @@ Global
 		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{33A153EC-3217-464A-BF33-E6882CB643FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{33A153EC-3217-464A-BF33-E6882CB643FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{33A153EC-3217-464A-BF33-E6882CB643FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{33A153EC-3217-464A-BF33-E6882CB643FC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{73DB03A7-9890-4C33-A266-D6DF5C15ACCF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{73DB03A7-9890-4C33-A266-D6DF5C15ACCF}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{73DB03A7-9890-4C33-A266-D6DF5C15ACCF}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{73DB03A7-9890-4C33-A266-D6DF5C15ACCF}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
