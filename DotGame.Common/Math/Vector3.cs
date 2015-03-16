@@ -309,6 +309,34 @@ namespace DotGame
             result = value1.X * value2.X + value1.Y * value2.Y + value1.Z * value2.Z;
         }
 
+		/// <summary>
+        /// Gibt das Kreuzprodukt der angegebenen Vektoren zurück. Dies ist die rechtshändige Senkrechte auf der von value1 und value2 definierten Ebene.
+        /// </summary>
+        /// <param name="value1">Der erste Vektor.</param>
+        /// <param name="value2">Der zweite Vektor.</param>
+        /// <returns>Das Kreuzprodukt.</returns>
+        public static Vector3 Cross(Vector3 vector1, Vector3 vector2)
+        {
+            Cross(ref vector1, ref vector2, out vector1);
+            return vector1;
+        }
+
+		/// <summary>
+        /// Gibt das Kreuzprodukt der angegebenen Vektoren zurück. Dies ist die rechtshändige Senkrechte auf der von value1 und value2 definierten Ebene.
+        /// </summary>
+        /// <param name="value1">Der erste Vektor.</param>
+        /// <param name="value2">Der zweite Vektor.</param>
+        /// <returns>Das Kreuzprodukt.</returns>
+        public static void Cross(ref Vector3 vector1, ref Vector3 vector2, out Vector3 result)
+        {
+            var x = vector1.Y * vector2.Z - vector2.Y * vector1.Z;
+            var y = -(vector1.X * vector2.Z - vector2.X * vector1.Z);
+            var z = vector1.X * vector2.Y - vector2.X * vector1.Y;
+            result.X = x;
+            result.Y = y;
+            result.Z = z;
+        }
+
         /// <summary>
         /// Normalisiert den angegebenen Vektor. Seine Länge beträgt danach 1.
         /// </summary>

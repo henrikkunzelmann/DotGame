@@ -48,12 +48,12 @@
     <Compile Include="Graphics\IVertexBuffer.cs" />
     <Compile Include="IGameWindow.cs" />
     <Compile Include="Math\Quaternion.cs" />
+    <Compile Include="Math\Vector2.cs">
+      <DependentUpon>Vector.tt</DependentUpon>
+    </Compile>
     <Compile Include="Math\Vector.cs">
       <AutoGen>True</AutoGen>
       <DesignTime>True</DesignTime>
-      <DependentUpon>Vector.tt</DependentUpon>
-    </Compile>
-    <Compile Include="Math\Vector2.cs">
       <DependentUpon>Vector.tt</DependentUpon>
     </Compile>
     <Compile Include="Math\Vector3.cs">
@@ -62,6 +62,8 @@
     <Compile Include="Math\Vector4.cs">
       <DependentUpon>Vector.tt</DependentUpon>
     </Compile>
+    <Compile Include="Math\Viewport.cs" />
+    <Compile Include="Math\Matrix4.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\LogLevel.cs" />
@@ -69,6 +71,7 @@
     <Compile Include="Utils\RandomUtils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Math\Manager.ttinclude" />
     <None Include="Math\Vector.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Vector.cs</LastGenOutput>
