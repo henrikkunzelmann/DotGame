@@ -32,6 +32,7 @@
   <ItemGroup>
     <Reference Include="System" />
     <Reference Include="System.Core" />
+    <Reference Include="System.Drawing" />
     <Reference Include="System.Xml.Linq" />
     <Reference Include="System.Data.DataSetExtensions" />
     <Reference Include="Microsoft.CSharp" />
@@ -39,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Graphics\Color.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />
     <Compile Include="Graphics\IIndexBuffer.cs" />
     <Compile Include="Graphics\ITexture3D.cs" />
@@ -58,9 +60,11 @@
     <Compile Include="Math\Vector4.cs">
       <DependentUpon>Vector.tt</DependentUpon>
     </Compile>
+	<Compile Include="Math\Quaternion.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Utils\Log.cs" />
     <Compile Include="Utils\LogLevel.cs" />
+    <Compile Include="Math\MathHelper.cs" />
     <Compile Include="Utils\RandomUtils.cs" />
   </ItemGroup>
   <ItemGroup>
