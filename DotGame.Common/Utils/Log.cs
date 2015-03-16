@@ -27,8 +27,12 @@ namespace DotGame.Utils
             if (message == null)
                 throw new ArgumentNullException("message");
 
-            if (level >= LevelMinimum) // alle Einträge die unter dem Minimum fallen ignoreren
-                Console.WriteLine("[{0}] ({1}) {2}", DateTime.Now.ToLongTimeString(), level.ToString(), message);
+            if (level >= LevelMinimum)// alle Einträge die unter dem Minimum fallen ignoreren
+            {
+                string formattedMessage = string.Format("[{0}] {1} {2}\r\n", DateTime.Now.ToLongTimeString(), ("(" + level.ToString() + ")").PadRight(10), message);
+                Console.Write(formattedMessage);
+                System.Diagnostics.Debug.Write(formattedMessage);
+            }
         }
 
         /// <summary>
@@ -175,6 +179,20 @@ namespace DotGame.Utils
                 throw new ArgumentNullException("args");
 
             Write(LogLevel.Error, format, args);
+        }
+
+
+        /// <summary>
+        /// Schreibt alle Felder des Objekts obj in den Log.
+        /// </summary>
+        /// <param name="level">Das LogLevel welches benutzt werden soll.</param>
+        /// <param name="obj">Das Objekt mit den Feldern die in den Log geschrieben werden sollen.</param>
+        public static void WriteFields(LogLevel level, object obj)
+        {
+            var fields = obj.GetType().GetFields();
+            Log.Write(level, "All fields for {0}: [n: {1}]", obj.GetType().FullName, fields.Length);
+            foreach (var field in fields)
+                Log.Write(level, "\t{0} = {1}", field.Name, field.GetValue(obj));
         }
     }
 }
