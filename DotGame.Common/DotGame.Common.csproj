@@ -46,6 +46,7 @@
     <Compile Include="Graphics\ITexture3D.cs" />
     <Compile Include="Graphics\ITexture2D.cs" />
     <Compile Include="Graphics\IVertexBuffer.cs" />
+    <Compile Include="IGameWindow.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs" />
     <Compile Include="Math\Vector3.cs" />
