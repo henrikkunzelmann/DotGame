@@ -190,7 +190,7 @@ namespace DotGame.Utils
         public static void WriteFields(LogLevel level, object obj)
         {
             var fields = obj.GetType().GetFields();
-            Log.Write(level, "All fields for {0}: [n: {1}]", obj.GetType().FullName, fields.Length);
+            Log.Write(level, "All fields for {0} [n: {1}]:", obj.GetType().FullName, fields.Length);
             foreach (var field in fields)
                 Log.Write(level, "\t{0} = {1}", field.Name, field.GetValue(obj));
         }

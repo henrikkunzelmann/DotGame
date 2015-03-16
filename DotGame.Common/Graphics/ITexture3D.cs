@@ -25,5 +25,15 @@ namespace DotGame.Graphics
         /// Die Länge der Texture.
         /// </summary>
         int Length { get; }
+
+        /// <summary>
+        /// Die Anzahl der MipMap Level der Texture.
+        /// </summary>
+        int MipLevels { get; }
+
+        /// <summary>
+        /// Das Format der Texture.
+        /// </summary>
+        TextureFormat Format { get; }
     }
 }

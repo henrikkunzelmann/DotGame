@@ -7,10 +7,9 @@ using System.Threading.Tasks;
 namespace DotGame.Graphics
 {
     /// <summary>
-    /// Stellt das GraphicsDevice dar, üblicherweise die GPU.
+    /// Eine Texture auf der gezeichnet werden kann.
     /// </summary>
-    public interface IGraphicsDevice : IDisposable
+    public interface IRenderTarget2D : ITexture2D
     {
-        IGraphicsFactory Factory { get; }
     }
 }

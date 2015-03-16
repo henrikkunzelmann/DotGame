@@ -3,10 +3,13 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Runtime.InteropServices;
 
 namespace DotGame.Graphics
 {
-    public struct Color
+    [Serializable]
+    [StructLayout(LayoutKind.Sequential)]
+    public struct Color : IEquatable<Color>
     {
         public float R;
         public float G;
@@ -44,6 +47,46 @@ namespace DotGame.Graphics
                              color1.B + color2.B,
                              color1.A + color2.A);
         }*/
+
+        public override bool Equals(object obj)
+        {
+            if (obj is Color)
+                return Equals((Color)obj);
+            return false;
+        }
+
+        public bool Equals(Color color)
+        {
+            return R == color.R && G == color.G && B == color.B && A == color.A;
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + R.GetHashCode();
+                hash = hash * 23 + G.GetHashCode();
+                hash = hash * 23 + B.GetHashCode();
+                hash = hash * 23 + A.GetHashCode();
+                return hash;
+            }
+        }
+
+        public override string ToString()
+        {
+            StringBuilder str = new StringBuilder();
+            str.Append("[R: ");
+            str.Append(R);
+            str.Append(", G:");
+            str.Append(G);
+            str.Append(", B:");
+            str.Append(B);
+            str.Append(", A:");
+            str.Append(A);
+            str.Append("]");
+            return str.ToString();
+        }
 
         public static Color Lerp(Color color1, Color color2, float value)
         {
