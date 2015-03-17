@@ -40,6 +40,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />
     <Compile Include="Graphics\IGraphicsFactory.cs" />

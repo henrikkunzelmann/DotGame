@@ -8,6 +8,8 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DotGame;
+using DotGame.Graphics;
+using Color = DotGame.Graphics.Color;
 
 namespace DotGame.Test
 {
@@ -19,13 +21,27 @@ namespace DotGame.Test
         {
             InitializeComponent();
 
-            Engine = new Engine(new DotGame.Windows.GameWindow(this));
+            var props = typeof(Color).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
+            foreach (var prop in props)
+            {
+                comboBox1.Items.Add(prop.GetValue(null));
+                comboBox1.SelectedItem = Color.CornflowerBlue;
+            }
+            comboBox1.Update();
+
+            Engine = new Engine(new DotGame.Windows.GameWindow(splitContainer1.Panel1));
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
             Engine.Dispose();
             base.OnFormClosing(e);
+        }
+
+        private void timer1_Tick(object sender, EventArgs e)
+        {
+            Engine.Window.GraphicsDevice.Clear((Color)comboBox1.SelectedItem);
+            Engine.Window.GraphicsDevice.SwapBuffers();
         }
     }
 }

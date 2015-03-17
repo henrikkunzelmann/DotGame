@@ -22,6 +22,16 @@ namespace DotGame.Null
             get { throw new NotImplementedException(); }
         }
 
+        public void Clear(Color color)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SwapBuffers()
         {
             throw new NotImplementedException();
@@ -30,6 +40,36 @@ namespace DotGame.Null
         public void Dispose()
         {
 
+        }
+
+        bool IGraphicsDevice.IsDisposed
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        IGraphicsFactory IGraphicsDevice.Factory
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        void IGraphicsDevice.Clear(Color color)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IGraphicsDevice.Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
+        {
+            throw new NotImplementedException();
+        }
+
+        void IGraphicsDevice.SwapBuffers()
+        {
+            throw new NotImplementedException();
+        }
+
+        void IDisposable.Dispose()
+        {
+            throw new NotImplementedException();
         }
     }
 }

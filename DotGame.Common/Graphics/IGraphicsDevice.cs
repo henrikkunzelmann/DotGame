@@ -21,6 +21,24 @@ namespace DotGame.Graphics
         /// </summary>
         IGraphicsFactory Factory { get; }
 
+        /// <summary>
+        /// Leert den Inhalt des aktuell gebundenen RenderTargets. Ist kein RenderTarget gebunden, wird der Backbuffer angesprochen.
+        /// </summary>
+        /// <param name="color">Die Farbe.</param>
+        void Clear(Color color);
+
+        /// <summary>
+        /// Leert den Inhalt des aktuell gebundenen RenderTargets. Ist kein RenderTarget gebunden, wird der Backbuffer angesprochen.
+        /// </summary>
+        /// <param name="clearOptions">Die <see cref="ClearOptions"/>-Flags, die die angesprochenen Channel angeben.</param>
+        /// <param name="color">Die Farbe für Farbchannel benutzt wird.</param>
+        /// <param name="depth">Der Wert für den Tiefenchannel (standardmäßig 0).</param>
+        /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
+        void Clear(ClearOptions clearOptions, Color color, float depth, int stencil);
+
+        /// <summary>
+        /// Tauscht den Backbuffer mit dem Frontbuffer, was zum Anzeigen des Bildes führt.
+        /// </summary>
         void SwapBuffers();
     }
 }

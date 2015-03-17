@@ -14,6 +14,8 @@ namespace DotGame.Windows
     {
         private Control control;
 
+        public Graphics.IGraphicsDevice GraphicsDevice { get; private set; }
+
         public int Width
         {
             get { return control.Width; }
@@ -31,8 +33,11 @@ namespace DotGame.Windows
             if (control == null)
                 throw new ArgumentNullException("control");
             if (control.IsDisposed)
-                throw new ArgumentException("control is disposed", "control");
+                throw new ArgumentException("control is disposed.", "control");
             this.control = control;
+
+            // TODO: EngineSettings beachten; Das hier in Engine.cs verschieben;
+            GraphicsDevice = new DotGame.OpenGL4.GraphicsDevice(this, control);
         }
     }
 }

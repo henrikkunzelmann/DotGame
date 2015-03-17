@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DotGame.Graphics;
 
 namespace DotGame
 {
@@ -11,6 +12,8 @@ namespace DotGame
     /// </summary>
     public interface IGameWindow
     {
+        IGraphicsDevice GraphicsDevice { get; }
+
         /// <summary>
         /// Stellt die Breite des Engine-Fensters dar.
         /// </summary>

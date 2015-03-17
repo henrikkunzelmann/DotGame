@@ -8,6 +8,7 @@ using DotGame.Graphics;
 using DotGame.Utils;
 using OpenTK.Graphics;
 using OpenTK;
+using OpenTK.Graphics.OpenGL4;
 
 namespace DotGame.OpenGL4
 {
@@ -19,6 +20,10 @@ namespace DotGame.OpenGL4
         internal readonly GLControl Control;
         internal IGraphicsContext Context { get { return Control.Context; } }
         internal bool IsCurrent { get { return Control.Context.IsCurrent; } }
+
+        private Color clearColor;
+        private float clearDepth;
+        private int clearStencil;
 
         /// <summary>
         /// TODO: GameWindow speichern?
@@ -37,16 +42,16 @@ namespace DotGame.OpenGL4
             this.Control = new GLControl();
             this.Control.Name = "DotGame OpenGL GameWindow";
             this.Control.Dock = DockStyle.Fill;
+            this.Control.Load += Control_Load;
             container.Controls.Add(this.Control);
         }
-
         ~GraphicsDevice()
         {
             dispose(false);
             GC.SuppressFinalize(this);
         }
 
-        public void Init()
+        void Control_Load(object sender, EventArgs e)
         {
             this.Factory = new GraphicsFactory(this);
 
@@ -59,23 +64,73 @@ namespace DotGame.OpenGL4
                 Context.GraphicsMode.Buffers,
                 Context.GraphicsMode.Stereo);
 
-            Log.WriteFields(LogLevel.Info, Context.GraphicsMode);
-
             Control.Paint += Control_Paint;
         }
 
         void Control_Paint(object sender, PaintEventArgs e)
         {
-            var argb = Color.CornflowerBlue.ToArgb();
-            var color = Color.FromArgb(argb);
-            OpenTK.Graphics.OpenGL4.GL.ClearColor(color.R, color.G, color.B, color.A);
-            OpenTK.Graphics.OpenGL4.GL.Clear(OpenTK.Graphics.OpenGL4.ClearBufferMask.ColorBufferBit);
             Control.SwapBuffers();
+        }
+
+        public void Clear(Color color)
+        {
+            setClearColor(ref color);
+            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+        }
+
+        public void Clear(ClearOptions options, Color color, float depth, int stencil)
+        {
+            ClearBufferMask mask = ClearBufferMask.None;
+
+            if (options.HasFlag(ClearOptions.Color))
+            {
+                setClearColor(ref color);
+                mask = mask | ClearBufferMask.ColorBufferBit;
+            }
+
+            if (options.HasFlag(ClearOptions.Depth))
+            {
+                setClearDepth(ref depth);
+                mask = mask | ClearBufferMask.DepthBufferBit;
+            }
+
+            if (options.HasFlag(ClearOptions.Stencil))
+            {
+                setClearStencil(ref stencil);
+                mask = mask | ClearBufferMask.StencilBufferBit;
+            }
         }
 
         public void SwapBuffers()
         {
             Control.Invalidate();
+        }
+
+        private void setClearColor(ref Color color)
+        {
+            if (color != clearColor)
+            {
+                clearColor = color;
+                GL.ClearColor(color.R, color.G, color.B, color.A);
+            }
+        }
+
+        private void setClearDepth(ref float depth)
+        {
+            if (depth != clearDepth)
+            {
+                clearDepth = depth;
+                GL.ClearDepth(depth);
+            }
+        }
+
+        private void setClearStencil(ref int stencil)
+        {
+            if (stencil != clearStencil)
+            {
+                clearStencil = stencil;
+                GL.ClearStencil(stencil);
+            }
         }
 
         public void Dispose()

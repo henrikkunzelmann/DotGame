@@ -28,5 +28,16 @@ namespace DotGame.DirectX11
         {
             throw new NotImplementedException();
         }
+
+
+        public void Clear(Color color)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

@@ -82,6 +82,10 @@
       <Project>{002fb72c-ea2d-4fda-9960-7c5eb47face6}</Project>
       <Name>DotGame.Common</Name>
     </ProjectReference>
+    <ProjectReference Include="..\DotGame.OpenGL4\DotGame.OpenGL4.csproj">
+      <Project>{73db03a7-9890-4c33-a266-d6df5c15accf}</Project>
+      <Name>DotGame.OpenGL4</Name>
+    </ProjectReference>
     <ProjectReference Include="..\DotGame\DotGame.csproj">
       <Project>{f797a1bf-58c2-47b8-a089-72b27295de1b}</Project>
       <Name>DotGame</Name>
