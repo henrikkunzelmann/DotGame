@@ -1,0 +1,19 @@
+﻿<#@ template debug="true" hostspecific="false" language="C#" #>
+<#@ assembly name="System.Core" #>
+<#@ assembly name="System.Drawing" #>
+<#@ import namespace="System.Linq" #>
+<#@ import namespace="System.Text" #>
+<#@ import namespace="System.Collections.Generic" #>
+<#@ import namespace="System.Drawing" #>
+<#@ import namespace="System.Reflection" #>
+<#@ output extension=".txt" #><#
+var props = typeof(Color).GetProperties(BindingFlags.Public | BindingFlags.Static);
+foreach (var prop in props)
+{
+	var value = (Color)prop.GetValue(null);#>/// <summary>
+/// <#=prop.Name#> (R:<#=value.R#>, G:<#=value.G#>, B:<#=value.B#>, A:<#=value.A#>).
+/// </summary>
+public static Color <#=prop.Name#> { get { return new Color(0x<#=((uint)value.ToArgb()).ToString("X8")#>); } }
+
+<#}
+#>

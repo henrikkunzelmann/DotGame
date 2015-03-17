@@ -43,7 +43,7 @@ namespace DotGame.Utils
         /// <returns>Die Farbe.</returns>
         public static Color NextColor(this Random rand, bool alpha1 = true)
         {
-            return new Color(rand.NextFloat(), rand.NextFloat(), rand.NextFloat(), alpha1 ? 1.0f : rand.NextFloat());
+            return Color.FromArgb(alpha1 ? 1.0f : rand.NextFloat(), rand.NextFloat(), rand.NextFloat(), rand.NextFloat());
         }
     }
 }
