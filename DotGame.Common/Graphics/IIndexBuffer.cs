@@ -9,7 +9,7 @@ namespace DotGame.Graphics
     /// <summary>
     /// Stellt einen IndexBuffer dar.
     /// </summary>
-    public interface IIndexBuffer : IDisposable
+    public interface IIndexBuffer : IGraphicsObject
     {
         /// <summary>
         /// Gibt die Anzahl der Indices in diesem IndexBuffer an.

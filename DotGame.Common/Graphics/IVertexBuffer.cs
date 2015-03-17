@@ -9,7 +9,7 @@ namespace DotGame.Graphics
     /// <summary>
     /// Stellt einen VertexBuffer dar.
     /// </summary>
-    public interface IVertexBuffer : IDisposable
+    public interface IVertexBuffer : IGraphicsObject
     {
         /// <summary>
         /// Die Anzahl aller Vertices in diesem VertexBuffer.

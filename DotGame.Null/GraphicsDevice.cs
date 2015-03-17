@@ -12,9 +12,19 @@ namespace DotGame.Null
     /// </summary>
     public class GraphicsDevice : IGraphicsDevice
     {
+        public bool IsDisposed
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         public IGraphicsFactory Factory
         {
             get { throw new NotImplementedException(); }
+        }
+
+        public void SwapBuffers()
+        {
+            throw new NotImplementedException();
         }
 
         public void Dispose()

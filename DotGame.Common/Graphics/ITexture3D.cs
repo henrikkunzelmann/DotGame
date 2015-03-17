@@ -9,7 +9,7 @@ namespace DotGame.Graphics
     /// <summary>
     /// Stellt eine dreidimensionale Texture dar.
     /// </summary>
-    public interface ITexture3D : IDisposable
+    public interface ITexture3D : IGraphicsObject
     {
         /// <summary>
         /// Die Breite der Texture.

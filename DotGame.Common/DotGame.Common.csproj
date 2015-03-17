@@ -43,6 +43,7 @@
     <Compile Include="Graphics\Color.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />
     <Compile Include="Graphics\IGraphicsFactory.cs" />
+    <Compile Include="Graphics\IGraphicsObject.cs" />
     <Compile Include="Graphics\IIndexBuffer.cs" />
     <Compile Include="Graphics\IRenderTarget2D.cs" />
     <Compile Include="Graphics\IRenderTarget2DArray.cs" />
@@ -80,6 +81,10 @@
     <Compile Include="Utils\RandomUtils.cs" />
   </ItemGroup>
   <ItemGroup>
+    <None Include="Graphics\ColorConstants.tt">
+      <Generator>TextTemplatingFileGenerator</Generator>
+      <LastGenOutput>ColorConstants.txt</LastGenOutput>
+    </None>
     <None Include="Math\Manager.ttinclude" />
     <None Include="Math\Vector.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
@@ -89,7 +94,13 @@
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
   </ItemGroup>
-  <ItemGroup />
+  <ItemGroup>
+    <Content Include="Graphics\ColorConstants.txt">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ColorConstants.tt</DependentUpon>
+    </Content>
+  </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
        Other similar extension points exist, see Microsoft.Common.targets.

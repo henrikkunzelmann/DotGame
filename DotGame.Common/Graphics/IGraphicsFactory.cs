@@ -9,7 +9,7 @@ namespace DotGame.Graphics
     /// <summary>
     /// Stellt Methoden zum Erstellen von Ressourcen bereit.
     /// </summary>
-    public interface IGraphicsFactory
+    public interface IGraphicsFactory : IGraphicsObject
     {
         ITexture2D CreateTexture2D(int width, int height, TextureFormat format);
         ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format);

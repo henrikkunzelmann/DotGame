@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
-    public interface ITextureArray
+    public interface ITextureArray : IGraphicsObject
     {
         /// <summary>
         /// Die Anzahl der Texturen in diesem TextureArray.

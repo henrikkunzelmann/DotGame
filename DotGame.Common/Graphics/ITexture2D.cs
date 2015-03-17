@@ -9,7 +9,7 @@ namespace DotGame.Graphics
     /// <summary>
     /// Stellt eine zweidimensionale Texture dar.
     /// </summary>
-    public interface ITexture2D : IDisposable
+    public interface ITexture2D : IGraphicsObject
     {
         /// <summary>
         /// Die Breite der Texture.
