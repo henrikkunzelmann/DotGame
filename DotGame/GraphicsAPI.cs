@@ -6,8 +6,13 @@ using System.Threading.Tasks;
 
 namespace DotGame
 {
-    public struct EngineSettings
+    public enum GraphicsAPI
     {
-        public GraphicsAPI GraphicsAPI { get; set; }
+        OpenGL4,
+        OpenGLES2,
+        OpenGLES3,
+        Vulkan,
+        DirectX11,
+        DirectX12,
     }
 }

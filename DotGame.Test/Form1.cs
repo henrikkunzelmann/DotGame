@@ -29,7 +29,10 @@ namespace DotGame.Test
             }
             comboBox1.Update();
 
-            Engine = new Engine(new DotGame.OpenGL4.GraphicsDevice(splitContainer1.Panel1));
+            Engine = new Engine(new EngineSettings()
+            {
+                GraphicsAPI = GraphicsAPI.OpenGL4
+            }, splitContainer1.Panel1);
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

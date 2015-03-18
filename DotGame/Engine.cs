@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Utils;
 using DotGame.Graphics;
+using System.Windows.Forms;
 
 namespace DotGame
 {
@@ -28,25 +29,36 @@ namespace DotGame
             get { return "dev"; }
         }
 
-        public Engine(IGraphicsDevice device)
-            : this(device, new EngineSettings())
+        public Engine()
+            : this(new EngineSettings())
         {
         }
 
-        public Engine(IGraphicsDevice device, EngineSettings settings)
+        public Engine(EngineSettings settings)
+            :this(settings, null)
         {
-            if (device == null)
-                throw new ArgumentNullException("device");
+        }
 
-            this.GraphicsDevice = device;
+        public Engine(EngineSettings settings, Control container)
+        {
             this.Settings = settings;
+            switch (settings.GraphicsAPI)
+            {
+                case GraphicsAPI.OpenGL4:
+                    this.GraphicsDevice = new DotGame.OpenGL4.GraphicsDevice(container);
+                    break;
+
+                case GraphicsAPI.DirectX11:
+                    this.GraphicsDevice = new DotGame.OpenGL4.GraphicsDevice(container);
+                    break;
+            }
 
             Log.Info("DotGame {0}", Version);
             Log.Info("===========");
             Log.Info("Engine starting...");
 
-            Log.Debug("Got GraphicsDevice: " + device.GetType().FullName);
-            Log.Debug("Got window: [width: {0}, height: {1}]", device.DefaultWindow.Width, device.DefaultWindow.Height);
+            Log.Debug("Got GraphicsDevice: " + GraphicsDevice.GetType().FullName);
+            Log.Debug("Got window: [width: {0}, height: {1}]", GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height);
             Log.WriteFields(LogLevel.Verbose, settings);
         }
 

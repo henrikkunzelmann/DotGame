@@ -46,7 +46,7 @@ namespace DotGame.OpenGL4
         }
         ~GraphicsDevice()
         {
-            dispose(false);
+            Dispose(false);
             GC.SuppressFinalize(this);
         }
 
@@ -73,7 +73,7 @@ namespace DotGame.OpenGL4
 
         public void Clear(Color color)
         {
-            setClearColor(ref color);
+            SetClearColor(ref color);
             GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
         }
 
@@ -83,19 +83,19 @@ namespace DotGame.OpenGL4
 
             if (options.HasFlag(ClearOptions.Color))
             {
-                setClearColor(ref color);
+                SetClearColor(ref color);
                 mask |= ClearBufferMask.ColorBufferBit;
             }
 
             if (options.HasFlag(ClearOptions.Depth))
             {
-                setClearDepth(ref depth);
+                SetClearDepth(ref depth);
                 mask |= ClearBufferMask.DepthBufferBit;
             }
 
             if (options.HasFlag(ClearOptions.Stencil))
             {
-                setClearStencil(ref stencil);
+                SetClearStencil(ref stencil);
                 mask |= ClearBufferMask.StencilBufferBit;
             }
         }
@@ -105,7 +105,7 @@ namespace DotGame.OpenGL4
             Control.Invalidate();
         }
 
-        private void setClearColor(ref Color color)
+        private void SetClearColor(ref Color color)
         {
             if (color != clearColor)
             {
@@ -114,7 +114,7 @@ namespace DotGame.OpenGL4
             }
         }
 
-        private void setClearDepth(ref float depth)
+        private void SetClearDepth(ref float depth)
         {
             if (depth != clearDepth)
             {
@@ -123,7 +123,7 @@ namespace DotGame.OpenGL4
             }
         }
 
-        private void setClearStencil(ref int stencil)
+        private void SetClearStencil(ref int stencil)
         {
             if (stencil != clearStencil)
             {
@@ -135,10 +135,10 @@ namespace DotGame.OpenGL4
         public void Dispose()
         {
             Log.Info("GraphicsDevice.Dispose() called!");
-            dispose(true);
+            Dispose(true);
         }
 
-        private void dispose(bool isDisposing)
+        private void Dispose(bool isDisposing)
         {
             Factory.Dispose();
             Control.Dispose();
