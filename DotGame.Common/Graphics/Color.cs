@@ -871,14 +871,14 @@ namespace DotGame.Graphics
 
         private Color(float r, float g, float b, float a)
         {
-            if (a < 0 || a > 1)
-                throw new ArgumentOutOfRangeException("a", "a is not in range 0 - 1");
-            if (r < 0 || r > 1)
-                throw new ArgumentOutOfRangeException("r", "r is not in range 0 - 1");
-            if (g < 0 || g > 1)
-                throw new ArgumentOutOfRangeException("g", "g is not in range 0 - 1");
-            if (b < 0 || b > 1)
-                throw new ArgumentOutOfRangeException("b", "b is not in range 0 - 1");
+            if (a < 0)
+                throw new ArgumentOutOfRangeException("a", "a < 0");
+            if (r < 0)
+                throw new ArgumentOutOfRangeException("r", "r < 0");
+            if (g < 0)
+                throw new ArgumentOutOfRangeException("g", "g < 0");
+            if (b < 0)
+                throw new ArgumentOutOfRangeException("b", "b < 0");
 
 
             this.R = r;
