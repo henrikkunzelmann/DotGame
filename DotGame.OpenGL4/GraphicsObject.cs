@@ -29,16 +29,16 @@ namespace DotGame.OpenGL4
 
         ~GraphicsObject()
         {
-            dispose(false);
+            Dispose(false);
         }
 
         public void Dispose()
         {
-            dispose(true);
+            Dispose(true);
             GC.SuppressFinalize(this);
         }
 
-        protected void assertNotDisposed()
+        protected void AssertNotDisposed()
         {
             if (GraphicsDevice.IsDisposed)
                 throw new ObjectDisposedException(GraphicsDevice.GetType().FullName);
@@ -47,16 +47,16 @@ namespace DotGame.OpenGL4
                 throw new ObjectDisposedException(GetType().FullName);
         }
 
-        protected void assertCurrent()
+        protected void AssertCurrent()
         {
-            assertNotDisposed();
+            AssertNotDisposed();
             
             // TODO: Eigene Exception.
             if (!GraphicsDeviceInternal.IsCurrent)
                 throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
         }
 
-        protected virtual void dispose(bool isDisposing)
+        protected virtual void Dispose(bool isDisposing)
         {
             if (Disposing != null)
                 Disposing.Invoke(this, EventArgs.Empty);
