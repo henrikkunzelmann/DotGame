@@ -750,7 +750,7 @@ namespace DotGame.Graphics
         /// <returns>Die Farbe.</returns>
         public static Color FromArgb(float r, float g, float b)
         {
-            return new Color(r, g, b, 1.0f);
+            return FromArgb(1f, r, g, b);
         }
 
         /// <summary>
@@ -871,6 +871,16 @@ namespace DotGame.Graphics
 
         private Color(float r, float g, float b, float a)
         {
+            if (a < 0 || a > 1)
+                throw new ArgumentOutOfRangeException("a", "a is not in range 0 - 1");
+            if (r < 0 || r > 1)
+                throw new ArgumentOutOfRangeException("r", "r is not in range 0 - 1");
+            if (g < 0 || g > 1)
+                throw new ArgumentOutOfRangeException("g", "g is not in range 0 - 1");
+            if (b < 0 || b > 1)
+                throw new ArgumentOutOfRangeException("b", "b is not in range 0 - 1");
+
+
             this.R = r;
             this.G = g;
             this.B = b;

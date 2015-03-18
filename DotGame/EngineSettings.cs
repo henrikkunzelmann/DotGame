@@ -8,6 +8,5 @@ namespace DotGame
 {
     public struct EngineSettings
     {
-        // STUB
     }
 }

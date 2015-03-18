@@ -12,64 +12,34 @@ namespace DotGame.Null
     /// </summary>
     public class GraphicsDevice : IGraphicsDevice
     {
-        public bool IsDisposed
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public bool IsDisposed { get; private set; }
 
         public IGraphicsFactory Factory
         {
             get { throw new NotImplementedException(); }
         }
 
+        public IGameWindow DefaultWindow
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         public void Clear(Color color)
         {
-            throw new NotImplementedException();
         }
 
         public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
         {
-            throw new NotImplementedException();
         }
 
         public void SwapBuffers()
         {
-            throw new NotImplementedException();
         }
 
         public void Dispose()
         {
-
-        }
-
-        bool IGraphicsDevice.IsDisposed
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        IGraphicsFactory IGraphicsDevice.Factory
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        void IGraphicsDevice.Clear(Color color)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IGraphicsDevice.Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
-        {
-            throw new NotImplementedException();
-        }
-
-        void IGraphicsDevice.SwapBuffers()
-        {
-            throw new NotImplementedException();
-        }
-
-        void IDisposable.Dispose()
-        {
-            throw new NotImplementedException();
+            // wir haben nichts wirklich zu disposen
+            IsDisposed = true;
         }
     }
 }

@@ -29,7 +29,7 @@ namespace DotGame.Test
             }
             comboBox1.Update();
 
-            Engine = new Engine(new DotGame.Windows.GameWindow(splitContainer1.Panel1));
+            Engine = new Engine(new DotGame.OpenGL4.GraphicsDevice(splitContainer1.Panel1));
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -40,8 +40,8 @@ namespace DotGame.Test
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-            Engine.Window.GraphicsDevice.Clear((Color)comboBox1.SelectedItem);
-            Engine.Window.GraphicsDevice.SwapBuffers();
+            Engine.GraphicsDevice.Clear((Color)comboBox1.SelectedItem);
+            Engine.GraphicsDevice.SwapBuffers();
         }
     }
 }

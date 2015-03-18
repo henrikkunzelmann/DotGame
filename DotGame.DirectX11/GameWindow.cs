@@ -4,17 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DotGame.Graphics;
 
-namespace DotGame.Windows
+namespace DotGame.DirectX11
 {
-    /// <summary>
-    /// Die Windows-Forms Implementation für das IGameWindow.
-    /// </summary>
     public class GameWindow : IGameWindow
     {
-        private Control control;
+        public IGraphicsDevice GraphicsDevice { get; private set; }
 
-        public Graphics.IGraphicsDevice GraphicsDevice { get; private set; }
+        private Control control;
 
         public int Width
         {
@@ -28,16 +26,19 @@ namespace DotGame.Windows
             set { control.Height = value; }
         }
 
-        public GameWindow(Control control)
+        public GameWindow(GraphicsDevice device, Control control)
         {
+            if (device == null)
+                throw new ArgumentNullException("device");
+            if (device.IsDisposed)
+                throw new ArgumentException("device is disposed", "device");
             if (control == null)
                 throw new ArgumentNullException("control");
             if (control.IsDisposed)
-                throw new ArgumentException("control is disposed.", "control");
-            this.control = control;
+                throw new ArgumentException("control is disposed", "control");
 
-            // TODO: EngineSettings beachten; Das hier in Engine.cs verschieben;
-            GraphicsDevice = new DotGame.OpenGL4.GraphicsDevice(this, control);
+            this.GraphicsDevice = device;
+            this.control = control;
         }
     }
 }

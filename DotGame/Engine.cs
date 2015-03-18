@@ -4,15 +4,16 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Utils;
+using DotGame.Graphics;
 
 namespace DotGame
 {
     public class Engine : IDisposable
     {
         /// <summary>
-        /// Das IGameWindow in dem die Engine zeichnet.
+        /// Das GraphicsDevice welches die Engine nutzt.
         /// </summary>
-        public IGameWindow Window { get; private set; }
+        public IGraphicsDevice GraphicsDevice { get; private set; }
 
         /// <summary>
         /// Die Einstellungen mit dem die Engine gestartet wurde.
@@ -27,24 +28,25 @@ namespace DotGame
             get { return "dev"; }
         }
 
-        public Engine(IGameWindow window)
-            : this(window, new EngineSettings())
+        public Engine(IGraphicsDevice device)
+            : this(device, new EngineSettings())
         {
         }
 
-        public Engine(IGameWindow window, EngineSettings settings)
+        public Engine(IGraphicsDevice device, EngineSettings settings)
         {
-            if (window == null)
-                throw new ArgumentNullException("window");
+            if (device == null)
+                throw new ArgumentNullException("device");
 
-            this.Window = window;
+            this.GraphicsDevice = device;
             this.Settings = settings;
 
             Log.Info("DotGame {0}", Version);
             Log.Info("===========");
             Log.Info("Engine starting...");
 
-            Log.Debug("Got window: [width: {0}, height: {1}]", window.Width, window.Height);
+            Log.Debug("Got GraphicsDevice: " + device.GetType().FullName);
+            Log.Debug("Got window: [width: {0}, height: {1}]", device.DefaultWindow.Width, device.DefaultWindow.Height);
             Log.WriteFields(LogLevel.Verbose, settings);
         }
 

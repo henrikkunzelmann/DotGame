@@ -14,47 +14,36 @@ namespace DotGame.DirectX11
 {
     public class GraphicsDevice : IGraphicsDevice
     {
-        Device device;
-        internal readonly RenderControl Control;
+        private Device device;
 
-        public GraphicsDevice(IGameWindow gameWindow, Control container)
+        public bool IsDisposed { get; private set; }
+        public IGraphicsFactory Factory { get; private set; }
+
+        public IGameWindow DefaultWindow { get; private set; }
+
+        public GraphicsDevice(Control container)
         {
-            if (gameWindow == null)
-                throw new ArgumentNullException("gameWindow");
             if (container == null)
                 throw new ArgumentNullException("container");
             if (container.IsDisposed)
                 throw new ArgumentException("container is disposed.", "container");
 
-            this.Control = new RenderControl();
-            this.Control.Name = "DotGameDirectX GameWindow";
-            this.Control.Dock = DockStyle.Fill;
-            this.Control.Load += Control_Load;
-            container.Controls.Add(this.Control);
-
-        }
-
-        void Control_Load(object sender, EventArgs e)
-        {
-        }
-
-
-        public bool IsDisposed
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public IGraphicsFactory Factory
-        {
-            get { throw new NotImplementedException(); }
-        }
-
-        public void SwapBuffers()
-        {
-            throw new NotImplementedException();
+            Factory = new GraphicsFactory(this);
+            DefaultWindow = new GameWindow(this, container);
         }
 
         public void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            if (Factory != null && !Factory.IsDisposed)
+                Factory.Dispose();
+
+            IsDisposed = true;
+        }
+
+        public void SwapBuffers()
         {
             throw new NotImplementedException();
         }

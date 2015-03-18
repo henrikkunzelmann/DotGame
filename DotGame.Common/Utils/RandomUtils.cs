@@ -37,13 +37,31 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Gibt eine Farbe mit Zufallswerten zwischen 0.0f und 1.0f zurück.
+        /// Gibt eine zufällige Farbe zurück mit dem Alpha-Wert 1.
         /// </summary>
-        /// <param name="alpha1">Gibt an, ob der Alphaanteil mit 1.0f initialisiert werden soll.</param>
-        /// <returns>Die Farbe.</returns>
-        public static Color NextColor(this Random rand, bool alpha1 = true)
+        /// <returns>Die zufällige Farbe.</returns>
+        public static Color NextColorRGB(this Random rand)
         {
-            return Color.FromArgb(alpha1 ? 1.0f : rand.NextFloat(), rand.NextFloat(), rand.NextFloat(), rand.NextFloat());
+             return rand.NextColorRGB(1.0f);
+        }
+
+        /// <summary>
+        /// Gibt eine zufällige Farbe zurück mit dem angegebenen Alphawert.
+        /// </summary>
+        /// <param name="AlphaValue">Der zu nutzende Alphawert.</param>
+        /// <returns>Die zufällige Farbe.</returns>
+        public static Color NextColorRGB(this Random rand, float AlphaValue)
+        {
+            return Color.FromArgb(AlphaValue, rand.NextFloat(), rand.NextFloat(), rand.NextFloat());
+        }
+
+        /// <summary>
+        /// Gibt eine zufällige Farbe mit einem zufälligen Alphawert zurück.
+        /// </summary>
+        /// <returns>Die zufällige Farbe.</returns>
+        public static Color NextColorARGB(this Random random)
+        {
+            return random.NextColorRGB(random.NextFloat());
         }
     }
 }

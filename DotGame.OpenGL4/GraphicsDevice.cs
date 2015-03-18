@@ -17,6 +17,8 @@ namespace DotGame.OpenGL4
         public bool IsDisposed { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
 
+        public IGameWindow DefaultWindow { get; private set; }
+
         internal readonly GLControl Control;
         internal IGraphicsContext Context { get { return Control.Context; } }
         internal bool IsCurrent { get { return Control.Context.IsCurrent; } }
@@ -25,13 +27,8 @@ namespace DotGame.OpenGL4
         private float clearDepth;
         private int clearStencil;
 
-        /// <summary>
-        /// TODO: GameWindow speichern?
-        /// </summary>
-        public GraphicsDevice(IGameWindow gameWindow, Control container)
+        public GraphicsDevice(Control container)
         {
-            if (gameWindow == null)
-                throw new ArgumentNullException("gameWindow");
             if (container == null)
                 throw new ArgumentNullException("container");
             if (container.IsDisposed)
@@ -44,6 +41,8 @@ namespace DotGame.OpenGL4
             this.Control.Dock = DockStyle.Fill;
             this.Control.Load += Control_Load;
             container.Controls.Add(this.Control);
+
+            this.DefaultWindow = new GameWindow(this, this.Control);
         }
         ~GraphicsDevice()
         {
@@ -85,19 +84,19 @@ namespace DotGame.OpenGL4
             if (options.HasFlag(ClearOptions.Color))
             {
                 setClearColor(ref color);
-                mask = mask | ClearBufferMask.ColorBufferBit;
+                mask |= ClearBufferMask.ColorBufferBit;
             }
 
             if (options.HasFlag(ClearOptions.Depth))
             {
                 setClearDepth(ref depth);
-                mask = mask | ClearBufferMask.DepthBufferBit;
+                mask |= ClearBufferMask.DepthBufferBit;
             }
 
             if (options.HasFlag(ClearOptions.Stencil))
             {
                 setClearStencil(ref stencil);
-                mask = mask | ClearBufferMask.StencilBufferBit;
+                mask |= ClearBufferMask.StencilBufferBit;
             }
         }
 

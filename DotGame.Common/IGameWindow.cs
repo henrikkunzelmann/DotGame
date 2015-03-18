@@ -12,15 +12,18 @@ namespace DotGame
     /// </summary>
     public interface IGameWindow
     {
+        /// <summary>
+        /// Das GraphicsDevice zu welchem das Fenster gehört.
+        /// </summary>
         IGraphicsDevice GraphicsDevice { get; }
 
         /// <summary>
-        /// Stellt die Breite des Engine-Fensters dar.
+        /// Stellt die Breite des Fensters dar.
         /// </summary>
         int Width { get; set; }
 
         /// <summary>
-        /// Stellt die Höhe des Engine-Fensters dar.
+        /// Stellt die Höhe des Fensters dar.
         /// </summary>
         int Height { get; set; }
     }

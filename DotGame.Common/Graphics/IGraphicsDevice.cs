@@ -22,6 +22,11 @@ namespace DotGame.Graphics
         IGraphicsFactory Factory { get; }
 
         /// <summary>
+        /// Das Fenster welches das GraphicsDevice nutzt.
+        /// </summary>
+        IGameWindow DefaultWindow { get; }
+
+        /// <summary>
         /// Leert den Inhalt des aktuell gebundenen RenderTargets. Ist kein RenderTarget gebunden, wird der Backbuffer angesprochen.
         /// </summary>
         /// <param name="color">Die Farbe.</param>
