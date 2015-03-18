@@ -58,7 +58,7 @@
     <Compile Include="Graphics\ITextureArray.cs" />
     <Compile Include="Graphics\IVertexBuffer.cs" />
     <Compile Include="Graphics\TextureFormat.cs" />
-    <Compile Include="IGameWindow.cs" />
+    <Compile Include="Graphics\IGameWindow.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs">
       <DependentUpon>Vector.tt</DependentUpon>

@@ -7,13 +7,15 @@ using System.Windows.Forms;
 using DotGame.Graphics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
+using OpenTK.Graphics;
+using Config = OpenTK.Configuration;
+using Utilities = OpenTK.Platform.Utilities;
 
-namespace DotGame.OpenGL4
+namespace DotGame.OpenGL4.Windows
 {
     public class GameWindow : IGameWindow
     {
-        public IGraphicsDevice GraphicsDevice { get; private set; }
-
+        private IGraphicsDevice graphicsDevice;
         private Control control;
 
         public int Width
@@ -28,19 +30,31 @@ namespace DotGame.OpenGL4
             set { control.Height = value; }
         }
 
-        public GameWindow(GraphicsDevice device, Control control)
+        public bool FullScreen
         {
-            if (device == null)
-                throw new ArgumentNullException("device");
-            if (device.IsDisposed)
-                throw new ArgumentException("device is disposed", "device");
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public GameWindow(Control control)
+        {
             if (control == null)
                 throw new ArgumentNullException("control");
             if (control.IsDisposed)
                 throw new ArgumentException("control is disposed", "control");
 
-            this.GraphicsDevice = device;
             this.control = control;
+        }
+
+        public IGraphicsDevice CreateDevice()
+        {
+            if (graphicsDevice != null)
+                return graphicsDevice;
+
+            GraphicsContext context = new GraphicsContext(GraphicsMode.Default, Utilities.CreateWindowsWindowInfo(control.Handle));
+            context.LoadAll();
+            graphicsDevice = new GraphicsDevice(this, context);
+            return graphicsDevice;
         }
     }
 }

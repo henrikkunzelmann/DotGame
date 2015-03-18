@@ -15,7 +15,7 @@ namespace DotGame.DirectX11
         public EventHandler<EventArgs> Disposing { get; set; }
         public object Tag { get; set; }
 
-        internal GraphicsFactory(IGraphicsDevice graphicsDevice)
+        internal GraphicsFactory(GraphicsDevice graphicsDevice)
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");

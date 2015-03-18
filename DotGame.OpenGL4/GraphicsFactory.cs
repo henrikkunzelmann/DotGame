@@ -20,13 +20,11 @@ namespace DotGame.OpenGL4
             AssertCurrent();
 
             if (format == TextureFormat.Unknown)
-                throw new ArgumentException("TextureFormat must not be Unknown");
-
-            if (width == 0)
-                throw new ArgumentException("Width must not be zero");
-
-            if (height == 0)
-                throw new ArgumentException("Height must not be zero");
+                throw new ArgumentException("format must not be TextureFormat.Unknown", "format");
+            if (width <= 0)
+                throw new ArgumentException("width must not be zero or negative", "width");
+            if (height <= 0)
+                throw new ArgumentException("weight must not be zero or negative", "height");
 
             return new Texture2D((GraphicsDevice)GraphicsDevice, width, height, format);
         }

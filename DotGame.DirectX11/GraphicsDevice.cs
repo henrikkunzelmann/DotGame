@@ -31,46 +31,31 @@ namespace DotGame.DirectX11
 
         internal DeviceContext Context { get; private set; } 
 
-        public GraphicsDevice(Control container)
+        internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain)
         {
-            if (container == null)
-                throw new ArgumentNullException("container");
-            if (container.IsDisposed)
-                throw new ArgumentException("container is disposed.", "container");
+            if (window == null)
+                throw new ArgumentNullException("window");
+            if (device == null)
+                throw new ArgumentNullException("device");
+            if (device.IsDisposed)
+                throw new ArgumentException("device is disposed", "device");
+            if (swapChain == null)
+                throw new ArgumentNullException("swapChain");
+            if (swapChain.IsDisposed)
+                throw new ArgumentException("swapChain is disposed", "swapChain");
 
-            this.Control = new RenderControl();
-            this.Control.Name = "DotGame DirectX GameWindow";
-            this.Control.Dock = DockStyle.Fill;
-            this.Control.Load += Control_Load;
-            container.Controls.Add(this.Control);
+            this.DefaultWindow = window;
+            this.device = device;
+            this.swapChain = swapChain;
+            this.Context = device.ImmediateContext;
 
+            this.Factory = new GraphicsFactory(this);
 
-            Factory = new GraphicsFactory(this);
-            DefaultWindow = new GameWindow(this, container);
-
-
+            InitBackbuffer();
         }
 
-        void Control_Load(object sender, EventArgs e)
+        private void InitBackbuffer()
         {
-            SwapChainDescription swapChainDescription = new SwapChainDescription()
-            {
-                BufferCount = 1,
-                Flags = SwapChainFlags.None,
-                IsWindowed = true,
-                ModeDescription = new ModeDescription(Control.Width, Control.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                OutputHandle = Control.Handle,
-                SampleDescription = new SampleDescription(1, 0),
-                SwapEffect = SwapEffect.Discard,
-                Usage = Usage.RenderTargetOutput
-            };
-
-            Device.CreateWithSwapChain(SharpDX.Direct3D.DriverType.Hardware, DeviceCreationFlags.Debug, swapChainDescription, out device, out swapChain);
-            Context = device.ImmediateContext;
-
-            Factory factory = swapChain.GetParent<Factory>();
-            factory.MakeWindowAssociation(Control.Handle, WindowAssociationFlags.IgnoreAll);
-            
             backBuffer = swapChain.GetBackBuffer<Texture2D>(0);
             renderTargetView = new RenderTargetView(device, backBuffer);
 
@@ -79,8 +64,8 @@ namespace DotGame.DirectX11
                 Format = Format.D32_Float_S8X24_UInt,
                 ArraySize = 1,
                 MipLevels = 1,
-                Width = Control.Width,
-                Height = Control.Height,
+                Width = backBuffer.Description.Width,
+                Height = backBuffer.Description.Height,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil,

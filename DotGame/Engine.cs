@@ -42,20 +42,22 @@ namespace DotGame
         public Engine(EngineSettings settings, Control container)
         {
             this.Settings = settings;
-            switch (settings.GraphicsAPI)
-            {
-                case GraphicsAPI.OpenGL4:
-                    this.GraphicsDevice = new DotGame.OpenGL4.GraphicsDevice(container);
-                    break;
-
-                case GraphicsAPI.DirectX11:
-                    this.GraphicsDevice = new DotGame.DirectX11.GraphicsDevice(container);
-                    break;
-            }
 
             Log.Info("DotGame {0}", Version);
             Log.Info("===========");
             Log.Info("Engine starting...");
+
+            switch (settings.GraphicsAPI)
+            {
+                case GraphicsAPI.OpenGL4:
+                    this.GraphicsDevice = new DotGame.OpenGL4.Windows.GameWindow(container).CreateDevice();
+                    break;
+
+                case GraphicsAPI.DirectX11:
+                    this.GraphicsDevice = new DotGame.DirectX11.Windows.GameWindow(container).CreateDevice();
+                    break;
+            }
+
 
             Log.Debug("Got GraphicsDevice: " + GraphicsDevice.GetType().FullName);
             Log.Debug("Got window: [width: {0}, height: {1}]", GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height);

@@ -19,40 +19,25 @@ namespace DotGame.OpenGL4
 
         public IGameWindow DefaultWindow { get; private set; }
 
-        internal readonly GLControl Control;
-        internal IGraphicsContext Context { get { return Control.Context; } }
-        internal bool IsCurrent { get { return Control.Context.IsCurrent; } }
+        internal GraphicsContext Context { get; private set; }
+        internal bool IsCurrent { get { return Context.IsCurrent; } }
 
         private Color clearColor;
         private float clearDepth;
         private int clearStencil;
 
-        public GraphicsDevice(Control container)
+        public GraphicsDevice(IGameWindow window, GraphicsContext context)
         {
-            if (container == null)
-                throw new ArgumentNullException("container");
-            if (container.IsDisposed)
-                throw new ArgumentException("container is disposed.", "container");
+            if (window == null)
+                throw new ArgumentNullException("window");
+            if (context == null)
+                throw new ArgumentNullException("context");
+            if (context.IsDisposed)
+                throw new ArgumentException("context is disposed.", "context");
 
-            Log.Info("Initializing OpenGL GraphicsDevice on Container {0}...", container.Name);
 
-            this.Control = new GLControl();
-            this.Control.Name = "DotGame OpenGL GameWindow";
-            this.Control.Dock = DockStyle.Fill;
-            this.Control.Load += Control_Load;
-            container.Controls.Add(this.Control);
-
-            this.DefaultWindow = new GameWindow(this, this.Control);
-        }
-        ~GraphicsDevice()
-        {
-            Dispose(false);
-            GC.SuppressFinalize(this);
-        }
-
-        void Control_Load(object sender, EventArgs e)
-        {
-            this.Factory = new GraphicsFactory(this);
+            this.DefaultWindow = window;
+            this.Context = context;
 
             Log.Debug("Got context: [ColorFormat: {0}, Depth: {1}, Stencil: {2}, FSAA Samples: {3}, AccumulatorFormat: {4}, Buffers: {5}, Stereo: {6}]",
                 Context.GraphicsMode.ColorFormat,
@@ -63,12 +48,14 @@ namespace DotGame.OpenGL4
                 Context.GraphicsMode.Buffers,
                 Context.GraphicsMode.Stereo);
 
-            Control.Paint += Control_Paint;
-        }
+            Context.LoadAll();
 
-        void Control_Paint(object sender, PaintEventArgs e)
+            Factory = new GraphicsFactory(this);
+        }
+        ~GraphicsDevice()
         {
-            Control.SwapBuffers();
+            Dispose(false);
+            GC.SuppressFinalize(this);
         }
 
         public void Clear(Color color)
@@ -102,7 +89,7 @@ namespace DotGame.OpenGL4
 
         public void SwapBuffers()
         {
-            Control.Invalidate();
+            Context.SwapBuffers();
         }
 
         private void SetClearColor(ref Color color)
@@ -141,7 +128,7 @@ namespace DotGame.OpenGL4
         private void Dispose(bool isDisposing)
         {
             Factory.Dispose();
-            Control.Dispose();
+            Context.Dispose();
             IsDisposed = true;
         }
     }

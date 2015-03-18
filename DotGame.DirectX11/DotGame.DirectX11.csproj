@@ -54,7 +54,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="GameWindow.cs" />
+    <Compile Include="Windows\GameWindow.cs" />
     <Compile Include="GraphicsDevice.cs" />
     <Compile Include="GraphicsFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
