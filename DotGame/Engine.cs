@@ -49,7 +49,7 @@ namespace DotGame
                     break;
 
                 case GraphicsAPI.DirectX11:
-                    this.GraphicsDevice = new DotGame.OpenGL4.GraphicsDevice(container);
+                    this.GraphicsDevice = new DotGame.DirectX11.GraphicsDevice(container);
                     break;
             }
 

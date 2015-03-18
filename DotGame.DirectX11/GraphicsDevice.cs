@@ -29,6 +29,8 @@ namespace DotGame.DirectX11
 
         internal readonly RenderControl Control;
 
+        internal DeviceContext Context { get; private set; } 
+
         public GraphicsDevice(Control container)
         {
             if (container == null)
@@ -51,26 +53,24 @@ namespace DotGame.DirectX11
 
         void Control_Load(object sender, EventArgs e)
         {
-            ControlEventArgs controlEventArgs = (ControlEventArgs)e;
-
             SwapChainDescription swapChainDescription = new SwapChainDescription()
             {
                 BufferCount = 1,
                 Flags = SwapChainFlags.None,
                 IsWindowed = true,
-                ModeDescription = new ModeDescription(controlEventArgs.Control.Width, controlEventArgs.Control.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
-                OutputHandle = controlEventArgs.Control.Handle,
+                ModeDescription = new ModeDescription(Control.Width, Control.Height, new Rational(60, 1), Format.R8G8B8A8_UNorm),
+                OutputHandle = Control.Handle,
                 SampleDescription = new SampleDescription(1, 0),
                 SwapEffect = SwapEffect.Discard,
                 Usage = Usage.RenderTargetOutput
             };
 
             Device.CreateWithSwapChain(SharpDX.Direct3D.DriverType.Hardware, DeviceCreationFlags.Debug, swapChainDescription, out device, out swapChain);
+            Context = device.ImmediateContext;
 
             Factory factory = swapChain.GetParent<Factory>();
-            factory.MakeWindowAssociation(controlEventArgs.Control.Handle, WindowAssociationFlags.IgnoreAll);
-
-
+            factory.MakeWindowAssociation(Control.Handle, WindowAssociationFlags.IgnoreAll);
+            
             backBuffer = swapChain.GetBackBuffer<Texture2D>(0);
             renderTargetView = new RenderTargetView(device, backBuffer);
 
@@ -79,8 +79,8 @@ namespace DotGame.DirectX11
                 Format = Format.D32_Float_S8X24_UInt,
                 ArraySize = 1,
                 MipLevels = 1,
-                Width = controlEventArgs.Control.Width,
-                Height = controlEventArgs.Control.Height,
+                Width = Control.Width,
+                Height = Control.Height,
                 SampleDescription = new SampleDescription(1, 0),
                 Usage = ResourceUsage.Default,
                 BindFlags = BindFlags.DepthStencil,
@@ -89,7 +89,7 @@ namespace DotGame.DirectX11
             });
             depthStencilView = new DepthStencilView(device, depthBuffer);
 
-            device.ImmediateContext.OutputMerger.SetTargets(depthStencilView, renderTargetView);
+            Context.OutputMerger.SetTargets(depthStencilView, renderTargetView);
         }
 
         public void Dispose()
@@ -105,18 +105,33 @@ namespace DotGame.DirectX11
 
         public void SwapBuffers()
         {
-            throw new NotImplementedException();
+            swapChain.Present(0, PresentFlags.None);
         }
 
 
         public void Clear(Color color)
         {
-            throw new NotImplementedException();
+            Context.ClearRenderTargetView(renderTargetView, new SharpDX.Color4(color.R, color.B, color.G, color.A));
         }
 
         public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
         {
-            throw new NotImplementedException();
+            if (clearOptions.HasFlag(ClearOptions.Color))
+            {
+                Clear(color);
+            }
+            else if (clearOptions.HasFlag(ClearOptions.Depth) && clearOptions.HasFlag(ClearOptions.Depth))
+            {
+                Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, depth, (byte)stencil);
+            }
+            else if (clearOptions.HasFlag(ClearOptions.Depth))
+            {
+                Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth, depth, (byte)stencil);
+            }
+            else if (clearOptions.HasFlag(ClearOptions.Depth))
+            {
+                Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Stencil, depth, (byte)stencil);
+            } 
         }
     }
 }
