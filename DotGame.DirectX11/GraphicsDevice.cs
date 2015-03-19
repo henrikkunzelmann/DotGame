@@ -26,9 +26,7 @@ namespace DotGame.DirectX11
         public IGraphicsFactory Factory { get; private set; }
 
         public IGameWindow DefaultWindow { get; private set; }
-
-        internal readonly RenderControl Control;
-
+        
         internal DeviceContext Context { get; private set; } 
 
         internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain)

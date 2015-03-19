@@ -58,6 +58,9 @@
     <Compile Include="GraphicsDevice.cs" />
     <Compile Include="GraphicsFactory.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Windows\GameWindow.cs">
+      <SubType>Form</SubType>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
