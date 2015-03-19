@@ -60,7 +60,7 @@ namespace DotGame
                     break;
 
                 case GraphicsAPI.DirectX11:
-                    this.GraphicsDevice = new DotGame.DirectX11.Windows.GameWindow(container).CreateDevice();
+                    this.GraphicsDevice = new DotGame.DirectX11.Windows.GameControl(container).CreateDevice();
                     break;
             }
 

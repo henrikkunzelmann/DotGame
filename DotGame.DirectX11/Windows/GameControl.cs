@@ -14,7 +14,7 @@ using SharpDX.DXGI;
 
 namespace DotGame.DirectX11.Windows
 {
-    public class GameWindow : IGameWindow
+    public class GameControl : IGameWindow
     {
         private IGraphicsDevice graphicsDevice;
         private Control control;
@@ -37,7 +37,13 @@ namespace DotGame.DirectX11.Windows
             set { throw new NotImplementedException(); }
         }
 
-        public GameWindow(Control control)
+        public bool VSync
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
+
+        public GameControl(Control control)
         {
             if (control == null)
                 throw new ArgumentNullException("control");

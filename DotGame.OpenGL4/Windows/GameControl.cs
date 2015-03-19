@@ -56,5 +56,11 @@ namespace DotGame.OpenGL4.Windows
             graphicsDevice = new GraphicsDevice(this, context);
             return graphicsDevice;
         }
+
+        public bool VSync
+        {
+            get { throw new NotImplementedException(); }
+            set { throw new NotImplementedException(); }
+        }
     }
 }
