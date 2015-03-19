@@ -11,8 +11,6 @@ namespace DotGame.OpenGL4.Windows
 {
     class GameWindow : OpenTK.GameWindow, IGameWindow
     {
-        bool fullScreen = false;
-
         public GameWindow() : base() { }
         public GameWindow(int width, int height) : base(width, height) { }
         public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title) { }
@@ -24,17 +22,15 @@ namespace DotGame.OpenGL4.Windows
             return new GraphicsDevice(this, context);
         }
 
-        public bool FullScreen 
+        public bool IsFullScreen 
         { 
             get 
             {
-                return fullScreen;
+                return WindowState == OpenTK.WindowState.Fullscreen;
             } 
             set 
             {
-                fullScreen = value;
-
-                if (fullScreen)
+                if (value)
                 {
                     WindowState = OpenTK.WindowState.Fullscreen;
                 }

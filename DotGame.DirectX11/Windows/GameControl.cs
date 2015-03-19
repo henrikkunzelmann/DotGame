@@ -31,7 +31,7 @@ namespace DotGame.DirectX11.Windows
             set { control.Height = value; }
         }
 
-        public bool FullScreen
+        public bool IsFullScreen
         {
             get { throw new NotImplementedException(); }
             set { throw new NotImplementedException(); }

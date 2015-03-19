@@ -46,7 +46,7 @@ namespace DotGame.DirectX11.Windows
             return graphicsDevice;
         }
 
-        public bool FullScreen
+        public bool IsFullScreen
         {
             get
             {

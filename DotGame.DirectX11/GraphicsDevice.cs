@@ -12,7 +12,7 @@ using SharpDX.DXGI;
 
 namespace DotGame.DirectX11
 {
-    public class GraphicsDevice : IGraphicsDevice
+    public sealed class GraphicsDevice : IGraphicsDevice
     {
         private Device device;
         private SwapChain swapChain;

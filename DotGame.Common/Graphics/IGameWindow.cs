@@ -22,7 +22,7 @@ namespace DotGame.Graphics
         /// </summary>
         int Height { get; set; }
 
-        bool FullScreen { get; set; }
+        bool IsFullScreen { get; set; }
 
         bool VSync { get; set; }
 

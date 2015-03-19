@@ -32,7 +32,7 @@ namespace DotGame.OpenGL4.Windows
             set { control.Height = value; }
         }
 
-        public bool FullScreen
+        public bool IsFullScreen
         {
             get { return false; }
             set { throw new NotImplementedException(); }
