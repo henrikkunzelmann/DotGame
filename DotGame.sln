@@ -3,6 +3,8 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
 VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame", "DotGame\DotGame.csproj", "{F797A1BF-58C2-47B8-A089-72B27295DE1B}"
+EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.DirectX11", "DotGame.DirectX11\DotGame.DirectX11.csproj", "{33A153EC-3217-464A-BF33-E6882CB643FC}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.OpenGL4", "DotGame.OpenGL4\DotGame.OpenGL4.csproj", "{73DB03A7-9890-4C33-A266-D6DF5C15ACCF}"
@@ -23,6 +25,10 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F797A1BF-58C2-47B8-A089-72B27295DE1B}.Release|Any CPU.Build.0 = Release|Any CPU
 		{33A153EC-3217-464A-BF33-E6882CB643FC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{33A153EC-3217-464A-BF33-E6882CB643FC}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{33A153EC-3217-464A-BF33-E6882CB643FC}.Release|Any CPU.ActiveCfg = Release|Any CPU
