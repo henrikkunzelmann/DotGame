@@ -10,13 +10,15 @@ using OpenTK.Graphics.OpenGL4;
 using OpenTK.Graphics;
 using Config = OpenTK.Configuration;
 using Utilities = OpenTK.Platform.Utilities;
+using OpenTK.Platform;
 
 namespace DotGame.OpenGL4.Windows
 {
-    public class GameControl : IGameWindow
+    public class GameControl : DotGame.Graphics.IGameWindow
     {
         private IGraphicsDevice graphicsDevice;
         private Control control;
+        private IWindowInfo windowInfo;
 
         public int Width
         {
@@ -51,7 +53,8 @@ namespace DotGame.OpenGL4.Windows
             if (graphicsDevice != null)
                 return graphicsDevice;
 
-            GraphicsContext context = new GraphicsContext(GraphicsMode.Default, Utilities.CreateWindowsWindowInfo(control.Handle));
+            windowInfo = Utilities.CreateWindowsWindowInfo(control.Handle);
+            GraphicsContext context = new GraphicsContext(GraphicsMode.Default, windowInfo);
             context.LoadAll();
             graphicsDevice = new GraphicsDevice(this, context);
             return graphicsDevice;
