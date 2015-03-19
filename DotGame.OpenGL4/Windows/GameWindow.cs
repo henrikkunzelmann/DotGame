@@ -3,58 +3,46 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Windows.Forms;
-using DotGame.Graphics;
 using OpenTK;
-using OpenTK.Graphics.OpenGL4;
+using DotGame.Graphics;
 using OpenTK.Graphics;
-using Config = OpenTK.Configuration;
-using Utilities = OpenTK.Platform.Utilities;
 
 namespace DotGame.OpenGL4.Windows
 {
-    public class GameWindow : IGameWindow
+    class GameWindow : OpenTK.GameWindow, IGameWindow
     {
-        private IGraphicsDevice graphicsDevice;
-        private Control control;
+        bool fullScreen = false;
 
-        public int Width
-        {
-            get { return control.Width; }
-            set { control.Width = value; }
-        }
+        public GameWindow() : base() { }
+        public GameWindow(int width, int height) : base(width, height) { }
+        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title) { }
 
-        public int Height
-        {
-            get { return control.Height; }
-            set { control.Height = value; }
-        }
-
-        public bool FullScreen
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
-        public GameWindow(Control control)
-        {
-            if (control == null)
-                throw new ArgumentNullException("control");
-            if (control.IsDisposed)
-                throw new ArgumentException("control is disposed", "control");
-
-            this.control = control;
-        }
 
         public IGraphicsDevice CreateDevice()
         {
-            if (graphicsDevice != null)
-                return graphicsDevice;
+            GraphicsContext context = (GraphicsContext)this.Context;
+            return new GraphicsDevice(this, context);
+        }
 
-            GraphicsContext context = new GraphicsContext(GraphicsMode.Default, Utilities.CreateWindowsWindowInfo(control.Handle));
-            context.LoadAll();
-            graphicsDevice = new GraphicsDevice(this, context);
-            return graphicsDevice;
+        public bool FullScreen 
+        { 
+            get 
+            {
+                return fullScreen;
+            } 
+            set 
+            {
+                fullScreen = value;
+
+                if (fullScreen)
+                {
+                    WindowState = OpenTK.WindowState.Fullscreen;
+                }
+                else 
+                {
+                    WindowState = OpenTK.WindowState.Normal;
+                }
+            } 
         }
     }
 }

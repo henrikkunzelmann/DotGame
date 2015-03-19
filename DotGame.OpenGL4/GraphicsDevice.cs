@@ -85,6 +85,8 @@ namespace DotGame.OpenGL4
                 SetClearStencil(ref stencil);
                 mask |= ClearBufferMask.StencilBufferBit;
             }
+
+            GL.Clear(mask);
         }
 
         public void SwapBuffers()

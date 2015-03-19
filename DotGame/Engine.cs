@@ -50,7 +50,7 @@ namespace DotGame
             switch (settings.GraphicsAPI)
             {
                 case GraphicsAPI.OpenGL4:
-                    this.GraphicsDevice = new DotGame.OpenGL4.Windows.GameWindow(container).CreateDevice();
+                    this.GraphicsDevice = new DotGame.OpenGL4.Windows.GameControl(container).CreateDevice();
                     break;
 
                 case GraphicsAPI.DirectX11:
