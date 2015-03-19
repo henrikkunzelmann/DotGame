@@ -10,7 +10,19 @@ namespace DotGame.OpenAL
 {
     public class MixerChannel : AudioObject, IMixerChannel
     {
-        public float Gain { get { return Get(EfxAuxiliaryf.EffectslotGain); } set { Set(EfxAuxiliaryf.EffectslotGain, value); } }
+        public IEffect Effect {
+            get { return effect; }
+            set
+            {
+                effect = (Effect)value;
+                if (effect == null)
+                    AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, 0);
+                else
+                    AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, effect.ID);
+            }
+        }
+        private Effect effect;
+        public float WetGain { get { return Get(EfxAuxiliaryf.EffectslotGain); } set { Set(EfxAuxiliaryf.EffectslotGain, value); } }
 
         internal readonly int ID;
 
@@ -23,6 +35,11 @@ namespace DotGame.OpenAL
             DotGame.OpenAL.AudioDevice.CheckALError();
 
             AudioDeviceInternal.Efx.AuxiliaryEffectSlot(ID, EfxAuxiliaryi.EffectslotAuxiliarySendAuto, 1);
+
+            //effect = AudioDeviceInternal.Efx.GenEffect();
+            //AudioDeviceInternal.Efx.BindEffect(effect, EfxEffectType.Chorus);
+            //AudioDeviceInternal.Efx.Effect()
+            //AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, effect);
         }
 
         private void Set(EfxAuxiliaryf param, float value)

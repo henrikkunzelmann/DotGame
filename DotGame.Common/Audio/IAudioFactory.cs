@@ -11,8 +11,9 @@ namespace DotGame.Audio
     /// </summary>
     public interface IAudioFactory
     {
-        ISound CreateSound(string file);
+        ISound CreateSound(string file, bool forceMono);
         ISampleSource CreateSampleSource(string file);
         IMixerChannel CreateMixerChannel(string name);
+        IEffectReverb CreateReverb();
     }
 }

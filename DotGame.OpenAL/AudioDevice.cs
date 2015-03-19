@@ -47,7 +47,7 @@ namespace DotGame.OpenAL
             if (!AvailableDevices.Contains(device))
                 throw new InvalidOperationException(string.Format("AudioDevice \"{0}\" does not exist.", device));
 
-            Context = new OpenTK.Audio.AudioContext(device, 0, 0, true, true, AudioContext.MaxAuxiliarySends.UseDriverDefault);
+            Context = new OpenTK.Audio.AudioContext(device, 0, 15, true, true, AudioContext.MaxAuxiliarySends.UseDriverDefault);
             Efx = new EffectsExtension();
 
             deviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
@@ -60,6 +60,8 @@ namespace DotGame.OpenAL
             ApiVersion = new Version(major, minor);
             Alc.GetInteger(deviceHandle, AlcGetInteger.EfxMaxAuxiliarySends, 1, val);
             MaxRoutes = val[0];
+
+            AL.DistanceModel(ALDistanceModel.ExponentDistance);
 
             Log.Debug("Got context: [Device: \"{0}\", Version: {1}, MaxRoutes: {2}]",
                 Context.CurrentDevice,

@@ -13,9 +13,9 @@ namespace DotGame.OpenAL
         {
         }
 
-        public ISound CreateSound(string file)
+        public ISound CreateSound(string file, bool forceMono)
         {
-            return new Sound(AudioDeviceInternal, file);
+            return new Sound(AudioDeviceInternal, file, forceMono);
         }
 
         public ISampleSource CreateSampleSource(string file)
@@ -26,6 +26,11 @@ namespace DotGame.OpenAL
         public IMixerChannel CreateMixerChannel(string name)
         {
             return new MixerChannel(AudioDeviceInternal, name);
+        }
+
+        public IEffectReverb CreateReverb()
+        {
+            return new EffectReverb(AudioDeviceInternal);
         }
     }
 }

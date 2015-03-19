@@ -11,6 +11,14 @@ namespace DotGame.Audio
     /// </summary>
     public interface IMixerChannel : IAudioObject
     {
-        float Gain { get; set; }
+        /// <summary>
+        /// Der Effekt, der diesem Channel zugeordnet wird.
+        /// </summary>
+        IEffect Effect { get; set; }
+
+        /// <summary>
+        /// Ruft den Mischungsanteil zwischen dem rohen Signal (dry) und dem, vom Effekt bearbeiteten, Signal (wet) ab, oder legt diesen fest.
+        /// </summary>
+        float WetGain { get; set; }
     }
 }
