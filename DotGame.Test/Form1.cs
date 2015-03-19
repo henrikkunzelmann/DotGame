@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using DotGame;
 using DotGame.Graphics;
+using DotGame.Audio;
 using Color = DotGame.Graphics.Color;
 
 namespace DotGame.Test
@@ -16,7 +17,7 @@ namespace DotGame.Test
     public partial class Form1 : Form
     {
         public Engine Engine { get; private set; }
-
+        
         public Form1()
         {
             InitializeComponent();
@@ -31,8 +32,16 @@ namespace DotGame.Test
 
             Engine = new Engine(new EngineSettings()
             {
-                GraphicsAPI = GraphicsAPI.DirectX11
+                GraphicsAPI = GraphicsAPI.OpenGL4,
+                AudioAPI = AudioAPI.OpenAL
             }, splitContainer1.Panel1);
+
+            var sound = Engine.AudioDevice.Factory.CreateSound("test.ogg");
+            var instance = sound.CreateInstance(true);
+            instance.Gain = 0.1f;
+            instance.Pitch = 1f;
+            instance.IsLooping = true;
+            //instance.Play(); // Uncommenten zum Abspielen
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

@@ -53,6 +53,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="AudioAPI.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
     <Compile Include="GraphicsAPI.cs" />
@@ -70,6 +71,10 @@
     <ProjectReference Include="..\DotGame.DirectX11\DotGame.DirectX11.csproj">
       <Project>{33a153ec-3217-464a-bf33-e6882cb643fc}</Project>
       <Name>DotGame.DirectX11</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\DotGame.OpenAL\DotGame.OpenAL.csproj">
+      <Project>{a62851d0-dd5b-417b-a40f-97a5c1f1cdb6}</Project>
+      <Name>DotGame.OpenAL</Name>
     </ProjectReference>
     <ProjectReference Include="..\DotGame.OpenGL4\DotGame.OpenGL4.csproj">
       <Project>{73db03a7-9890-4c33-a266-d6df5c15accf}</Project>

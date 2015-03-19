@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotGame.Utils;
 using DotGame.Graphics;
 using System.Windows.Forms;
+using DotGame.Audio;
 
 namespace DotGame
 {
@@ -15,6 +16,11 @@ namespace DotGame
         /// Das GraphicsDevice welches die Engine nutzt.
         /// </summary>
         public IGraphicsDevice GraphicsDevice { get; private set; }
+
+        /// <summary>
+        /// Das AudioDevice welches die Engine nutzt.
+        /// </summary>
+        public IAudioDevice AudioDevice { get; private set; }
 
         /// <summary>
         /// Die Einstellungen mit dem die Engine gestartet wurde.
@@ -62,6 +68,13 @@ namespace DotGame
             Log.Debug("Got GraphicsDevice: " + GraphicsDevice.GetType().FullName);
             Log.Debug("Got window: [width: {0}, height: {1}]", GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height);
             Log.WriteFields(LogLevel.Verbose, settings);
+
+            switch (settings.AudioAPI)
+            {
+                case AudioAPI.OpenAL:
+                    this.AudioDevice = new DotGame.OpenAL.AudioDevice(settings.AudioDevice);
+                    break;
+            }
         }
 
         public void Dispose()

@@ -41,6 +41,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\IMixerChannel.cs" />
+    <Compile Include="Audio\ISampleSource.cs" />
+    <Compile Include="Audio\IAudioDevice.cs" />
+    <Compile Include="Audio\IAudioFactory.cs" />
+    <Compile Include="Audio\IAudioObject.cs" />
+    <Compile Include="Audio\ISound.cs" />
+    <Compile Include="Audio\ISoundInstance.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />

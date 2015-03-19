@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.Common.Tests", "Dot
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.Test", "DotGame.Test\DotGame.Test.csproj", "{7D44F990-CF80-4B2A-AE64-35BACB109C3E}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.OpenAL", "DotGame.OpenAL\DotGame.OpenAL.csproj", "{A62851D0-DD5B-417B-A40F-97A5C1F1CDB6}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{7D44F990-CF80-4B2A-AE64-35BACB109C3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D44F990-CF80-4B2A-AE64-35BACB109C3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7D44F990-CF80-4B2A-AE64-35BACB109C3E}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A62851D0-DD5B-417B-A40F-97A5C1F1CDB6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A62851D0-DD5B-417B-A40F-97A5C1F1CDB6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A62851D0-DD5B-417B-A40F-97A5C1F1CDB6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A62851D0-DD5B-417B-A40F-97A5C1F1CDB6}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
