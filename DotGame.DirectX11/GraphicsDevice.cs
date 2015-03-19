@@ -121,21 +121,8 @@ namespace DotGame.DirectX11
 
         public bool VSync
         {
-            get
-            {
-                return syncInterval != 0;
-            }
-            set
-            {
-                if (value)
-                {
-                    //TODO Get refresh rate
-                    syncInterval = 8;
-                    
-                }
-                else
-                    syncInterval = 0;
-            }
+            get { return syncInterval != 0; }
+            set { syncInterval = value ? 1 : 0; }
         }
     }
 }

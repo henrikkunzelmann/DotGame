@@ -136,20 +136,11 @@ namespace DotGame.OpenGL4
 
         public bool VSync
         {
-            get
-            {
-                return Context.SwapInterval > 1;
-            }
+            get { return Context.SwapInterval > 1; }
             set
             {
                 //AssertCurrent
-                if (value)
-                {
-                    int interval = (int)(1000f / DisplayDevice.Default.RefreshRate);
-                    Context.SwapInterval = interval;
-                }
-                else
-                    Context.SwapInterval = 1;
+                Context.SwapInterval = value ? 1 : 0;
             }
         }
     }
