@@ -133,5 +133,24 @@ namespace DotGame.OpenGL4
             Context.Dispose();
             IsDisposed = true;
         }
+
+        public bool VSync
+        {
+            get
+            {
+                return Context.SwapInterval > 1;
+            }
+            set
+            {
+                //AssertCurrent
+                if (value)
+                {
+                    int interval = (int)(1000f / DisplayDevice.Default.RefreshRate);
+                    Context.SwapInterval = interval;
+                }
+                else
+                    Context.SwapInterval = 1;
+            }
+        }
     }
 }

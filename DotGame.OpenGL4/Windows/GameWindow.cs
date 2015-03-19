@@ -40,21 +40,5 @@ namespace DotGame.OpenGL4.Windows
                 }
             } 
         }
-
-        public new bool VSync
-        {
-            get { return base.VSync == VSyncMode.On; }
-            set
-            {
-                if (value)
-                {
-                    base.VSync = VSyncMode.On;
-                }
-                else
-                {
-                    base.VSync = VSyncMode.Off;
-                }
-            }
-        }
     }
 }

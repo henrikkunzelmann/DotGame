@@ -27,7 +27,9 @@ namespace DotGame.DirectX11
 
         public IGameWindow DefaultWindow { get; private set; }
         
-        internal DeviceContext Context { get; private set; } 
+        internal DeviceContext Context { get; private set; }
+
+        private int syncInterval = 0;
 
         internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain)
         {
@@ -88,7 +90,7 @@ namespace DotGame.DirectX11
 
         public void SwapBuffers()
         {
-            swapChain.Present(0, PresentFlags.None);
+            swapChain.Present(syncInterval, PresentFlags.None);
         }
 
 
@@ -115,6 +117,25 @@ namespace DotGame.DirectX11
             {
                 Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Stencil, depth, (byte)stencil);
             } 
+        }
+
+        public bool VSync
+        {
+            get
+            {
+                return syncInterval != 0;
+            }
+            set
+            {
+                if (value)
+                {
+                    //TODO Get refresh rate
+                    syncInterval = 8;
+                    
+                }
+                else
+                    syncInterval = 0;
+            }
         }
     }
 }

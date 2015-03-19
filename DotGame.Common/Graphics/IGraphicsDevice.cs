@@ -45,5 +45,10 @@ namespace DotGame.Graphics
         /// Tauscht den Backbuffer mit dem Frontbuffer, was zum Anzeigen des Bildes führt.
         /// </summary>
         void SwapBuffers();
+
+        /// <summary>
+        /// Ruft die vertikale Synchronisation ab oder legt diese fest.
+        /// </summary>
+        bool VSync { get; set; }
     }
 }

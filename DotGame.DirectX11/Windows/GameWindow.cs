@@ -16,8 +16,20 @@ namespace DotGame.DirectX11.Windows
     {
         IGraphicsDevice graphicsDevice;
         SwapChain swapChain;
+        
+        public GameWindow() : base() { }
 
-        bool vsync = false;
+        public GameWindow(int width, int height) : base() 
+        { 
+            Width = width; 
+            Height = height;
+        }
+
+        public GameWindow(int width, int height, string title) : base(title)
+        {
+            Width = width;
+            Height = height;
+        }
 
         public IGraphicsDevice CreateDevice()
         {
@@ -55,18 +67,6 @@ namespace DotGame.DirectX11.Windows
             set
             {
                 swapChain.SetFullscreenState(value, null);
-            }
-        }
-
-        public bool VSync
-        {
-            get
-            {
-                return vsync;
-            }
-            set
-            {
-                vsync = value;
             }
         }
     }

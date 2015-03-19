@@ -24,8 +24,6 @@ namespace DotGame.Graphics
 
         bool IsFullScreen { get; set; }
 
-        bool VSync { get; set; }
-
         /// <summary>
         /// Erstellt ein GraphicsDevice für diese GameWindow.
         /// </summary>
