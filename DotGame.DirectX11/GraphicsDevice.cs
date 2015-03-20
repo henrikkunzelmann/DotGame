@@ -17,9 +17,7 @@ namespace DotGame.DirectX11
         private Device device;
         private SwapChain swapChain;
 
-        private RenderTargetView renderTargetView;
         private Texture2D backBuffer;
-        private DepthStencilView depthStencilView;
         private Texture2D depthBuffer;
 
         public bool IsDisposed { get; private set; }
@@ -30,6 +28,14 @@ namespace DotGame.DirectX11
         internal DeviceContext Context { get; private set; }
 
         private int syncInterval = 0;
+        public bool VSync
+        {
+            get { return syncInterval != 0; }
+            set { syncInterval = value ? 1 : 0; }
+        }
+
+        private RenderTargetView currentRenderTarget;
+        private DepthStencilView currentDepthTarget;
 
         internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain)
         {
@@ -56,26 +62,15 @@ namespace DotGame.DirectX11
 
         private void InitBackbuffer()
         {
-            backBuffer = swapChain.GetBackBuffer<Texture2D>(0);
-            renderTargetView = new RenderTargetView(device, backBuffer);
+            backBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
+            depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth32);
 
-            depthBuffer = new SharpDX.Direct3D11.Texture2D(device, new Texture2DDescription()
-            {
-                Format = Format.D32_Float_S8X24_UInt,
-                ArraySize = 1,
-                MipLevels = 1,
-                Width = backBuffer.Description.Width,
-                Height = backBuffer.Description.Height,
-                SampleDescription = new SampleDescription(1, 0),
-                Usage = ResourceUsage.Default,
-                BindFlags = BindFlags.DepthStencil,
-                CpuAccessFlags = CpuAccessFlags.None,
-                OptionFlags = ResourceOptionFlags.None,
-            });
-            depthStencilView = new DepthStencilView(device, depthBuffer);
 
-            Context.OutputMerger.SetTargets(depthStencilView, renderTargetView);
+            currentRenderTarget = backBuffer.RenderView;
+            currentDepthTarget = depthBuffer.DepthView;
+            Context.OutputMerger.SetTargets(depthBuffer.DepthView, backBuffer.RenderView);
         }
+
 
         public void Dispose()
         {
@@ -84,6 +79,9 @@ namespace DotGame.DirectX11
 
             if (Factory != null && !Factory.IsDisposed)
                 Factory.Dispose();
+
+            if (backBuffer != null && !backBuffer.IsDisposed)
+                backBuffer.Dispose();
 
             IsDisposed = true;
         }
@@ -96,33 +94,22 @@ namespace DotGame.DirectX11
 
         public void Clear(Color color)
         {
-            Context.ClearRenderTargetView(renderTargetView, new SharpDX.Color4(color.R, color.B, color.G, color.A));
+            Context.ClearRenderTargetView(currentRenderTarget, new SharpDX.Color4(color.R, color.G, color.B, color.A));
         }
 
         public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
         {
             if (clearOptions.HasFlag(ClearOptions.Color))
-            {
                 Clear(color);
-            }
-            else if (clearOptions.HasFlag(ClearOptions.Depth) && clearOptions.HasFlag(ClearOptions.Depth))
-            {
-                Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth | DepthStencilClearFlags.Stencil, depth, (byte)stencil);
-            }
-            else if (clearOptions.HasFlag(ClearOptions.Depth))
-            {
-                Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Depth, depth, (byte)stencil);
-            }
-            else if (clearOptions.HasFlag(ClearOptions.Depth))
-            {
-                Context.ClearDepthStencilView(depthStencilView, DepthStencilClearFlags.Stencil, depth, (byte)stencil);
-            } 
-        }
 
-        public bool VSync
-        {
-            get { return syncInterval != 0; }
-            set { syncInterval = value ? 1 : 0; }
+            DepthStencilClearFlags clearFlags = 0;
+            if (clearOptions.HasFlag(ClearOptions.Depth))
+                clearFlags|= DepthStencilClearFlags.Depth;
+            if (clearOptions.HasFlag(ClearOptions.Stencil))
+                clearFlags |= DepthStencilClearFlags.Stencil;
+
+            if (clearFlags != 0)
+                Context.ClearDepthStencilView(currentDepthTarget, clearFlags, depth, (byte)stencil);
         }
     }
 }

@@ -54,6 +54,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="FormatConverter.cs" />
+    <Compile Include="Texture2D.cs" />
     <Compile Include="Windows\GameControl.cs" />
     <Compile Include="GraphicsDevice.cs" />
     <Compile Include="GraphicsFactory.cs" />

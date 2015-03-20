@@ -9,7 +9,8 @@ namespace DotGame.DirectX11
 {
     public class GraphicsFactory : IGraphicsFactory
     {
-        public IGraphicsDevice GraphicsDevice { get; private set; }
+        private GraphicsDevice graphicsDevice;
+        public IGraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
         public bool IsDisposed { get; private set; }
 
         public EventHandler<EventArgs> Disposing { get; set; }
@@ -21,11 +22,12 @@ namespace DotGame.DirectX11
                 throw new ArgumentNullException("graphicsDevice");
             if (graphicsDevice.IsDisposed)
                 throw new ArgumentException("graphicsDevice is disposed.", "graphicsDevice");
+            this.graphicsDevice = graphicsDevice;
         }
 
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
         {
-            throw new NotImplementedException();
+            return new Texture2D(graphicsDevice, width, height, 0, format, 1, false);
         }
 
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format)
@@ -35,7 +37,7 @@ namespace DotGame.DirectX11
 
         public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, int arraySize)
         {
-            throw new NotImplementedException();
+            return new Texture2D(graphicsDevice, width, height, 0, format, arraySize, false);
         }
 
         public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, int arraySize)
@@ -45,7 +47,7 @@ namespace DotGame.DirectX11
 
         public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format)
         {
-            throw new NotImplementedException();
+            return new Texture2D(graphicsDevice, width, height, 0, format, 1, true);
         }
 
         public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format)
@@ -55,7 +57,7 @@ namespace DotGame.DirectX11
 
         public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, int arraySize)
         {
-            throw new NotImplementedException();
+            return new Texture2D(graphicsDevice, width, height, 0, format, arraySize, true);
         }
 
         public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, int arraySize)
@@ -63,10 +65,16 @@ namespace DotGame.DirectX11
             throw new NotImplementedException();
         }
 
-        
 
         public void Dispose()
         {
+            if (IsDisposed)
+                return;
+            if (Disposing != null)
+                Disposing(this, new EventArgs());
+
+            // TODO Alle erzeugten Objekte disposen
+
             IsDisposed = true;
         }
     }

@@ -49,7 +49,7 @@ namespace DotGame.DirectX11.Windows
             };
 
             Device device;
-            Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.None, swapChainDescription, out device, out swapChain);
+            Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.Debug, swapChainDescription, out device, out swapChain);
 
             Factory factory = swapChain.GetParent<Factory>();
             factory.MakeWindowAssociation(Handle, WindowAssociationFlags.IgnoreAll);
