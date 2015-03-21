@@ -9,6 +9,7 @@ using DotGame.Utils;
 using OpenTK.Graphics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
+using DotGame.OpenGL4.Windows;
 
 namespace DotGame.OpenGL4
 {
@@ -18,6 +19,15 @@ namespace DotGame.OpenGL4
         public IGraphicsFactory Factory { get; private set; }
 
         public IGameWindow DefaultWindow { get; private set; }
+        public bool VSync
+        {
+            get { return Context.SwapInterval > 1; }
+            set
+            {
+                //AssertCurrent
+                Context.SwapInterval = value ? 1 : 0;
+            }
+        }
 
         internal GraphicsContext Context { get; private set; }
         internal bool IsCurrent { get { return Context.IsCurrent; } }
@@ -25,6 +35,12 @@ namespace DotGame.OpenGL4
         private Color clearColor;
         private float clearDepth;
         private int clearStencil;
+
+        internal static int MipLevels(int width, int height, int depth = 0)
+        {
+            var max = Math.Max(width, Math.Max(height, depth));
+            return (int)Math.Ceiling(Math.Log(max, 2));
+        }
 
         public GraphicsDevice(IGameWindow window, GraphicsContext context)
         {
@@ -91,6 +107,9 @@ namespace DotGame.OpenGL4
 
         public void SwapBuffers()
         {
+            // TODO (Joex3): Evtl. woanders hinschieben.
+            ((GraphicsFactory)Factory).DisposeUnused();
+
             Context.SwapBuffers();
         }
 
@@ -129,19 +148,10 @@ namespace DotGame.OpenGL4
 
         private void Dispose(bool isDisposing)
         {
-            Factory.Dispose();
             Context.Dispose();
             IsDisposed = true;
-        }
-
-        public bool VSync
-        {
-            get { return Context.SwapInterval > 1; }
-            set
-            {
-                //AssertCurrent
-                Context.SwapInterval = value ? 1 : 0;
-            }
+            // Wird hinter IsDisposed = true; aufgerufen, damit die GraphicsObject Dispose Implementationen bescheid wissen, dass nicht mehr auf das GraphicsDevice zugegriffen werden kann.
+            Factory.Dispose();
         }
     }
 }

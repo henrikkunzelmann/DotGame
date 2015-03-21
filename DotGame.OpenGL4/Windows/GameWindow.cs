@@ -9,19 +9,8 @@ using OpenTK.Graphics;
 
 namespace DotGame.OpenGL4.Windows
 {
-    class GameWindow : OpenTK.GameWindow, IGameWindow
+    class GameWindow : OpenTK.GameWindow, IGameWindow, IWindowContainer
     {
-        public GameWindow() : base() { }
-        public GameWindow(int width, int height) : base(width, height) { }
-        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title) { }
-
-
-        public IGraphicsDevice CreateDevice()
-        {
-            GraphicsContext context = (GraphicsContext)this.Context;
-            return new GraphicsDevice(this, context);
-        }
-
         public bool IsFullScreen 
         { 
             get 
@@ -39,6 +28,20 @@ namespace DotGame.OpenGL4.Windows
                     WindowState = OpenTK.WindowState.Normal;
                 }
             } 
+        }
+
+        public OpenTK.Platform.IWindowInfo WindowInfo { get; private set; }
+
+        public GameWindow() : base() { }
+        public GameWindow(int width, int height) : base(width, height) { }
+        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title) { }
+
+
+        public IGraphicsDevice CreateDevice()
+        {
+            this.WindowInfo = WindowInfo;
+            GraphicsContext context = (GraphicsContext)this.Context;
+            return new GraphicsDevice(this, context);
         }
     }
 }
