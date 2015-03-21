@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
+using System.Diagnostics;
 
 namespace DotGame.OpenGL4
 {
@@ -15,26 +16,35 @@ namespace DotGame.OpenGL4
         public object Tag { get; set; }
 
         internal readonly GraphicsDevice GraphicsDeviceInternal;
+        internal readonly StackTrace CreationTrace;
 
-        public GraphicsObject(GraphicsDevice graphicsDevice)
+        public GraphicsObject(GraphicsDevice graphicsDevice, StackTrace creationTrace)
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (graphicsDevice.IsDisposed)
                 throw new ArgumentException("graphicsDevice is disposed.", "graphicsDevice");
 
-            this.GraphicsDevice = GraphicsDevice;
+            this.GraphicsDevice = graphicsDevice;
             this.GraphicsDeviceInternal = graphicsDevice;
+            this.CreationTrace = creationTrace;
         }
 
         ~GraphicsObject()
         {
-            Dispose(false);
+            if (GraphicsDevice.IsDisposed || GraphicsDeviceInternal.IsCurrent)
+                Dispose(false);
+            else
+                ((GraphicsFactory)GraphicsDevice.Factory).DeferredDispose.Add(this);
         }
 
         public void Dispose()
         {
-            Dispose(true);
+            if (GraphicsDevice.IsDisposed || GraphicsDeviceInternal.IsCurrent)
+                Dispose(true);
+            else
+                ((GraphicsFactory)GraphicsDevice.Factory).DeferredDispose.Add(this);
+
             GC.SuppressFinalize(this);
         }
 
@@ -51,12 +61,12 @@ namespace DotGame.OpenGL4
         {
             AssertNotDisposed();
             
-            // TODO: Eigene Exception.
+            // TODO (Joex3): Eigene Exception.
             if (!GraphicsDeviceInternal.IsCurrent)
                 throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
         }
 
-        protected virtual void Dispose(bool isDisposing)
+        internal virtual void Dispose(bool isDisposing)
         {
             if (Disposing != null)
                 Disposing.Invoke(this, EventArgs.Empty);
