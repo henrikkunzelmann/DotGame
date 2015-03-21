@@ -20,7 +20,7 @@ namespace DotGame.DirectX11
         public int Width { get { return Handle.Description.Width; } }
         public int Height { get { return Handle.Description.Height; } }
         public int MipLevels { get { return Handle.Description.MipLevels; } }
-        public TextureFormat Format { get { return FormatConverter.Convert(Handle.Description.Format); } }
+        public TextureFormat Format { get { return FormatConverter.ConvertToTexture(Handle.Description.Format); } }
         public int ArraySize { get { return Handle.Description.ArraySize; } }
 
         public bool IsDisposed { get; private set; }
@@ -38,17 +38,17 @@ namespace DotGame.DirectX11
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (width <= 0)
-                throw new ArgumentOutOfRangeException("width", "width must be positive");
+                throw new ArgumentOutOfRangeException("width", "Width must be positive.");
             if (height <= 0)
-                throw new ArgumentOutOfRangeException("height", "height must be positive");
+                throw new ArgumentOutOfRangeException("height", "Height must be positive.");
             if (mipLevels < 0)
-                throw new ArgumentOutOfRangeException("mipLevels", "height must be not negative");
+                throw new ArgumentOutOfRangeException("mipLevels", "Height must be not negative.");
             if (isRenderTarget && mipLevels != 0)
-                throw new ArgumentException("mipLevels can not be set with isRenderTarget", "mipLevels");
+                throw new ArgumentException("MipLevels can not be set with isRenderTarget.", "mipLevels");
             if (format == TextureFormat.Unknown)
-                throw new ArgumentException("format is TextureFormat.Unkown", "format");
+                throw new ArgumentException("Format must be not TextureFormat.Unkown.", "format");
             if (arraySize <= 0)
-                throw new ArgumentOutOfRangeException("arraySize", "arraySize must be positive");
+                throw new ArgumentOutOfRangeException("arraySize", "ArraySize must be positive.");
 
             this.graphicsDevice = graphicsDevice;
 
@@ -75,7 +75,7 @@ namespace DotGame.DirectX11
             }
 
             this.Handle = new SharpDX.Direct3D11.Texture2D(graphicsDevice.Context.Device, desc);
-            CreateViews(isRenderTarget);
+            CreateViews();
         }
 
         internal Texture2D(GraphicsDevice graphicsDevice, SharpDX.Direct3D11.Texture2D handle)
@@ -88,17 +88,17 @@ namespace DotGame.DirectX11
             this.graphicsDevice = graphicsDevice;
             this.Handle = handle;
 
-            CreateViews(handle.Description.BindFlags.HasFlag(BindFlags.RenderTarget | BindFlags.DepthStencil));
+            CreateViews();
         }
 
-        private void CreateViews(bool isRenderTarget)
+        private void CreateViews()
         {
-            if (this.Handle.Description.BindFlags.HasFlag(BindFlags.DepthStencil))
-                DepthView = new DepthStencilView(graphicsDevice.Context.Device, this.Handle);
-            if (this.Handle.Description.BindFlags.HasFlag(BindFlags.RenderTarget))
-                RenderView = new RenderTargetView(graphicsDevice.Context.Device, this.Handle);
-            if (this.Handle.Description.BindFlags.HasFlag(BindFlags.ShaderResource))
-                ResourceView = new ShaderResourceView(graphicsDevice.Context.Device, this.Handle);
+            if (Handle.Description.BindFlags.HasFlag(BindFlags.DepthStencil))
+                DepthView = new DepthStencilView(graphicsDevice.Context.Device, Handle);
+            if (Handle.Description.BindFlags.HasFlag(BindFlags.RenderTarget))
+                RenderView = new RenderTargetView(graphicsDevice.Context.Device, Handle);
+            if (Handle.Description.BindFlags.HasFlag(BindFlags.ShaderResource))
+                ResourceView = new ShaderResourceView(graphicsDevice.Context.Device, Handle);
         }
 
         public void Dispose()
@@ -106,7 +106,7 @@ namespace DotGame.DirectX11
             if (IsDisposed)
                 return;
             if (Disposing != null)
-                Disposing(this, new EventArgs());
+                Disposing(this, EventArgs.Empty);
 
             if (ResourceView != null && !ResourceView.IsDisposed)
                 ResourceView.Dispose();

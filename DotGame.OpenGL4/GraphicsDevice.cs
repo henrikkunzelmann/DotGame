@@ -74,6 +74,26 @@ namespace DotGame.OpenGL4
             GC.SuppressFinalize(this);
         }
 
+        public int GetSizeOf(TextureFormat format)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetSizeOf(VertexElementType format)
+        {
+            throw new NotImplementedException();
+        }
+
+        public int GetSizeOf(VertexDescription description)
+        {
+            int size = 0;
+            VertexElement[] elements = description.GetElements();
+            for (int i = 0; i < elements.Length; i++)
+                size += GetSizeOf(elements[i].Type);
+
+            return size;
+        }
+
         public void Clear(Color color)
         {
             SetClearColor(ref color);

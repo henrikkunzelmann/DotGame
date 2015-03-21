@@ -92,6 +92,18 @@ namespace DotGame.OpenGL4
             throw new NotImplementedException();
         }
 
+        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct, IVertexType
+        {
+            AssertCurrent();
+            throw new NotImplementedException();
+        }
+
+        public IIndexBuffer CreateIndexBuffer<T>(T[] data) where T : struct
+        {
+            AssertCurrent();
+            throw new NotImplementedException();
+        }
+
         internal void DisposeUnused()
         {
             // TODO (Joex3): Wieder eigene Exception? :s

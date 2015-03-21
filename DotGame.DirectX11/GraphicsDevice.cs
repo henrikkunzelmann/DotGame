@@ -44,11 +44,11 @@ namespace DotGame.DirectX11
             if (device == null)
                 throw new ArgumentNullException("device");
             if (device.IsDisposed)
-                throw new ArgumentException("device is disposed", "device");
+                throw new ArgumentException("device is disposed.", "device");
             if (swapChain == null)
                 throw new ArgumentNullException("swapChain");
             if (swapChain.IsDisposed)
-                throw new ArgumentException("swapChain is disposed", "swapChain");
+                throw new ArgumentException("swapChain is disposed.", "swapChain");
 
             this.DefaultWindow = window;
             this.device = device;
@@ -71,11 +71,31 @@ namespace DotGame.DirectX11
             Context.OutputMerger.SetTargets(depthBuffer.DepthView, backBuffer.RenderView);
         }
 
+        public int GetSizeOf(TextureFormat format)
+        {
+            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(FormatConverter.Convert(format));
+        }
+
+        public int GetSizeOf(VertexElementType format)
+        {
+            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(FormatConverter.Convert(format));
+        }
+
+        public int GetSizeOf(VertexDescription description)
+        {
+            int size = 0;
+            VertexElement[] elements = description.GetElements();
+            for (int i = 0; i < elements.Length; i++)
+                size += GetSizeOf(elements[i].Type);
+
+            return size;
+        }
 
         public void Dispose()
         {
             if (IsDisposed)
                 return;
+
 
             if (Factory != null && !Factory.IsDisposed)
                 Factory.Dispose();

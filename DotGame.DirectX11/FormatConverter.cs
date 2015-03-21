@@ -10,7 +10,7 @@ namespace DotGame.DirectX11
 {
     public static class FormatConverter
     {
-        private static readonly Dictionary<TextureFormat, Format> formats = new Dictionary<TextureFormat, Format>()
+        private static readonly Dictionary<TextureFormat, Format> textureFormats = new Dictionary<TextureFormat, Format>()
         {
             { TextureFormat.Unknown, Format.Unknown },
             { TextureFormat.RGB32_Float, Format.R32G32B32_Float },
@@ -22,18 +22,40 @@ namespace DotGame.DirectX11
             // TODO (henrik1235) Mehr TextureFormate hinzufügen
         };
 
+        private static readonly Dictionary<VertexElementType, Format> vertexFormats = new Dictionary<VertexElementType, Format>()
+        {
+            { VertexElementType.Single, Format.R32_Float },
+            { VertexElementType.Vector2, Format.R32G32_Float },
+            { VertexElementType.Vector3, Format.R32G32B32_Float },
+            { VertexElementType.Vector4, Format.R32G32B32A32_Float }
+        };
+
         public static Format Convert(TextureFormat format)
         {
-            if (!formats.ContainsKey(format))
-                throw new NotSupportedException("format is not supported");
-            return formats[format];
+            if (!textureFormats.ContainsKey(format))
+                throw new NotSupportedException("Format is not supported.");
+            return textureFormats[format];
         }
 
-        public static TextureFormat Convert(Format format)
+        public static Format Convert(VertexElementType format)
         {
-            if (!formats.ContainsValue(format))
+            if (!vertexFormats.ContainsKey(format))
+                throw new NotSupportedException("Format is not supported.");
+            return vertexFormats[format];
+        }
+
+        public static TextureFormat ConvertToTexture(Format format)
+        {
+            if (!textureFormats.ContainsValue(format))
                 throw new NotImplementedException();
-            return formats.First((f) => f.Value == format).Key;
+            return textureFormats.First((f) => f.Value == format).Key;
+        }
+
+        public static VertexElementType ConvertToVertex(Format format)
+        {
+            if (!vertexFormats.ContainsValue(format))
+                throw new NotImplementedException();
+            return vertexFormats.First((f) => f.Value == format).Key;
         }
     }
 }

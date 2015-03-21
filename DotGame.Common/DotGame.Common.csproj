@@ -66,9 +66,14 @@
     <Compile Include="Graphics\ITexture3DArray.cs" />
     <Compile Include="Graphics\ITextureArray.cs" />
     <Compile Include="Graphics\IVertexBuffer.cs" />
+    <Compile Include="Graphics\IVertexType.cs" />
     <Compile Include="Graphics\TextureFormat.cs" />
     <Compile Include="Graphics\IGameWindow.cs" />
     <Compile Include="Graphics\TextureFormatHelper.cs" />
+    <Compile Include="Graphics\VertexDescription.cs" />
+    <Compile Include="Graphics\VertexElement.cs" />
+    <Compile Include="Graphics\VertexElementType.cs" />
+    <Compile Include="Graphics\VertexElementUsage.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs">
       <DependentUpon>Vector.tt</DependentUpon>

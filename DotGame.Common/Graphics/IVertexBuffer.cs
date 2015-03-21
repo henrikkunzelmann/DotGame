@@ -11,6 +11,8 @@ namespace DotGame.Graphics
     /// </summary>
     public interface IVertexBuffer : IGraphicsObject
     {
+        VertexDescription Description { get; }
+
         /// <summary>
         /// Die Anzahl aller Vertices in diesem VertexBuffer.
         /// </summary>

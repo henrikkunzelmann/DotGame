@@ -24,6 +24,26 @@ namespace DotGame.Null
             get { throw new NotImplementedException(); }
         }
 
+        public int GetSizeOf(TextureFormat format)
+        {
+            return 1;
+        }
+
+        public int GetSizeOf(VertexElementType type)
+        {
+            return 1;
+        }
+
+        public int GetSizeOf(VertexDescription description)
+        {
+            int size = 0;
+            VertexElement[] elements = description.GetElements();
+            for (int i = 0; i < elements.Length; i++)
+                size += GetSizeOf(elements[i].Type);
+
+            return size;
+        }
+
         public void Clear(Color color)
         {
         }

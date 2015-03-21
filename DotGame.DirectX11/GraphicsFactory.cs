@@ -65,6 +65,20 @@ namespace DotGame.DirectX11
             throw new NotImplementedException();
         }
 
+        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct, IVertexType
+        {
+            VertexBuffer buffer = new VertexBuffer(graphicsDevice, description);
+            buffer.SetData(data);
+            return buffer;
+        }
+
+        public IIndexBuffer CreateIndexBuffer<T>(T[] data) where T : struct
+        {
+            IndexBuffer buffer = new IndexBuffer(graphicsDevice);
+            buffer.SetData(data);
+            return buffer;
+        }
+
 
         public void Dispose()
         {

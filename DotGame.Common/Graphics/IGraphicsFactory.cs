@@ -19,5 +19,8 @@ namespace DotGame.Graphics
         IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format);
         IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, int arraySize);
         IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, int arraySize);
+
+        IVertexBuffer CreateVertexBuffer<T>(T[] vertices, VertexDescription description) where T : struct, IVertexType;
+        IIndexBuffer CreateIndexBuffer<T>(T[] indices) where T : struct;
     }
 }

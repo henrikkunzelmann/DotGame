@@ -27,6 +27,27 @@ namespace DotGame.Graphics
         IGameWindow DefaultWindow { get; }
 
         /// <summary>
+        /// Gibt die Größe in Bytes des TextureFormats zurück.
+        /// </summary>
+        /// <param name="format">Das TextureFormat.</param>
+        /// <returns></returns>
+        int GetSizeOf(TextureFormat format);
+
+        /// <summary>
+        /// Gibt die Größe in Bytes des VertexElementTypes zurück.
+        /// </summary>
+        /// <param name="format">Das VertexElementType.</param>
+        /// <returns></returns>
+        int GetSizeOf(VertexElementType format);
+
+        /// <summary>
+        /// Gibt die Größe in Bytes der VertexDescription zurück.
+        /// </summary>
+        /// <param name="description">Die VertexDescription.</param>
+        /// <returns></returns>
+        int GetSizeOf(VertexDescription description);
+
+        /// <summary>
         /// Leert den Inhalt des aktuell gebundenen RenderTargets. Ist kein RenderTarget gebunden, wird der Backbuffer angesprochen.
         /// </summary>
         /// <param name="color">Die Farbe.</param>
