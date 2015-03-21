@@ -70,20 +70,5 @@ namespace DotGame.OpenGL4
             AssertCurrent();
             throw new NotImplementedException();
         }
-
-
-
-        public static Dictionary<TextureFormat, PixelInternalFormat> TextureFormats = new Dictionary<TextureFormat, PixelInternalFormat>() 
-        {
-            {TextureFormat.RGB32_Float, PixelInternalFormat.Rgb32f},
-            {TextureFormat.DXT1, PixelInternalFormat.CompressedRgbaS3tcDxt1Ext},
-            {TextureFormat.DXT3, PixelInternalFormat.CompressedRgbaS3tcDxt3Ext},
-            {TextureFormat.DXT5, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext},
-            {TextureFormat.RGBA16_UIntNorm, PixelInternalFormat.Rgba16},
-            {TextureFormat.RGBA8_UIntNorm, PixelInternalFormat.Rgba8},
-            {TextureFormat.Depth16, PixelInternalFormat.DepthComponent16},
-            {TextureFormat.Depth32, PixelInternalFormat.DepthComponent32},
-            {TextureFormat.Depth24Stencil8, PixelInternalFormat.Depth24Stencil8},
-        };
     }
 }

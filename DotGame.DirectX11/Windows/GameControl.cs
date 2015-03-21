@@ -37,12 +37,6 @@ namespace DotGame.DirectX11.Windows
             set { throw new NotImplementedException(); }
         }
 
-        public bool VSync
-        {
-            get { throw new NotImplementedException(); }
-            set { throw new NotImplementedException(); }
-        }
-
         public GameControl(Control control)
         {
             if (control == null)
