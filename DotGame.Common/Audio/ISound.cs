@@ -11,6 +11,8 @@ namespace DotGame.Audio
     /// </summary>
     public interface ISound : IAudioObject
     {
+        bool Supports3D { get; }
+
         ISoundInstance CreateInstance(bool isPaused);
     }
 }

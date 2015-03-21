@@ -10,6 +10,7 @@ namespace DotGame.Audio
     {
         long TotalSamples { get; }
         long Position { get; set; }
+        AudioFormat NativeFormat { get; }
         int Channels { get; }
         int SampleRate { get; }
 
