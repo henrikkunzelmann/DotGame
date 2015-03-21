@@ -91,8 +91,6 @@ namespace DotGame.OpenGL4
             AssertCurrent();
             throw new NotImplementedException();
         }
-<<<<<<< HEAD
-=======
 
         internal void DisposeUnused()
         {
@@ -152,6 +150,5 @@ namespace DotGame.OpenGL4
 
             IsDisposed = true;
         }
->>>>>>> origin/master
     }
 }
