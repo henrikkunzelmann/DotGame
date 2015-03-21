@@ -13,9 +13,9 @@ namespace DotGame.OpenAL
         {
         }
 
-        public ISound CreateSound(string file, bool forceMono)
+        public ISound CreateSound(string file, bool supports3D)
         {
-            return new Sound(AudioDeviceInternal, file, forceMono);
+            return new Sound(AudioDeviceInternal, file, supports3D);
         }
 
         public ISampleSource CreateSampleSource(string file)

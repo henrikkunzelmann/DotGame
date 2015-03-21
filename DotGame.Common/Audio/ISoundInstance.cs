@@ -12,7 +12,6 @@ namespace DotGame.Audio
 
         Vector3 Position { get; set; }
         Vector3 Velocity { get; set; }
-        float DopplerScale { get; set; }
         float Gain { get; set; }
         float Pitch { get; set; }
         bool IsLooping { get; set; }

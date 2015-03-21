@@ -13,6 +13,7 @@ namespace DotGame.OpenAL
         public long TotalSamples { get; private set; }
         public long Position { get { AssertNotDisposed(); return reader.DecodedPosition; } set { AssertNotDisposed(); reader.DecodedPosition = value; } }
 
+        public AudioFormat NativeFormat { get; private set; }
         public int Channels { get; private set; }
         public int SampleRate { get; private set; }
 
@@ -24,6 +25,7 @@ namespace DotGame.OpenAL
 
             this.TotalSamples = reader.TotalSamples;
             this.Position = reader.DecodedPosition;
+            this.NativeFormat = AudioFormat.Float32;
             this.Channels = reader.Channels;
             this.SampleRate = reader.SampleRate;
         }

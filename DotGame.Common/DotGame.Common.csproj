@@ -41,6 +41,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\AudioFormat.cs" />
     <Compile Include="Audio\IEffect.cs" />
     <Compile Include="Audio\IEffectReverb.cs" />
     <Compile Include="Audio\IMixerChannel.cs" />

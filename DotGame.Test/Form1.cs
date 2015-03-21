@@ -43,7 +43,7 @@ namespace DotGame.Test
             var sound = Engine.AudioDevice.Factory.CreateSound("test.ogg", true);
             reverb = Engine.AudioDevice.Factory.CreateReverb();
             reverb.Density = 0.3f;
-            reverb.Gain = 0.02f;
+            reverb.Gain = 0.2f;
             Engine.AudioDevice.MasterChannel.Effect = reverb;
             propertyGrid1.SelectedObject = reverb;
 
@@ -64,13 +64,11 @@ namespace DotGame.Test
         private void timer1_Tick(object sender, EventArgs e)
         {
             Engine.AudioDevice.MasterChannel.Effect = reverb;
-            var newPos = new Vector3((float)Math.Cos(t) * 32, (float)Math.Sin(t) * 32, 0);
+            var newPos = new Vector3((float)Math.Cos(t) * 4, (float)Math.Sin(t) * 4, 0);
             var velocity = newPos - instance.Position;
             instance.Position = newPos;
             instance.Velocity = velocity;
-            instance.DopplerScale = 16;
             t += 0.03f;
-            Console.WriteLine(t % (float)Math.PI);
 
             Engine.GraphicsDevice.Clear((Color)comboBox1.SelectedItem);
             Engine.GraphicsDevice.SwapBuffers();
