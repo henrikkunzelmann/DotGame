@@ -7,6 +7,7 @@ using DotGame.Audio;
 using DotGame.Utils;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
+using System.Collections.ObjectModel;
 
 namespace DotGame.OpenAL
 {
@@ -17,14 +18,22 @@ namespace DotGame.OpenAL
 
         public bool IsDisposed { get; private set; }
         public IAudioFactory Factory { get; private set; }
-        public Version ApiVersion { get; private set; }
-        public IMixerChannel MasterChannel { get; private set; }
+        public string DeviceName { get; private set; }
+        public string VendorName { get; private set; }
+        public string Renderer { get; private set; }
+        public string DriverVersion { get; private set; }
+        public Version Version { get; private set; }
+        public Version EfxVersion { get; private set; }
+        public ReadOnlyCollection<string> Extensions { get; private set; }
         public int MaxRoutes { get; private set; }
-        
+
+        public IMixerChannel MasterChannel { get; private set; }
+        public IAudioListener Listener { get; private set; }
+
         internal readonly OpenTK.Audio.AudioContext Context;
         internal readonly OpenTK.Audio.OpenAL.EffectsExtension Efx;
 
-        private readonly IntPtr deviceHandle;
+        private readonly IntPtr DeviceHandle;
 
         internal static void CheckALError()
         {
@@ -32,6 +41,15 @@ namespace DotGame.OpenAL
             if (error != ALError.NoError)
             {
                 throw new InvalidOperationException(AL.GetErrorString(error));
+            }
+        }
+
+        internal void CheckAlcError()
+        {
+            var error = Alc.GetError(DeviceHandle);
+            if (error != AlcError.NoError)
+            {
+                throw new InvalidOperationException(error.ToString());
             }
         }
 
@@ -68,41 +86,66 @@ namespace DotGame.OpenAL
 
         public AudioDevice(string device)
         {
-            if (device == null)
-                device = DefaultDevice;
-
-            if (!AvailableDevices.Contains(device))
+            if (device != null && !AvailableDevices.Contains(device))
                 throw new InvalidOperationException(string.Format("AudioDevice \"{0}\" does not exist.", device));
 
             Context = new OpenTK.Audio.AudioContext(device, 0, 15, true, true, AudioContext.MaxAuxiliarySends.UseDriverDefault);
+            CheckAlcError();
             Efx = new EffectsExtension();
+            CheckAlcError();
 
-            deviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
+            DeviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
             int[] val = new int[4];
+            DeviceName = Context.CurrentDevice;
+            VendorName = AL.Get(ALGetString.Vendor);
+            Renderer = AL.Get(ALGetString.Renderer);
+            DriverVersion = AL.Get(ALGetString.Version);
             int major, minor;
-            Alc.GetInteger(deviceHandle, AlcGetInteger.MajorVersion, 1, val);
+            Alc.GetInteger(DeviceHandle, AlcGetInteger.MajorVersion, 1, val);
             major = val[0];
-            Alc.GetInteger(deviceHandle, AlcGetInteger.MinorVersion, 1, val);
-            minor = val[1];
-            ApiVersion = new Version(major, minor);
-            Alc.GetInteger(deviceHandle, AlcGetInteger.EfxMaxAuxiliarySends, 1, val);
+            Alc.GetInteger(DeviceHandle, AlcGetInteger.MinorVersion, 1, val);
+            minor = val[0];
+            Version = new Version(major, minor);
+            Alc.GetInteger(DeviceHandle, AlcGetInteger.EfxMajorVersion, 1, val);
+            major = val[0];
+            Alc.GetInteger(DeviceHandle, AlcGetInteger.EfxMinorVersion, 1, val);
+            minor = val[0];
+            EfxVersion = new Version(major, minor);
+            Alc.GetInteger(DeviceHandle, AlcGetInteger.EfxMaxAuxiliarySends, 1, val);
+            MaxRoutes = val[0];
+            Extensions = new List<string>(AL.Get(ALGetString.Extensions).Split(' ')).AsReadOnly();
+
             MaxRoutes = val[0];
 
             AL.DistanceModel(ALDistanceModel.ExponentDistance);
 
-            Log.Debug("Got context: [Device: \"{0}\", Version: {1}, MaxRoutes: {2}]",
-                Context.CurrentDevice,
-                ApiVersion,
-                MaxRoutes);
+            LogDiagnostics(LogLevel.Verbose);
 
             Factory = new AudioFactory(this);
             MasterChannel = Factory.CreateMixerChannel("Master");
+            Listener = new AudioListener(this);
         }
 
         ~AudioDevice()
         {
             Dispose(false);
             GC.SuppressFinalize(this);
+        }
+
+        public void LogDiagnostics(LogLevel logLevel)
+        {
+            Log.Write(logLevel, "OpenAL Diagnostics:");
+            Log.Write(logLevel, "\tDevice Name: " + DeviceName);
+            Log.Write(logLevel, "\tVendor Name: " + VendorName);
+            Log.Write(logLevel, "\tRenderer: " + Renderer);
+            Log.Write(logLevel, "\tDriver Version: " + DriverVersion);
+            Log.Write(logLevel, "\tOpenAL Version: " + Version);
+            Log.Write(logLevel, "\tEfx Version: " + EfxVersion);
+            Log.Write(logLevel, "\tExtensions supported:");
+            for (int i = 0; i < Extensions.Count; i++)
+            {
+                Log.Write(logLevel, "\t\t" + Extensions[i] + ((i < Extensions.Count - 1) ? "," : ""));
+            }
         }
 
         public void Dispose()

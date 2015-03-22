@@ -27,13 +27,13 @@ namespace DotGame.OpenAL
             buffers = new List<AudioBuffer>();
             if (supports3D)
             {
-                var format = OpenAL.AudioDevice.GetFormat(source.NativeFormat, 1);
-                float[] samplesChannel = new float[samples.Length / channels];
+                var format = OpenAL.AudioDevice.GetFormat(AudioFormat.Short16, 1);
+                short[] samplesChannel = new short[samples.Length / channels];
                 for (int i = 0; i < channels; i++)
                 {
                     for (int j = 0; j < samplesChannel.Length; j++)
                     {
-                        samplesChannel[j] = samples[i + j * channels];
+                        samplesChannel[j] = (short)(samples[i + j * channels] * short.MaxValue);
                     }
 
                     var buffer = new AudioBuffer(audioDevice);
@@ -43,9 +43,15 @@ namespace DotGame.OpenAL
             }
             else
             {
-                var format = OpenAL.AudioDevice.GetFormat(source.NativeFormat, source.Channels);
+                short[] samplesChannel = new short[samples.Length];
+                for (int i = 0; i < samplesChannel.Length; i++)
+                {
+                    samplesChannel[i] = (short)(samples[i] * short.MaxValue);
+                }
+
+                var format = OpenAL.AudioDevice.GetFormat(AudioFormat.Short16, source.Channels);
                 var buffer = new AudioBuffer(audioDevice);
-                buffer.SetData(format, samples, sampleRate);
+                buffer.SetData(format, samplesChannel, sampleRate);
                 buffers.Add(buffer);
             }
 

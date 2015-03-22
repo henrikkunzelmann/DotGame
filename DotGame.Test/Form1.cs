@@ -40,15 +40,16 @@ namespace DotGame.Test
                 AudioAPI = AudioAPI.OpenAL
             }, splitContainer1.Panel1);
 
+            Engine.AudioDevice.Listener.Gain = 0.1f;
+
             var sound = Engine.AudioDevice.Factory.CreateSound("test.ogg", true);
             reverb = Engine.AudioDevice.Factory.CreateReverb();
-            reverb.Density = 0.3f;
-            reverb.Gain = 0.2f;
+            reverb.Density = 0.2f;
+            reverb.Gain = 0.05f;
             Engine.AudioDevice.MasterChannel.Effect = reverb;
             propertyGrid1.SelectedObject = reverb;
 
             instance = sound.CreateInstance(true);
-            instance.Gain = 0.1f;
             instance.Pitch = 1f;
             instance.IsLooping = true;
             instance.Position = new Vector3(0, 8, 20);

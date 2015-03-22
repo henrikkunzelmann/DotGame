@@ -48,6 +48,7 @@
     <Compile Include="AudioBuffer.cs" />
     <Compile Include="AudioDevice.cs" />
     <Compile Include="AudioFactory.cs" />
+    <Compile Include="AudioListener.cs" />
     <Compile Include="AudioObject.cs" />
     <Compile Include="Effect.cs" />
     <Compile Include="EffectReverb.cs" />

@@ -1,6 +1,7 @@
 ﻿using DotGame.Graphics;
 using System;
 using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -22,13 +23,54 @@ namespace DotGame.Audio
         /// </summary>
         IAudioFactory Factory { get; }
 
-        Version ApiVersion { get; }
+        /// <summary>
+        /// Ruft den Namen des aktuell benutzten Geräts ab.
+        /// </summary>
+        string DeviceName { get; }
+        
+        /// <summary>
+        /// Ruft den Namen des Herstellers des Treibers ab.
+        /// </summary>
+        string VendorName { get; }
+
+        /// <summary>
+        /// Ruft den Renderer des Herstellers ab.
+        /// </summary>
+        string Renderer { get; }
+        
+        /// <summary>
+        /// Ruft die Treiberversion ab.
+        /// </summary>
+        string DriverVersion { get; }
+
+        /// <summary>
+        /// Ruft die API-Version ab.
+        /// </summary>
+        Version Version { get; }
+
+        /// <summary>
+        /// Ruft die Version der Efx Erweiterung ab.
+        /// </summary>
+        Version EfxVersion { get; }
+
+        /// <summary>
+        /// Ruft eine Liste an allen unterstützten Erweiterungen ab.
+        /// </summary>
+        ReadOnlyCollection<string> Extensions { get; }
+
+        /// <summary>
+        /// Ruft die maximale Anzahl an Routes per Channel ab.
+        /// </summary>
+        int MaxRoutes { get; }
 
         /// <summary>
         /// Ruft den IMixerChannel ab, in den alle ISoundInstance-Instanzen standardmäßig geroutet werden.
         /// </summary>
         IMixerChannel MasterChannel { get; }
 
-        int MaxRoutes { get; }
+        /// <summary>
+        /// Ruft den IAudioListener ab, den Beobachter darstellt.
+        /// </summary>
+        IAudioListener Listener { get; }
     }
 }
