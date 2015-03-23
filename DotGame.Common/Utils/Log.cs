@@ -29,9 +29,13 @@ namespace DotGame.Utils
 
             if (level >= LevelMinimum)// alle Einträge die unter dem Minimum fallen ignoreren
             {
-                string formattedMessage = string.Format("[{0}] {1} {2}\r\n", DateTime.Now.ToLongTimeString(), ("(" + level.ToString() + ")").PadRight(10), message);
-                Console.Write(formattedMessage);
-                System.Diagnostics.Debug.Write(formattedMessage);
+                string[] messageLines = message.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                foreach (string str in messageLines)
+                {
+                    string formattedMessage = string.Format("[{0}] {1} {2}\r\n", DateTime.Now.ToLongTimeString(), ("(" + level.ToString() + ")").PadRight(10), str);
+                    Console.Write(formattedMessage);
+                    System.Diagnostics.Debug.Write(formattedMessage);
+                }
             }
         }
 
