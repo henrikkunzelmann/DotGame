@@ -89,5 +89,66 @@ namespace DotGame.OpenAL
             if (AudioDevice.IsDisposed)
                 throw new ObjectDisposedException(AudioDevice.GetType().FullName);
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is IAudioListener)
+                return Equals((IAudioListener)obj);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(IAudioListener other)
+        {
+            if (other is AudioListener)
+            {
+                var o = (AudioListener)other;
+                return AudioDevice == o.AudioDevice
+                    && Gain == other.Gain
+                    && Position == other.Position
+                    && Velocity == other.Velocity
+                    && Up == other.Up
+                    && At == other.At;
+            }
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + AudioDevice.GetHashCode();
+                hash = hash * 23 + Gain.GetHashCode();
+                hash = hash * 23 + Position.GetHashCode();
+                hash = hash * 23 + Velocity.GetHashCode();
+                hash = hash * 23 + Up.GetHashCode();
+                hash = hash * 23 + At.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[AudioListener Gain: ");
+            builder.Append(Gain);
+            builder.Append(", Position: ");
+            builder.Append(Position);
+            builder.Append(", Velocity: ");
+            builder.Append(Velocity);
+            builder.Append(", Up: ");
+            builder.Append(Up);
+            builder.Append(", At: ");
+            builder.Append(At);
+            builder.Append("]");
+
+            return builder.ToString();
+        }
     }
 }

@@ -159,5 +159,47 @@ namespace DotGame.OpenAL
             Context.Dispose();
             IsDisposed = true;
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is AudioDevice)
+                return Equals((IAudioDevice)obj);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(IAudioDevice other)
+        {
+            if (other is AudioDevice)
+                return DeviceHandle == ((AudioDevice)other).DeviceHandle;
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + DeviceHandle.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[AudioDevice Handle: ");
+            builder.Append(DeviceHandle);
+            builder.Append(", Device: ");
+            builder.Append(DeviceName);
+            builder.Append("]");
+
+            return builder.ToString();
+        }
     }
 }

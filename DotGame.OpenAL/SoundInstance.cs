@@ -156,5 +156,48 @@ namespace DotGame.OpenAL
 
             base.Dispose(isDisposing);
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is ISoundInstance)
+                return Equals((ISoundInstance)obj);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(ISoundInstance other)
+        {
+            if (other is SoundInstance)
+                return IDs.SequenceEqual(((SoundInstance)other).IDs);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                for (int i = 0; i < IDs.Count; i++)
+                    hash = hash * 23 + IDs[i].GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[SoundInstance Sound: ");
+            builder.Append(Sound);
+            builder.Append(", IDs: ");
+            builder.Append(IDs.Count);
+            builder.Append("]");
+
+            return builder.ToString();
+        }
     }
 }

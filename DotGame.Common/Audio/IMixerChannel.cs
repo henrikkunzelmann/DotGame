@@ -9,7 +9,7 @@ namespace DotGame.Audio
     /// <summary>
     /// Stellt einen Channel dar, in dem Effekte auf ein eingehendes Audiosignal angewendet werden können.
     /// </summary>
-    public interface IMixerChannel : IAudioObject
+    public interface IMixerChannel : IAudioObject, IEquatable<IMixerChannel>
     {
         /// <summary>
         /// Der Effekt, der diesem Channel zugeordnet wird.

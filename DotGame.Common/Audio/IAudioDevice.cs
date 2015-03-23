@@ -11,7 +11,7 @@ namespace DotGame.Audio
     /// <summary>
     /// Stellt das AudioDevice dar.
     /// </summary>
-    public interface IAudioDevice : IDisposable
+    public interface IAudioDevice : IDisposable, IEquatable<IAudioDevice>
     {
         /// <summary>
         /// Ruft einen Wert ab, der angibt, ob das Objekt verworfen wurde.

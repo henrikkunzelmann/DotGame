@@ -27,5 +27,16 @@ namespace DotGame.OpenAL
         public EffectReverb(AudioDevice audioDevice) : base(audioDevice, EfxEffectType.Reverb)
         {
         }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[Effect ID: ");
+            builder.Append(ID);
+            builder.Append(", Type: Reverb]");
+
+            return builder.ToString();
+        }
     }
 }

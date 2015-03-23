@@ -64,5 +64,51 @@ namespace DotGame.OpenAL
 
             base.Dispose(isDisposing);
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is VorbisSampleSource)
+                return Equals((VorbisSampleSource)obj);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(VorbisSampleSource other)
+        {
+            return reader == other.reader;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + reader.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[SampleSource Type: ogg/vorbis, NativeFormat:");
+            builder.Append(NativeFormat);
+            builder.Append(", Channels: ");
+            builder.Append(Channels);
+            builder.Append(", SampleRate: ");
+            builder.Append(SampleRate);
+            builder.Append(", TotalSamples: ");
+            builder.Append(TotalSamples);
+            builder.Append(", Position: ");
+            builder.Append(Position);
+            builder.Append("]");
+
+            return builder.ToString();
+        }
     }
 }

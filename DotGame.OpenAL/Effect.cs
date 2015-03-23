@@ -74,5 +74,45 @@ namespace DotGame.OpenAL
 
             base.Dispose(isDisposing);
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is IEffect)
+                return Equals((IEffect)obj);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(IEffect other)
+        {
+            if (other is Effect)
+                return ID == ((Effect)other).ID;
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + ID.GetHashCode();
+                return hash;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[Effect ID: ");
+            builder.Append(ID);
+            builder.Append("]");
+
+            return builder.ToString();
+        }
     }
 }

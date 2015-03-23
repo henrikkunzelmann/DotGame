@@ -9,7 +9,7 @@ namespace DotGame.Audio
     /// <summary>
     /// Stellt einen Sound dar, der beim Erstellen komplett geladen wird.
     /// </summary>
-    public interface ISound : IAudioObject
+    public interface ISound : IAudioObject, IEquatable<ISound>
     {
         bool Supports3D { get; }
 
