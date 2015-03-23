@@ -32,5 +32,46 @@ namespace DotGame.OpenAL
         {
             return new EffectReverb(AudioDeviceInternal);
         }
+
+        /// <inheritdoc/>
+        public override bool Equals(object obj)
+        {
+            if (obj == null)
+                return false;
+            if (obj is IAudioFactory)
+                return Equals((IAudioFactory)obj);
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public bool Equals(IAudioFactory other)
+        {
+            if (other is AudioFactory)
+                return AudioDevice == ((AudioFactory)other).AudioDevice;
+            return false;
+        }
+
+        /// <inheritdoc/>
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + AudioDevice.GetHashCode();
+                hash = hash * 23 + 3357;
+                return hash;
+            }
+        }
+
+        /// <inheritdoc/>
+        public override string ToString()
+        {
+            var builder = new StringBuilder();
+            builder.Append("[AudioFactory Device: ");
+            builder.Append(AudioDevice);
+            builder.Append("]");
+
+            return builder.ToString();
+        }
     }
 }

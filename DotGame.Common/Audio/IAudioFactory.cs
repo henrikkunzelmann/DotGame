@@ -9,7 +9,7 @@ namespace DotGame.Audio
     /// <summary>
     /// Stellt Methoden zum Erstellen von Ressourcen bereit.
     /// </summary>
-    public interface IAudioFactory
+    public interface IAudioFactory : IEquatable<IAudioFactory>
     {
         ISound CreateSound(string file, bool supports3D);
         ISampleSource CreateSampleSource(string file);

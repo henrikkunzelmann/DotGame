@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DotGame.Audio
 {
-    public interface ISoundInstance : IAudioObject
+    public interface ISoundInstance : IAudioObject, IEquatable<ISoundInstance>
     {
         ISound Sound { get; }
 
