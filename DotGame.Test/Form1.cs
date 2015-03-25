@@ -36,7 +36,7 @@ namespace DotGame.Test
 
             Engine = new Engine(new EngineSettings()
             {
-                GraphicsAPI = GraphicsAPI.DirectX11,
+                GraphicsAPI = GraphicsAPI.OpenGL4,
                 AudioAPI = AudioAPI.OpenAL
             }, splitContainer1.Panel1);
 
@@ -53,11 +53,12 @@ namespace DotGame.Test
             instance.Pitch = 1f;
             instance.IsLooping = true;
             instance.Position = new Vector3(0, 8, 20);
-            instance.Play(); // Uncommenten zum Abspielen
+            instance.Play(); // Uncommenten zum Abspielen 
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
         {
+            Engine.Stop();
             Engine.Dispose();
             base.OnFormClosing(e);
         }
@@ -70,9 +71,6 @@ namespace DotGame.Test
             instance.Position = newPos;
             instance.Velocity = velocity;
             t += 0.03f;
-
-            Engine.GraphicsDevice.Clear((Color)comboBox1.SelectedItem);
-            Engine.GraphicsDevice.SwapBuffers();
         }
     }
 }

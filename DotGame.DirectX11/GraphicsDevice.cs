@@ -106,6 +106,11 @@ namespace DotGame.DirectX11
             IsDisposed = true;
         }
 
+        public void MakeCurrent()
+        {
+
+        }
+
         public void SwapBuffers()
         {
             swapChain.Present(syncInterval, PresentFlags.None);

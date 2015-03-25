@@ -57,7 +57,7 @@ namespace DotGame.OpenGL4.Windows
             WindowInfo = Utilities.CreateWindowsWindowInfo(control.Handle);
             GraphicsContext context = new GraphicsContext(GraphicsMode.Default, WindowInfo);
             context.LoadAll();
-            graphicsDevice = new GraphicsDevice(this, context);
+            graphicsDevice = new GraphicsDevice(this, this, context);
             return graphicsDevice;
         }
     }

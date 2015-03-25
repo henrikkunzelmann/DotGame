@@ -41,7 +41,7 @@ namespace DotGame.OpenGL4.Windows
         {
             this.WindowInfo = WindowInfo;
             GraphicsContext context = (GraphicsContext)this.Context;
-            return new GraphicsDevice(this, context);
+            return new GraphicsDevice(this, this, context);
         }
     }
 }

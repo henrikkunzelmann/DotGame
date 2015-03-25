@@ -27,6 +27,11 @@ namespace DotGame.Graphics
         IGameWindow DefaultWindow { get; }
 
         /// <summary>
+        /// Setzt das GraphicsDevice auf den aktuellen Thread.
+        /// </summary>
+        void MakeCurrent();
+
+        /// <summary>
         /// Gibt die Größe in Bytes des TextureFormats zurück.
         /// </summary>
         /// <param name="format">Das TextureFormat.</param>

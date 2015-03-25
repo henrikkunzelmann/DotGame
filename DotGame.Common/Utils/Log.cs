@@ -11,11 +11,70 @@ namespace DotGame.Utils
     /// </summary>
     public static class Log
     {
+        private static object locker = new object();
+        private static StringBuilder buffer = new StringBuilder();
+
+        private static bool allowBuffer = true;
+        /// <summary>
+        /// Erlaubt ob die Log-Klasse Einträge buffern darf.
+        /// </summary>
+        public static bool AllowBuffer
+        {
+            get { return allowBuffer; }
+            set
+            {
+                lock (locker)
+                {
+                    if (allowBuffer != value)
+                    {
+                        allowBuffer = value;
+                        if (!allowBuffer)
+                            FlushBuffer();
+                    }
+                }
+            }
+        }
+
+        private static int bufferCapacity = 5000;
+        /// <summary>
+        /// Gibt an wie viele Zeichen gebuffert werden sollen bis sie zur Konsole oder Debug-Output geschrieben werden soll.
+        /// </summary>
+        public static int BufferCapacity
+        {
+            get { return bufferCapacity; }
+            set
+            {
+                lock (locker)
+                {
+                    if (value != bufferCapacity)
+                    {
+                        bufferCapacity = value;
+                        if (buffer.Length >= bufferCapacity)
+                            FlushBuffer();
+                    }
+                }
+            }
+        }
+
         /// <summary>
         /// Das Level ab dem Nachrichten im Log angezeigt werden.
         /// Standard: LogLevel.Verbose
         /// </summary>
         public static LogLevel LevelMinimum { get; set; }
+
+        /// <summary>
+        /// Sorgt dafür das der Buffer in die Konsole oder Debug-Output geschrieben wird.
+        /// </summary>
+        public static void FlushBuffer()
+        {
+            lock (locker)
+            {
+                string bufferString = buffer.ToString();
+                Console.Write(bufferString);
+                System.Diagnostics.Debug.Write(bufferString);
+                buffer.Clear();
+            }
+        }
 
         /// <summary>
         /// Schreibt eine Nachricht in den Log.
@@ -29,12 +88,17 @@ namespace DotGame.Utils
 
             if (level >= LevelMinimum)// alle Einträge die unter dem Minimum fallen ignoreren
             {
-                string[] messageLines = message.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
-                foreach (string str in messageLines)
+                lock (locker)
                 {
-                    string formattedMessage = string.Format("[{0}] {1} {2}\r\n", DateTime.Now.ToLongTimeString(), ("(" + level.ToString() + ")").PadRight(10), str);
-                    Console.Write(formattedMessage);
-                    System.Diagnostics.Debug.Write(formattedMessage);
+                    string[] messageLines = message.Split(new char[] { '\n', '\r' }, StringSplitOptions.RemoveEmptyEntries);
+                    foreach (string str in messageLines)
+                    {
+                        string formattedMessage = string.Format("[{0}] {1} {2}\r\n", DateTime.Now.ToLongTimeString(), ("(" + level.ToString() + ")").PadRight(10), str);
+                        buffer.Append(formattedMessage);
+                    }
+
+                    if (!allowBuffer || buffer.Length >= bufferCapacity)
+                        FlushBuffer();
                 }
             }
         }

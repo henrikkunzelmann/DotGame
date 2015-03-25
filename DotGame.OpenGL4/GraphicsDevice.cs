@@ -32,6 +32,7 @@ namespace DotGame.OpenGL4
         internal GraphicsContext Context { get; private set; }
         internal bool IsCurrent { get { return Context.IsCurrent; } }
 
+        private IWindowContainer container;
         private Color clearColor;
         private float clearDepth;
         private int clearStencil;
@@ -42,10 +43,12 @@ namespace DotGame.OpenGL4
             return (int)Math.Ceiling(Math.Log(max, 2));
         }
 
-        public GraphicsDevice(IGameWindow window, GraphicsContext context)
+        public GraphicsDevice(IGameWindow window, IWindowContainer container, GraphicsContext context)
         {
             if (window == null)
                 throw new ArgumentNullException("window");
+            if (container == null)
+                throw new ArgumentNullException("container");
             if (context == null)
                 throw new ArgumentNullException("context");
             if (context.IsDisposed)
@@ -53,6 +56,7 @@ namespace DotGame.OpenGL4
 
 
             this.DefaultWindow = window;
+            this.container = container;
             this.Context = context;
 
             Log.Debug("Got context: [ColorFormat: {0}, Depth: {1}, Stencil: {2}, FSAA Samples: {3}, AccumulatorFormat: {4}, Buffers: {5}, Stereo: {6}]",
@@ -67,11 +71,17 @@ namespace DotGame.OpenGL4
             Context.LoadAll();
 
             Factory = new GraphicsFactory(this);
+            Context.MakeCurrent(null);
         }
         ~GraphicsDevice()
         {
             Dispose(false);
             GC.SuppressFinalize(this);
+        }
+
+        public void MakeCurrent()
+        {
+            Context.MakeCurrent(container.WindowInfo);
         }
 
         public int GetSizeOf(TextureFormat format)
