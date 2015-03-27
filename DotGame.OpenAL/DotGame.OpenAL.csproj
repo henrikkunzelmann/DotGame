@@ -57,6 +57,7 @@
     <Compile Include="SoundInstance.cs" />
     <Compile Include="VorbisSampleSource.cs" />
     <Compile Include="Sound.cs" />
+    <Compile Include="WaveSampleSource.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

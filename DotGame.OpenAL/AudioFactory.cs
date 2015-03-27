@@ -15,12 +15,24 @@ namespace DotGame.OpenAL
 
         public ISound CreateSound(string file, bool supports3D)
         {
-            return new Sound(AudioDeviceInternal, file, supports3D);
+            var source = CreateSampleSource(file);
+            return new Sound(AudioDeviceInternal, source, supports3D);
+        }
+
+        public ISound CreateSound(ISampleSource source, bool supports3D)
+        {
+            return new Sound(AudioDeviceInternal, source, supports3D);
         }
 
         public ISampleSource CreateSampleSource(string file)
         {
-            return new VorbisSampleSource(AudioDeviceInternal, file);
+            var magic = GetMagic(file);
+            if (magic == ".wav")
+                return new WaveSampleSource(AudioDeviceInternal, file);
+            else if (magic == ".ogg")
+                return new VorbisSampleSource(AudioDeviceInternal, file);
+
+            throw new NotSupportedException(magic);
         }
 
         public IMixerChannel CreateMixerChannel(string name)
@@ -31,6 +43,12 @@ namespace DotGame.OpenAL
         public IEffectReverb CreateReverb()
         {
             return new EffectReverb(AudioDeviceInternal);
+        }
+
+        private string GetMagic(string file)
+        {
+            // TODO (Joex3): besseres handlen.
+            return System.IO.Path.GetExtension(file);
         }
 
         /// <inheritdoc/>

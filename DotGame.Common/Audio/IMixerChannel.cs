@@ -17,7 +17,7 @@ namespace DotGame.Audio
         IEffect Effect { get; set; }
 
         /// <summary>
-        /// Ruft den Mischungsanteil zwischen dem rohen Signal (dry) und dem, vom Effekt bearbeiteten, Signal (wet) ab, oder legt diesen fest.
+        /// Ruft die Lautstärke des bearbeiteten Signals (wet) ab, oder legt diese fest.
         /// </summary>
         float WetGain { get; set; }
     }

@@ -42,7 +42,8 @@ namespace DotGame.Test
 
             Engine.AudioDevice.Listener.Gain = 0.1f;
 
-            var sound = Engine.AudioDevice.Factory.CreateSound("test.ogg", true);
+            var source = Engine.AudioDevice.Factory.CreateSampleSource("16-44100.wav");
+            var sound = Engine.AudioDevice.Factory.CreateSound(source, true);
             reverb = Engine.AudioDevice.Factory.CreateReverb();
             reverb.Density = 0.2f;
             reverb.Gain = 0.05f;
@@ -66,7 +67,7 @@ namespace DotGame.Test
         private void timer1_Tick(object sender, EventArgs e)
         {
             Engine.AudioDevice.MasterChannel.Effect = reverb;
-            var newPos = new Vector3((float)Math.Cos(t) * 4, (float)Math.Sin(t) * 4, 0);
+            var newPos = new Vector3((float)Math.Cos(t) * 4, (float)Math.Sin(t) * 1, (float)Math.Sin(t) * 4);
             var velocity = newPos - instance.Position;
             instance.Position = newPos;
             instance.Velocity = velocity;

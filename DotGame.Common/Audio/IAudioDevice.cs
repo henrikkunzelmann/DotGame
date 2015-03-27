@@ -69,7 +69,7 @@ namespace DotGame.Audio
         IMixerChannel MasterChannel { get; }
 
         /// <summary>
-        /// Ruft den IAudioListener ab, den Beobachter darstellt.
+        /// Ruft die IAudioListener-Instanz ab, die den Beobachter darstellt.
         /// </summary>
         IAudioListener Listener { get; }
     }

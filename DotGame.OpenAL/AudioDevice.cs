@@ -124,6 +124,7 @@ namespace DotGame.OpenAL
             Factory = new AudioFactory(this);
             MasterChannel = Factory.CreateMixerChannel("Master");
             Listener = new AudioListener(this);
+            Listener.Orientation(Vector3.UnitY, Vector3.UnitZ);
         }
 
         ~AudioDevice()

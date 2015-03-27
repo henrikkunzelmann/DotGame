@@ -24,7 +24,6 @@ namespace DotGame.OpenAL
             reader = new VorbisReader(file);
 
             this.TotalSamples = reader.TotalSamples;
-            this.Position = reader.DecodedPosition;
             this.NativeFormat = AudioFormat.Float32;
             this.Channels = reader.Channels;
             this.SampleRate = reader.SampleRate;

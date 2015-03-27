@@ -17,9 +17,8 @@ namespace DotGame.OpenAL
 
         private readonly List<AudioBuffer> buffers;
 
-        public Sound(AudioDevice audioDevice, string file, bool supports3D) : base(audioDevice)
+        public Sound(AudioDevice audioDevice, ISampleSource source, bool supports3D) : base(audioDevice)
         {
-            var source = audioDevice.Factory.CreateSampleSource(file);
             var channels = source.Channels;
             var sampleRate = source.SampleRate;
             var samples = source.ReadAll();
