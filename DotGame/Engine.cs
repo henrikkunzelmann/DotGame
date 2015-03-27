@@ -76,11 +76,17 @@ namespace DotGame
             switch (Settings.GraphicsAPI)
             {
                 case GraphicsAPI.OpenGL4:
-                    window = new DotGame.OpenGL4.Windows.GameControl(container);
+                    if (container == null)
+                        window = new DotGame.OpenGL4.Windows.GameWindow();
+                    else
+                        window = new DotGame.OpenGL4.Windows.GameControl(container);
                     break;
 
                 case GraphicsAPI.DirectX11:
-                    window = new DotGame.DirectX11.Windows.GameControl(container);
+                    if (container == null)
+                        window = new DotGame.DirectX11.Windows.GameWindow();
+                    else
+                        window = new DotGame.DirectX11.Windows.GameControl(container);
                     break;
             }
 

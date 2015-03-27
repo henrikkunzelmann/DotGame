@@ -3,10 +3,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using SharpDX.Direct3D11;
+using OpenTK.Graphics.OpenGL4;
 using DotGame.Graphics;
+using System.Runtime.InteropServices;
 
-namespace DotGame.DirectX11
+namespace DotGame.OpenGL4
 {
     public class IndexBuffer : IIndexBuffer
     {
@@ -22,9 +23,8 @@ namespace DotGame.DirectX11
 
         public int IndexCount { get; private set; }
 
-        internal SharpDX.DXGI.Format Format { get; private set; }
-        internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
-
+        private int iboId;
+ 
         public IndexBuffer(GraphicsDevice graphicsDevice)
         {
             if (graphicsDevice == null)
@@ -33,6 +33,8 @@ namespace DotGame.DirectX11
                 throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
 
             this.graphicsDevice = graphicsDevice;
+
+            iboId = GL.GenBuffer();
         }
 
         public void SetData<T>(T[] data) where T : struct
@@ -44,19 +46,8 @@ namespace DotGame.DirectX11
 
             this.IndexCount = data.Length;
 
-            Type tType = typeof(T);
-            if (tType == typeof(int))
-                Format = SharpDX.DXGI.Format.R32_SInt;
-            else if (tType == typeof(uint))
-                Format = SharpDX.DXGI.Format.R32_UInt;
-            else if (tType == typeof(short))
-                Format = SharpDX.DXGI.Format.R16_SInt;
-            else if (tType == typeof(ushort))
-                Format = SharpDX.DXGI.Format.R16_UInt;
-            else
-                throw new NotSupportedException("Type for data not supported.");
-
-            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.IndexBuffer, data);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, iboId);
+            GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(Marshal.SizeOf(data[0]) * data.Length), data, BufferUsageHint.StaticDraw);
         }
 
         public void Dispose()
@@ -66,9 +57,7 @@ namespace DotGame.DirectX11
             if (Disposing != null)
                 Disposing(this, EventArgs.Empty);
 
-            if (Buffer != null && !Buffer.IsDisposed)
-                Buffer.Dispose();
-
+            GL.DeleteTexture(iboId);
 
             IsDisposed = true;
         }

@@ -48,6 +48,8 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="FormatConverter.cs" />
+    <Compile Include="IndexBuffer.cs" />
+    <Compile Include="VertexBuffer.cs" />
     <Compile Include="Windows\GameControl.cs" />
     <Compile Include="GraphicsDevice.cs" />
     <Compile Include="GraphicsFactory.cs" />

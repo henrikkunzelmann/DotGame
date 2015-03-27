@@ -12,7 +12,7 @@ using Device = SharpDX.Direct3D11.Device;
 
 namespace DotGame.DirectX11.Windows
 {
-    class GameWindow : RenderForm, IGameWindow
+    public class GameWindow : RenderForm, IGameWindow
     {
         IGraphicsDevice graphicsDevice;
         SwapChain swapChain;
@@ -55,6 +55,8 @@ namespace DotGame.DirectX11.Windows
             factory.MakeWindowAssociation(Handle, WindowAssociationFlags.IgnoreAll);
 
             graphicsDevice = new GraphicsDevice(this, device, swapChain);
+
+            this.Show();
             return graphicsDevice;
         }
 

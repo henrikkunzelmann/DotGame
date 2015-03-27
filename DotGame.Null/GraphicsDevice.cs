@@ -56,6 +56,8 @@ namespace DotGame.Null
         {
         }
 
+        public void MakeCurrent() { }
+
         public void Dispose()
         {
             // wir haben nichts wirklich zu disposen

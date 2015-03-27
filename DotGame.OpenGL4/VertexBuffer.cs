@@ -4,11 +4,11 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
-using SharpDX.Direct3D11;
+using OpenTK.Graphics.OpenGL4;
 
-namespace DotGame.DirectX11
+namespace DotGame.OpenGL4
 {
-    public class VertexBuffer : IVertexBuffer
+    internal class VertexBuffer : IVertexBuffer
     {
         private GraphicsDevice graphicsDevice;
         public IGraphicsDevice GraphicsDevice
@@ -16,21 +16,20 @@ namespace DotGame.DirectX11
             get { return graphicsDevice; }
         }
 
-        public bool IsDisposed { get; private set; }
-        public EventHandler<EventArgs> Disposing { get; set; }
-        public object Tag { get; set; }
+        private int vboId;
+        private int vaoId;
 
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
 
-        public SharpDX.Direct3D11.Buffer Buffer { get; private set; }
+        public bool IsDisposed { get; private set; }
+        public EventHandler<EventArgs> Disposing { get; set; }
+        public object Tag { get; set; }
 
-        public VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
+        internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
-            if (graphicsDevice.IsDisposed)
-                throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
+            vaoId = GL.GenVertexArray();
+            vboId = GL.GenBuffer();
 
             this.graphicsDevice = graphicsDevice;
             this.Description = description;
@@ -38,14 +37,18 @@ namespace DotGame.DirectX11
 
         public void SetData<T>(T[] data) where T : struct, IVertexType
         {
-            if (data == null)
+            if(data == null) 
                 throw new ArgumentNullException("data");
-            if (data.Length == 0)
+            if(data.Length == 0) 
                 throw new ArgumentException("data must not be empty.");
+
 
             this.VertexCount = data.Length;
 
-            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.VertexBuffer, data);
+            int size = ((IVertexType)data[0]).Description.Size;
+            
+            GL.BindBuffer(BufferTarget.ArrayBuffer, vboId);
+            GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw); 
         }
 
         public void Dispose()
@@ -54,10 +57,9 @@ namespace DotGame.DirectX11
                 return;
             if (Disposing != null)
                 Disposing(this, EventArgs.Empty);
-
-            if (Buffer != null && !Buffer.IsDisposed)
-                Buffer.Dispose();
-
+                        
+            GL.DeleteVertexArray(vaoId);
+            GL.DeleteBuffer(vboId);
 
             IsDisposed = true;
         }

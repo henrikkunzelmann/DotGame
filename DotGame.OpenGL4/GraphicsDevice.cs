@@ -170,6 +170,15 @@ namespace DotGame.OpenGL4
             }
         }
 
+        internal static void CheckGLError()
+        {
+            var error = GL.GetError();
+            if (error != ErrorCode.NoError)
+            {
+                throw new InvalidOperationException(error.ToString());
+            }
+        }
+
         public void Dispose()
         {
             Log.Info("GraphicsDevice.Dispose() called!");

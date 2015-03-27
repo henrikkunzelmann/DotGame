@@ -70,7 +70,7 @@ namespace DotGame.DirectX11
                     desc.BindFlags |= BindFlags.RenderTarget;
             else
             {
-                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps;
+                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps; // TODO (henrik1235) GenerateMipMaps benötigt das RenderTarget BindFlag.
                 desc.BindFlags |= BindFlags.ShaderResource; // TODO (henrik1235) ShaderResource auch für RenderTargets und DepthBuffer erlauben
             }
 

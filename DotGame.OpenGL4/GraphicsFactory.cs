@@ -95,13 +95,18 @@ namespace DotGame.OpenGL4
         public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct, IVertexType
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            VertexBuffer buffer = new VertexBuffer((GraphicsDevice)GraphicsDevice, description);
+            buffer.SetData<T>(data);
+            return buffer;
+            //( ͡° ͜ʖ ͡°)
         }
 
         public IIndexBuffer CreateIndexBuffer<T>(T[] data) where T : struct
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            IndexBuffer buffer = new IndexBuffer((GraphicsDevice)GraphicsDevice);
+            buffer.SetData<T>(data);
+            return buffer;
         }
 
         internal void DisposeUnused()
