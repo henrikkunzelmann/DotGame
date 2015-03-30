@@ -8,30 +8,20 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace DotGame.OpenGL4
 {
-    internal class VertexBuffer : IVertexBuffer
+    internal class VertexBuffer : GraphicsObject, IVertexBuffer
     {
-        private GraphicsDevice graphicsDevice;
-        public IGraphicsDevice GraphicsDevice
-        {
-            get { return graphicsDevice; }
-        }
-
-        private int vboId;
-        private int vaoId;
+        internal int VertexBufferObjectID { get; private set; }
+        internal int VertexArrayObjectID { get; private set; }
 
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
 
-        public bool IsDisposed { get; private set; }
-        public EventHandler<EventArgs> Disposing { get; set; }
-        public object Tag { get; set; }
-
         internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
+            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            vaoId = GL.GenVertexArray();
-            vboId = GL.GenBuffer();
+            VertexArrayObjectID = GL.GenVertexArray();
+            VertexBufferObjectID = GL.GenBuffer();
 
-            this.graphicsDevice = graphicsDevice;
             this.Description = description;
         }
 
@@ -45,23 +35,21 @@ namespace DotGame.OpenGL4
 
             this.VertexCount = data.Length;
 
-            int size = ((IVertexType)data[0]).Description.Size;
+            int size = GraphicsDevice.GetSizeOf(data[0].Description);
             
-            GL.BindBuffer(BufferTarget.ArrayBuffer, vboId);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObjectID);
             GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw); 
         }
 
-        public void Dispose()
+        internal override void Dispose(bool isDisposing)
         {
             if (IsDisposed)
                 return;
-            if (Disposing != null)
-                Disposing(this, EventArgs.Empty);
-                        
-            GL.DeleteVertexArray(vaoId);
-            GL.DeleteBuffer(vboId);
 
-            IsDisposed = true;
+            GL.DeleteVertexArray(VertexArrayObjectID);
+            GL.DeleteBuffer(VertexBufferObjectID);
+
+            base.Dispose(isDisposing);
         }
     }
 }

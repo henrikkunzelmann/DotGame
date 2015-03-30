@@ -91,7 +91,19 @@ namespace DotGame.OpenGL4
 
         public int GetSizeOf(VertexElementType format)
         {
-            throw new NotImplementedException();
+            switch (format)
+            {
+                case VertexElementType.Single:
+                    return 4;
+                case VertexElementType.Vector2:
+                    return 8;
+                case VertexElementType.Vector3:
+                    return 12;
+                case VertexElementType.Vector4:
+                    return 16;
+                default:
+                    return 0;
+            }
         }
 
         public int GetSizeOf(VertexDescription description)

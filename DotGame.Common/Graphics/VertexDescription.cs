@@ -18,14 +18,6 @@ namespace DotGame.Graphics
             get { return elements.Length; }
         }
 
-        /// <summary>
-        /// Ruft die die Größe in Bytes ab
-        /// </summary>
-        public int Size
-        {
-            get { return elements.Length; }
-        }
-
         public VertexDescription(params VertexElement[] elements)
         {
             if (elements == null)

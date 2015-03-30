@@ -8,7 +8,7 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace DotGame.OpenGL4
 {
-    class Texture2D : GraphicsObject, ITexture2D
+    class Texture2D : GraphicsObject, ITexture2D, IRenderTarget2D
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -17,16 +17,17 @@ namespace DotGame.OpenGL4
 
         internal int TextureID { get; private set; }
 
-        public Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        public Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format)
+            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (width <= 0)
-                throw new ArgumentOutOfRangeException("width", "width must be positive.");
+                throw new ArgumentOutOfRangeException("width", "Width must be positive.");
             if (height <= 0)
-                throw new ArgumentOutOfRangeException("height", "height must be positive.");
+                throw new ArgumentOutOfRangeException("height", "Height must be positive.");
             if (mipLevels < 0)
-                throw new ArgumentOutOfRangeException("mipLevels", "height must be not negative.");
+                throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
             if (format == TextureFormat.Unknown)
                 throw new ArgumentException("format is TextureFormat.Unkown.", "format");
 
@@ -37,7 +38,7 @@ namespace DotGame.OpenGL4
 
             this.TextureID = GL.GenTexture();
 
-            //TODO Replace by GraphicsDevice Method.
+            //TODO (Robin) Replace by GraphicsDevice Method.
             GL.BindTexture(TextureTarget.Texture2D, TextureID);
             GL.TexImage2D(TextureTarget.Texture2D, 0, GraphicsFactory.TextureFormats[format], this.Width, this.Height, 0, PixelFormat.Alpha, PixelType.Byte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);

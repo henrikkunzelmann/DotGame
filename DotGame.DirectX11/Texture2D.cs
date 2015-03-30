@@ -42,7 +42,7 @@ namespace DotGame.DirectX11
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Height must be positive.");
             if (mipLevels < 0)
-                throw new ArgumentOutOfRangeException("mipLevels", "Height must be not negative.");
+                throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
             if (isRenderTarget && mipLevels != 0)
                 throw new ArgumentException("MipLevels can not be set with isRenderTarget.", "mipLevels");
             if (format == TextureFormat.Unknown)
@@ -70,7 +70,7 @@ namespace DotGame.DirectX11
                     desc.BindFlags |= BindFlags.RenderTarget;
             else
             {
-                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps; // TODO (henrik1235) GenerateMipMaps benötigt das RenderTarget BindFlag.
+                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps; // TODO (Robin) GenerateMipMaps benötigt das RenderTarget BindFlag.
                 desc.BindFlags |= BindFlags.ShaderResource; // TODO (henrik1235) ShaderResource auch für RenderTargets und DepthBuffer erlauben
             }
 

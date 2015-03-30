@@ -95,11 +95,11 @@
     </ProjectReference>
   </ItemGroup>
   <ItemGroup>
-    <Content Include="openal32.dll">
-    <Content Include="16-44100.wav">
+    <Content Include="8-44100.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
-    <Content Include="8-44100.wav">
+    <Content Include="openal32.dll" />
+    <Content Include="16-44100.wav">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </Content>
     <Content Include="openal32.dll" />
