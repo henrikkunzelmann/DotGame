@@ -27,6 +27,11 @@ namespace DotGame.Graphics
         IGameWindow DefaultWindow { get; }
 
         /// <summary>
+        /// Ruft die vertikale Synchronisation ab oder legt diese fest.
+        /// </summary>
+        bool VSync { get; set; }
+
+        /// <summary>
         /// Setzt das GraphicsDevice auf den aktuellen Thread.
         /// </summary>
         void MakeCurrent();
@@ -71,10 +76,5 @@ namespace DotGame.Graphics
         /// Tauscht den Backbuffer mit dem Frontbuffer, was zum Anzeigen des Bildes führt.
         /// </summary>
         void SwapBuffers();
-
-        /// <summary>
-        /// Ruft die vertikale Synchronisation ab oder legt diese fest.
-        /// </summary>
-        bool VSync { get; set; }
     }
 }

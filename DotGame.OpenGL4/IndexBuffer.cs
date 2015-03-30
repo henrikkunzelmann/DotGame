@@ -38,16 +38,13 @@ namespace DotGame.OpenGL4
             GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(Marshal.SizeOf(data[0]) * data.Length), data, BufferUsageHint.StaticDraw);
         }
 
-        internal override void Dispose(bool isDisposing)
+        protected override void Dispose(bool isDisposing)
         {
             if (IsDisposed)
                 return;
 
             if (!GraphicsDevice.IsDisposed)
                 GL.DeleteTexture(iboId);
-
-            base.Dispose(isDisposing);
         }
-
     }
 }

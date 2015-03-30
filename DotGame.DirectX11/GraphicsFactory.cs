@@ -3,20 +3,15 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using DotGame.Graphics;
 
 namespace DotGame.DirectX11
 {
-    public class GraphicsFactory : IGraphicsFactory
+    public class GraphicsFactory : GraphicsObject, IGraphicsFactory
     {
-        private GraphicsDevice graphicsDevice;
-        public IGraphicsDevice GraphicsDevice { get { return graphicsDevice; } }
-        public bool IsDisposed { get; private set; }
-
-        public EventHandler<EventArgs> Disposing { get; set; }
-        public object Tag { get; set; }
-
         internal GraphicsFactory(GraphicsDevice graphicsDevice)
+            : base(graphicsDevice, new StackTrace(1))
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
@@ -79,17 +74,20 @@ namespace DotGame.DirectX11
             return buffer;
         }
 
-
-        public void Dispose()
+        public IConstantBuffer CreateConstantBuffer(int size)
         {
-            if (IsDisposed)
-                return;
-            if (Disposing != null)
-                Disposing(this, new EventArgs());
+            return new ConstantBuffer(graphicsDevice, size);
+        }
 
-            // TODO Alle erzeugten Objekte disposen
+        public IShader CompileShader(string file)
+        {
+            throw new NotImplementedException();
+        }
 
-            IsDisposed = true;
+
+        protected override void Dispose(bool isDisposing)
+        {
+            // TODO (henrik1235) Alle erzeugten Objekte disposen
         }
     }
 }

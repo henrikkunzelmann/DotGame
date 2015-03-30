@@ -54,7 +54,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="ConstantBuffer.cs" />
     <Compile Include="FormatConverter.cs" />
+    <Compile Include="GraphicsObject.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="VertexBuffer.cs" />

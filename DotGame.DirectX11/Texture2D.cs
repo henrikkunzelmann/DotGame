@@ -4,29 +4,18 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
+using System.Diagnostics;
 using SharpDX.Direct3D11;
 
 namespace DotGame.DirectX11
 {
-    public class Texture2D : ITexture2D, ITexture2DArray, IRenderTarget2D, IRenderTarget2DArray
+    public class Texture2D : GraphicsObject, ITexture2D, ITexture2DArray, IRenderTarget2D, IRenderTarget2DArray
     {
-        private GraphicsDevice graphicsDevice;
-
-        public IGraphicsDevice GraphicsDevice
-        {
-            get { return graphicsDevice; }
-        }
-
         public int Width { get { return Handle.Description.Width; } }
         public int Height { get { return Handle.Description.Height; } }
         public int MipLevels { get { return Handle.Description.MipLevels; } }
         public TextureFormat Format { get { return FormatConverter.ConvertToTexture(Handle.Description.Format); } }
         public int ArraySize { get { return Handle.Description.ArraySize; } }
-
-        public bool IsDisposed { get; private set; }
-        public EventHandler<EventArgs> Disposing { get; set; }
-
-        public object Tag { get; set; }
 
         internal SharpDX.Direct3D11.Texture2D Handle { get; private set; }
         internal SharpDX.Direct3D11.ShaderResourceView ResourceView { get; private set; }
@@ -34,9 +23,8 @@ namespace DotGame.DirectX11
         internal SharpDX.Direct3D11.DepthStencilView DepthView { get; private set; }
 
         internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format, int arraySize, bool isRenderTarget)
+            : base(graphicsDevice, new StackTrace(1))
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Width must be positive.");
             if (height <= 0)
@@ -49,8 +37,6 @@ namespace DotGame.DirectX11
                 throw new ArgumentException("Format must be not TextureFormat.Unkown.", "format");
             if (arraySize <= 0)
                 throw new ArgumentOutOfRangeException("arraySize", "ArraySize must be positive.");
-
-            this.graphicsDevice = graphicsDevice;
 
             Texture2DDescription desc = new Texture2DDescription()
             {
@@ -79,13 +65,13 @@ namespace DotGame.DirectX11
         }
 
         internal Texture2D(GraphicsDevice graphicsDevice, SharpDX.Direct3D11.Texture2D handle)
+            : base(graphicsDevice, new StackTrace(1))
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
             if (handle == null)
                 throw new ArgumentNullException("handle");
+            if (handle.IsDisposed)
+                throw new ArgumentException("Handle is disposed.", "handle");
 
-            this.graphicsDevice = graphicsDevice;
             this.Handle = handle;
 
             CreateViews();
@@ -101,21 +87,14 @@ namespace DotGame.DirectX11
                 ResourceView = new ShaderResourceView(graphicsDevice.Context.Device, Handle);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool isDisposing)
         {
-            if (IsDisposed)
-                return;
-            if (Disposing != null)
-                Disposing(this, EventArgs.Empty);
-
             if (ResourceView != null && !ResourceView.IsDisposed)
                 ResourceView.Dispose();
             if (RenderView != null && !RenderView.IsDisposed)
                 RenderView.Dispose();
             if (Handle != null && !Handle.IsDisposed)
                 Handle.Dispose();
-
-            IsDisposed = true;
         }
     }
 }

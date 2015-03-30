@@ -22,5 +22,9 @@ namespace DotGame.Graphics
 
         IVertexBuffer CreateVertexBuffer<T>(T[] vertices, VertexDescription description) where T : struct, IVertexType;
         IIndexBuffer CreateIndexBuffer<T>(T[] indices) where T : struct;
+
+        IConstantBuffer CreateConstantBuffer(int size);
+
+        IShader CompileShader(string file);
     }
 }

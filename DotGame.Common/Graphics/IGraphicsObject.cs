@@ -20,7 +20,12 @@ namespace DotGame.Graphics
         /// <summary>
         /// Tritt auf, wenn "Dispose" aufgerufen oder das Objekt finalisiert und vom Garbage Collector der Microsoft .NET Common Language Runtime bereinigt wird.
         /// </summary>
-        EventHandler<EventArgs> Disposing { get; set; }
+        event EventHandler<EventArgs> OnDisposing;
+
+        /// <summary>
+        /// Tritt auf, wenn "Dispose" aufgerufen wurde.
+        /// </summary>
+        event EventHandler<EventArgs> OnDisposed;
 
         /// <summary>
         /// Ruft die Ressourcen-Tags für diese Ressource ab.

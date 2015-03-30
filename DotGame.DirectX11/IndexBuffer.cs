@@ -3,29 +3,21 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Diagnostics;
 using SharpDX.Direct3D11;
 using DotGame.Graphics;
 
 namespace DotGame.DirectX11
 {
-    public class IndexBuffer : IIndexBuffer
+    public class IndexBuffer : GraphicsObject, IIndexBuffer
     {
-        private GraphicsDevice graphicsDevice;
-        public IGraphicsDevice GraphicsDevice
-        {
-            get { return graphicsDevice; }
-        }
-
-        public bool IsDisposed { get; private set; }
-        public EventHandler<EventArgs> Disposing { get; set; }
-        public object Tag { get; set; }
-
         public int IndexCount { get; private set; }
 
         internal SharpDX.DXGI.Format Format { get; private set; }
         internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
 
         public IndexBuffer(GraphicsDevice graphicsDevice)
+            : base(graphicsDevice, new StackTrace(1))
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
@@ -59,18 +51,10 @@ namespace DotGame.DirectX11
             Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.IndexBuffer, data);
         }
 
-        public void Dispose()
+        protected override void Dispose(bool isDisposing)
         {
-            if (IsDisposed)
-                return;
-            if (Disposing != null)
-                Disposing(this, EventArgs.Empty);
-
             if (Buffer != null && !Buffer.IsDisposed)
                 Buffer.Dispose();
-
-
-            IsDisposed = true;
         }
     }
 }

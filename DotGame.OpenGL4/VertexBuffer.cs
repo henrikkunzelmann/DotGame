@@ -41,15 +41,10 @@ namespace DotGame.OpenGL4
             GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw); 
         }
 
-        internal override void Dispose(bool isDisposing)
+        protected override void Dispose(bool isDisposing)
         {
-            if (IsDisposed)
-                return;
-
             GL.DeleteVertexArray(VertexArrayObjectID);
             GL.DeleteBuffer(VertexBufferObjectID);
-
-            base.Dispose(isDisposing);
         }
     }
 }

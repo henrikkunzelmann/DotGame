@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using DotGame.Graphics;
 using System.Diagnostics;
 
-namespace DotGame.OpenGL4
+namespace DotGame.DirectX11
 {
     public abstract class GraphicsObject : IGraphicsObject
     {
@@ -24,7 +24,7 @@ namespace DotGame.OpenGL4
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (graphicsDevice.IsDisposed)
-                throw new ArgumentException("graphicsDevice is disposed.", "graphicsDevice");
+                throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
             if (creationStack == null)
                 throw new ArgumentNullException("creationStack");
 
@@ -34,10 +34,7 @@ namespace DotGame.OpenGL4
 
         ~GraphicsObject()
         {
-            if (graphicsDevice.IsDisposed || graphicsDevice.IsCurrent)
-                Dispose(false);
-            else
-                ((GraphicsFactory)GraphicsDevice.Factory).DeferredDispose.Add(this);
+            Dispose();
         }
 
         public void Dispose()
@@ -48,6 +45,7 @@ namespace DotGame.OpenGL4
             if (OnDisposing != null)
                 OnDisposing(this, EventArgs.Empty);
 
+            
             Dispose(true);
             IsDisposed = true;
             GC.SuppressFinalize(this);
@@ -65,15 +63,6 @@ namespace DotGame.OpenGL4
 
             if (IsDisposed)
                 throw new ObjectDisposedException(GetType().FullName);
-        }
-
-        protected void AssertCurrent()
-        {
-            AssertNotDisposed();
-            
-            // TODO (Joex3): Eigene Exception.
-            if (!graphicsDevice.IsCurrent)
-                throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
         }
     }
 }

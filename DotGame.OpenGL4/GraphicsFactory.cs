@@ -6,11 +6,12 @@ using System.Threading.Tasks;
 using DotGame.Graphics;
 using OpenTK.Graphics.OpenGL4;
 using System.Collections.ObjectModel;
+using System.Diagnostics;
 using DotGame.Utils;
 
 namespace DotGame.OpenGL4
 {
-    public class GraphicsFactory : IGraphicsFactory
+    public class GraphicsFactory : GraphicsObject, IGraphicsFactory
     {
         public static Dictionary<TextureFormat, PixelInternalFormat> TextureFormats = new Dictionary<TextureFormat, PixelInternalFormat>() 
         {
@@ -25,21 +26,13 @@ namespace DotGame.OpenGL4
             {TextureFormat.Depth24Stencil8, PixelInternalFormat.Depth24Stencil8},
         };
 
-        public bool IsDisposed { get; private set; }
-        public IGraphicsDevice GraphicsDevice { get; private set; }
-        public EventHandler<EventArgs> Disposing { get; set; }
-        public object Tag { get; set; }
-
-        internal readonly GraphicsDevice GraphicsDeviceInternal;
         internal readonly List<GraphicsObject> DeferredDispose; // Wird zum disposen benutzt, um MakeCurrent Aufrufe zu vermeiden. Siehe DisposeUnused und Referenzen dazu.
         internal ReadOnlyCollection<WeakReference<GraphicsObject>> Objects { get { return objects.AsReadOnly(); } }
         private readonly List<WeakReference<GraphicsObject>> objects;
 
         internal GraphicsFactory(GraphicsDevice graphicsDevice)
+            : base(graphicsDevice, new StackTrace(1))
         {
-            this.GraphicsDevice = graphicsDevice;
-            GraphicsDeviceInternal = graphicsDevice;
-
             DeferredDispose = new List<GraphicsObject>();
             objects = new List<WeakReference<GraphicsObject>>();
         }
@@ -47,7 +40,7 @@ namespace DotGame.OpenGL4
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
         {
             AssertCurrent();
-            return Register(new Texture2D(GraphicsDeviceInternal, width, height, 0, format));
+            return Register(new Texture2D(graphicsDevice, width, height, 0, format));
         }
 
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format)
@@ -98,7 +91,6 @@ namespace DotGame.OpenGL4
             VertexBuffer buffer = new VertexBuffer((GraphicsDevice)GraphicsDevice, description);
             buffer.SetData<T>(data);
             return buffer;
-            //( ͡° ͜ʖ ͡°)
         }
 
         public IIndexBuffer CreateIndexBuffer<T>(T[] data) where T : struct
@@ -109,23 +101,40 @@ namespace DotGame.OpenGL4
             return buffer;
         }
 
+        public IConstantBuffer CreateConstantBuffer(int size)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IShader CompileShader(string file)
+        {
+            throw new NotImplementedException();
+        }
+
         internal void DisposeUnused()
         {
-            // TODO (Joex3): Wieder eigene Exception? :s
-            if (!GraphicsDevice.IsDisposed && !GraphicsDeviceInternal.IsCurrent)
+            // TODO (Joex3): Wieder eigene Exception? 
+            if (!graphicsDevice.IsDisposed && !graphicsDevice.IsCurrent)
                 throw new Exception("DisposeUnused must be called in the render thread, or after the GraphicsDevice has been disposed.");
 
             if (DeferredDispose.Count > 0)
             {
-                foreach (var obj in DeferredDispose)
+                foreach (var obj in DeferredDispose)     
                 {
-                    // Das sollte eigentlich nie passieren. :s
+                    // TODO: (henrik1235) Klären ob die Liste nicht a
+                    if (obj is GraphicsFactory)
+                        return;
+
+                    // Das sollte eigentlich nie passieren.
                     if (obj.IsDisposed)
+                    {
+                        Log.Debug("{0} is in DeferredDispose queue, but its already disposed.", obj.GetType().FullName);
                         continue;
+                    }
 
-                    DotGame.Utils.Log.Warning("{0} not disposed! {1}", obj.GetType().FullName, obj.CreationTrace);
+                    DotGame.Utils.Log.Warning("{0} is not disposed! {1}", obj.GetType().FullName, obj);
 
-                    obj.Dispose(false);
+                    obj.Dispose(); // TODO: (henrik1235) Überprüfen ob wir nicht obj.Dispose(bool isDisposing) aufrufen sollten, inbesondere weil dann die DeferredDispose Liste verändert werden kann
                 }
                 DeferredDispose.Clear();
             }
@@ -137,35 +146,9 @@ namespace DotGame.OpenGL4
             return obj;
         }
 
-        private void AssertNotDisposed()
-        {
-            if (GraphicsDevice.IsDisposed)
-                throw new ObjectDisposedException(GraphicsDevice.GetType().FullName);
-
-            if (IsDisposed)
-                throw new ObjectDisposedException(GetType().FullName);
-        }
-
-        private void AssertCurrent()
-        {
-            AssertNotDisposed();
-
-            // TODO (Joex3): Eigene Exception.
-            if (!GraphicsDeviceInternal.IsCurrent)
-                throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
-        }
-
-        public void Dispose()
-        {
-            Log.Info("GraphicsFactory.Dispose() called!");
-            Dispose(true);
-        }
-
-        private void Dispose(bool isDisposing)
+        protected override void Dispose(bool isDisposing)
         {
             DisposeUnused();
-
-            IsDisposed = true;
         }
     }
 }

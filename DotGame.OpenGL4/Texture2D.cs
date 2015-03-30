@@ -44,14 +44,10 @@ namespace DotGame.OpenGL4
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
         }
 
-        internal override void Dispose(bool isDisposing)
+        protected override void Dispose(bool isDisposing)
         {
             if (!GraphicsDevice.IsDisposed)
-            {
                 GL.DeleteTexture(TextureID);
-            }
-
-            base.Dispose(isDisposing);
         }
     }
 }
