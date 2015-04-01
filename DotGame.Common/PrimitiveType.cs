@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotGame.Graphics
+namespace DotGame
 {
-    public enum ShaderType
+    public enum PrimitiveType
     {
-        Vertex, Pixel
+        PointList, LineList, LineStrip, TriangleList, TriangleStrip
     }
 }

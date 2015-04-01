@@ -85,7 +85,7 @@ namespace DotGame.OpenGL4
             throw new NotImplementedException();
         }
 
-        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct, IVertexType
+        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct
         {
             AssertCurrent();
             VertexBuffer buffer = new VertexBuffer((GraphicsDevice)GraphicsDevice, description);
@@ -106,10 +106,16 @@ namespace DotGame.OpenGL4
             throw new NotImplementedException();
         }
 
-        public IShader CompileShader(string file)
+        public IShader CompileShader(string name, ShaderCompileInfo vertex, ShaderCompileInfo pixel)
         {
             throw new NotImplementedException();
         }
+
+        public IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode)
+        {
+            throw new NotSupportedException("Creating shader from byte code is not supported.");
+        }
+
 
         internal void DisposeUnused()
         {
@@ -121,7 +127,7 @@ namespace DotGame.OpenGL4
             {
                 foreach (var obj in DeferredDispose)     
                 {
-                    // TODO: (henrik1235) Klären ob die Liste nicht a
+                    // TODO: (henrik1235) Klären ob die Liste nicht in IGraphicsDevice verschieben können
                     if (obj is GraphicsFactory)
                         return;
 

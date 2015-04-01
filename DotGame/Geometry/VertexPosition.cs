@@ -12,10 +12,10 @@ namespace DotGame.Geometry
     {
         public Vector3 Position;
 
-        private static readonly VertexDescription description = new VertexDescription(
+        public static readonly VertexDescription Description = new VertexDescription(
             new VertexElement(VertexElementUsage.Position, 0, VertexElementType.Vector3));
 
-        public VertexDescription Description { get { return description; } }
+        public VertexDescription VertexDescription { get { return Description; } }
 
         public VertexPosition(Vector3 position)
         {

@@ -12,6 +12,7 @@ namespace DotGame.DirectX11
     public class IndexBuffer : GraphicsObject, IIndexBuffer
     {
         public int IndexCount { get; private set; }
+        public int SizeBytes { get; private set; }
 
         internal SharpDX.DXGI.Format Format { get; private set; }
         internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
@@ -34,7 +35,9 @@ namespace DotGame.DirectX11
             if (data.Length == 0)
                 throw new ArgumentException("data must not be empty.");
 
+            // TODO (henrik1235) allgemein Daten (wie z.B. byte[]) mit Parameter Format unterstützen, IndexFormat einbauen?
             this.IndexCount = data.Length;
+            this.SizeBytes = SharpDX.Utilities.SizeOf(data);
 
             Type tType = typeof(T);
             if (tType == typeof(int))

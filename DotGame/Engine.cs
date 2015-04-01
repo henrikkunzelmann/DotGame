@@ -51,6 +51,11 @@ namespace DotGame
         /// </summary>
         private ManualResetEvent onStart = new ManualResetEvent(false);
 
+        // TODO (henrik1235) Test, entfernen
+        private IShader shader;
+        private IConstantBuffer constantBuffer;
+        private IVertexBuffer vertexBuffer;
+
         public Engine()
             : this(new EngineSettings())
         {
@@ -63,9 +68,7 @@ namespace DotGame
 
         public Engine(EngineSettings settings, Control container)
         {
-            if (container == null)
-                throw new ArgumentNullException("container");
-            if (container.IsDisposed)
+            if (container != null && container.IsDisposed)
                 throw new ArgumentException("Container is disposed.", "container");
             this.Settings = settings;
 
@@ -88,6 +91,8 @@ namespace DotGame
                     else
                         window = new DotGame.DirectX11.Windows.GameControl(container);
                     break;
+                default:
+                    throw new NotImplementedException("GraphicsAPI not implemented.");
             }
 
             // Engine initialisieren
@@ -101,6 +106,7 @@ namespace DotGame
 
             Log.Info("Engine init done!");
             Log.Info("===========");
+            Log.FlushBuffer();
         }
 
         private void Init()
@@ -118,6 +124,54 @@ namespace DotGame
             }
 
             Log.Debug("Got AudioDevice: " + this.AudioDevice.GetType().FullName);
+
+
+            // TODO (henrik1235) Test, entfernen
+            shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
+            constantBuffer = shader.CreateConstantBuffer();
+            vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
+                -1.0f, -1.0f, -1.0f,
+                -1.0f,  1.0f, -1.0f,
+                 1.0f,  1.0f, -1.0f,
+                -1.0f, -1.0f, -1.0f,
+                 1.0f,  1.0f, -1.0f,
+                 1.0f, -1.0f, -1.0f,
+                
+                -1.0f, -1.0f,  1.0f,
+                 1.0f,  1.0f,  1.0f,
+                -1.0f,  1.0f,  1.0f,
+                -1.0f, -1.0f,  1.0f,
+                 1.0f, -1.0f,  1.0f,
+                 1.0f,  1.0f,  1.0f,
+                
+                -1.0f, 1.0f, -1.0f, 
+                -1.0f, 1.0f,  1.0f, 
+                 1.0f, 1.0f,  1.0f, 
+                -1.0f, 1.0f, -1.0f, 
+                 1.0f, 1.0f,  1.0f, 
+                 1.0f, 1.0f, -1.0f, 
+                
+                -1.0f,-1.0f, -1.0f, 
+                 1.0f,-1.0f,  1.0f, 
+                -1.0f,-1.0f,  1.0f, 
+                -1.0f,-1.0f, -1.0f, 
+                 1.0f,-1.0f, -1.0f, 
+                 1.0f,-1.0f,  1.0f, 
+                
+                -1.0f, -1.0f, -1.0f,
+                -1.0f, -1.0f,  1.0f,
+                -1.0f,  1.0f,  1.0f,
+                -1.0f, -1.0f, -1.0f,
+                -1.0f,  1.0f,  1.0f,
+                -1.0f,  1.0f, -1.0f,
+                
+                 1.0f, -1.0f, -1.0f,
+                 1.0f,  1.0f,  1.0f,
+                 1.0f, -1.0f,  1.0f,
+                 1.0f, -1.0f, -1.0f,
+                 1.0f,  1.0f, -1.0f,
+                 1.0f,  1.0f,  1.0f,
+            }, Geometry.VertexPosition.Description);
         }
 
         private void Run()
@@ -150,6 +204,7 @@ namespace DotGame
 
             // Engine beenden
             Log.Info("Engine has stopped!");
+            Log.FlushBuffer();
             gameTime.Stop();
             IsRunning = false;
         }
@@ -185,9 +240,22 @@ namespace DotGame
         /// </summary>
         private void Tick(GameTime gameTime)
         {
-            Log.Verbose("FPS: {0:0.00}", 1000f / ((float)gameTime.LastFrameTime.Ticks / TimeSpan.TicksPerMillisecond));
+            float time = (float)gameTime.TotalTime.TotalSeconds;
+            var view = Matrix.CreateLookAt(new Vector3(0, 0, 5f), new Vector3(0, 0, 0), Vector3.UnitY);
+            var proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.PI / 4f, GraphicsDevice.DefaultWindow.Width / (float)GraphicsDevice.DefaultWindow.Height, 0.1f, 100.0f);
+            var worldViewProj = 
+                  Matrix.CreateRotationX(time)
+                * Matrix.CreateRotationY(time * 2)
+                * Matrix.CreateRotationZ(time * .7f) * view * proj;
+            worldViewProj.Transpose();
 
-            GraphicsDevice.Clear(Color.SkyBlue);
+            GraphicsDevice.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
+            GraphicsDevice.RenderContext.SetShader(shader);
+            shader.SetConstantBuffer(constantBuffer);
+            constantBuffer.UpdateData(worldViewProj);
+            GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
+            GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);
+            GraphicsDevice.RenderContext.Draw();
             GraphicsDevice.SwapBuffers();
         }
 

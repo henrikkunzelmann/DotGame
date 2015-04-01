@@ -16,6 +16,11 @@ namespace DotGame.OpenGL4
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
 
+        public int SizeBytes 
+        { 
+            get { throw new NotImplementedException(); } 
+        }
+
         internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
@@ -25,7 +30,7 @@ namespace DotGame.OpenGL4
             this.Description = description;
         }
 
-        public void SetData<T>(T[] data) where T : struct, IVertexType
+        public void SetData<T>(T[] data) where T : struct
         {
             if(data == null) 
                 throw new ArgumentNullException("data");
@@ -33,9 +38,8 @@ namespace DotGame.OpenGL4
                 throw new ArgumentException("data must not be empty.");
 
 
-            this.VertexCount = data.Length;
-
-            int size = GraphicsDevice.GetSizeOf(data[0].Description);
+            int size = GraphicsDevice.GetSizeOf(Description);
+            this.VertexCount = data.Length / size; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
             
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObjectID);
             GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw); 

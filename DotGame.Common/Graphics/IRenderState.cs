@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
-    public interface IVertexType
+    public interface IRenderState : IGraphicsObject
     {
-        VertexDescription VertexDescription { get; }
+        RenderStateInfo Info { get; }
     }
 }

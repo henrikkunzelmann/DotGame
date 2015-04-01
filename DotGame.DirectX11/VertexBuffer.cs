@@ -13,8 +13,10 @@ namespace DotGame.DirectX11
     {
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
+        public int SizeBytes { get; private set; }
 
-        public SharpDX.Direct3D11.Buffer Buffer { get; private set; }
+        internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
+        internal VertexBufferBinding Binding { get; private set; }
 
         public VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
             : base(graphicsDevice, new StackTrace(1))
@@ -28,16 +30,21 @@ namespace DotGame.DirectX11
             this.Description = description;
         }
 
-        public void SetData<T>(T[] data) where T : struct, IVertexType
+        public void SetData<T>(T[] data) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException("data");
             if (data.Length == 0)
                 throw new ArgumentException("data must not be empty.");
 
-            this.VertexCount = data.Length;
+            int descriptionSize = graphicsDevice.GetSizeOf(Description);
+            this.SizeBytes = SharpDX.Utilities.SizeOf(data);
+            if (SizeBytes % descriptionSize != 0)
+                throw new ArgumentException("Data does not match vertex description", "data");
+            this.VertexCount = SizeBytes / descriptionSize;
 
             Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.VertexBuffer, data);
+            Binding = new VertexBufferBinding(Buffer, descriptionSize, 0);
         }
 
         protected override void Dispose(bool isDisposing)

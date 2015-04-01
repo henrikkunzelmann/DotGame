@@ -9,6 +9,7 @@ using Device = SharpDX.Direct3D11.Device;
 using System.Windows.Forms;
 using SharpDX.Windows;
 using SharpDX.DXGI;
+using DotGame.Utils;
 
 namespace DotGame.DirectX11
 {
@@ -22,6 +23,7 @@ namespace DotGame.DirectX11
 
         public bool IsDisposed { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
+        public IRenderContext RenderContext { get; private set; }
 
         public IGameWindow DefaultWindow { get; private set; }
         
@@ -37,6 +39,8 @@ namespace DotGame.DirectX11
         private RenderTargetView currentRenderTarget;
         private DepthStencilView currentDepthTarget;
 
+        private Dictionary<VertexDescription, InputLayout> inputLayoutPool = new Dictionary<VertexDescription, InputLayout>();
+
         internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain)
         {
             if (window == null)
@@ -44,11 +48,11 @@ namespace DotGame.DirectX11
             if (device == null)
                 throw new ArgumentNullException("device");
             if (device.IsDisposed)
-                throw new ArgumentException("device is disposed.", "device");
+                throw new ArgumentException("Device is disposed.", "device");
             if (swapChain == null)
                 throw new ArgumentNullException("swapChain");
             if (swapChain.IsDisposed)
-                throw new ArgumentException("swapChain is disposed.", "swapChain");
+                throw new ArgumentException("SwapChain is disposed.", "swapChain");
 
             this.DefaultWindow = window;
             this.device = device;
@@ -56,6 +60,7 @@ namespace DotGame.DirectX11
             this.Context = device.ImmediateContext;
 
             this.Factory = new GraphicsFactory(this);
+            this.RenderContext = new RenderContext(this);
 
             InitBackbuffer();
         }
@@ -63,22 +68,34 @@ namespace DotGame.DirectX11
         private void InitBackbuffer()
         {
             backBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
-            depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth32);
-
+            depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth16);
 
             currentRenderTarget = backBuffer.RenderView;
             currentDepthTarget = depthBuffer.DepthView;
-            Context.OutputMerger.SetTargets(depthBuffer.DepthView, backBuffer.RenderView);
+
+            Context.OutputMerger.SetTargets(currentDepthTarget, currentRenderTarget);
+            Context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, backBuffer.Width, backBuffer.Height, 0.0f, 1.0f));
+
+        }
+
+        public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
+        {
+            T ret = obj as T;
+            if (ret == null)
+                throw new ArgumentException("GraphicsObject is not part of this api.", parameterName);
+            if (obj.GraphicsDevice != this)
+                throw new ArgumentException("GraphicsObject is not part of this graphics device.", parameterName);
+            return ret;
         }
 
         public int GetSizeOf(TextureFormat format)
         {
-            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(FormatConverter.Convert(format));
+            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(EnumConverter.Convert(format));
         }
 
         public int GetSizeOf(VertexElementType format)
         {
-            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(FormatConverter.Convert(format));
+            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(EnumConverter.Convert(format));
         }
 
         public int GetSizeOf(VertexDescription description)
@@ -109,6 +126,21 @@ namespace DotGame.DirectX11
         public void MakeCurrent()
         {
 
+        }
+
+        public InputLayout GetLayout(VertexDescription description, Shader shader)
+        {
+            InputLayout layout;
+            if (inputLayoutPool.TryGetValue(description, out layout))
+                return layout;
+
+            InputElement[] dxElements = new InputElement[description.ElementCount];
+            VertexElement[] elements = description.GetElements();
+
+            for (int i = 0; i < description.ElementCount; i++)
+                dxElements[i] = new InputElement(EnumConverter.Convert(elements[i].Usage), 0, EnumConverter.Convert(elements[i].Type), elements[i].UsageIndex);
+            layout = inputLayoutPool[description] = new InputLayout(Context.Device, shader.VertexCode, dxElements);
+            return layout;
         }
 
         public void SwapBuffers()

@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using System.Diagnostics;
+using SharpDX.D3DCompiler;
 using DotGame.Graphics;
 
 namespace DotGame.DirectX11
@@ -60,7 +62,7 @@ namespace DotGame.DirectX11
             throw new NotImplementedException();
         }
 
-        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct, IVertexType
+        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct
         {
             VertexBuffer buffer = new VertexBuffer(graphicsDevice, description);
             buffer.SetData(data);
@@ -79,15 +81,88 @@ namespace DotGame.DirectX11
             return new ConstantBuffer(graphicsDevice, size);
         }
 
-        public IShader CompileShader(string file)
-        {
-            throw new NotImplementedException();
+        public IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo)
+        { 
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name is empty or whitespace.", "name");
+            CheckCompileInfo(vertexInfo, "vertexInfo");
+            CheckCompileInfo(pixelInfo, "pixelInfo");
+
+            ShaderBytecode vertexCode, pixelCode;
+            using (IncludeHandler include = IncludeHandler.CreateForShader(vertexInfo.File))
+                vertexCode = ShaderBytecode.CompileFromFile(vertexInfo.File, vertexInfo.Function, vertexInfo.Version, ShaderFlags.None, EffectFlags.None, null, include);
+            using (IncludeHandler include = IncludeHandler.CreateForShader(pixelInfo.File))
+                pixelCode = ShaderBytecode.CompileFromFile(pixelInfo.File, pixelInfo.Function, pixelInfo.Version, ShaderFlags.None, EffectFlags.None, null, include);
+            return new Shader(graphicsDevice, name, vertexCode, pixelCode);
         }
 
+        private void CheckCompileInfo(ShaderCompileInfo info, string parameterName)
+        {
+            if (info.File == null)
+                throw new ArgumentException("File of info is null.", parameterName);
+            if (info.Function == null)
+                throw new ArgumentException("Function of info is null.", parameterName);
+            if (info.Version == null)
+                throw new ArgumentException("Version of info is null.", parameterName);
+        }
+
+        public IShader CreateShader(string name, byte[] vertex, byte[] pixel)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name is empty or whitespace.", "name");
+            if (vertex == null)
+                throw new ArgumentNullException("vertex");
+            if (pixel == null)
+                throw new ArgumentNullException("pixel");
+            return new Shader(graphicsDevice, name, new ShaderBytecode(vertex), new ShaderBytecode(pixel));
+        }
 
         protected override void Dispose(bool isDisposing)
         {
             // TODO (henrik1235) Alle erzeugten Objekte disposen
+        }
+
+        private class IncludeHandler : Include
+        {
+            public string Directory { get; private set; }
+
+            public IncludeHandler(string directory)
+            {
+                if (directory == null)
+                    throw new ArgumentNullException("directory");
+                this.Directory = directory;
+            }
+
+            public static IncludeHandler CreateForShader(string path)
+            {
+                if (path == null)
+                    throw new ArgumentNullException("path");
+                return new IncludeHandler(Path.GetDirectoryName(path));
+            }
+
+            public void Close(Stream stream)
+            {
+                stream.Close();
+            }
+
+            public Stream Open(IncludeType type, string fileName, Stream parentStream)
+            {
+                return new FileStream(Path.Combine(Directory, fileName), FileMode.Open, FileAccess.Read);
+            }
+
+            public void Dispose()
+            {
+            }
+
+            public IDisposable Shadow 
+            { 
+                get { return null; } 
+                set { } 
+            }
         }
     }
 }

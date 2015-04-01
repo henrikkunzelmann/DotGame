@@ -21,6 +21,7 @@
     <DefineConstants>DEBUG;TRACE</DefineConstants>
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
+    <UseVSHostingProcess>false</UseVSHostingProcess>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -34,6 +35,12 @@
     <Reference Include="SharpDX, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>$(SharpDXPackageBinDir)\SharpDX.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.D3DCompiler">
+      <HintPath>$(SharpDXPackageBinDir)\SharpDX.D3DCompiler.dll</HintPath>
+    </Reference>
+    <Reference Include="SharpDX.Diagnostics">
+      <HintPath>..\packages\SharpDX.Diagnostics.2.0.4\lib\net20\SharpDX.Diagnostics.dll</HintPath>
     </Reference>
     <Reference Include="SharpDX.Direct3D11, Version=2.6.3.0, Culture=neutral, PublicKeyToken=b4dcf0f35e5521f1, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
@@ -55,8 +62,11 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="ConstantBuffer.cs" />
-    <Compile Include="FormatConverter.cs" />
+    <Compile Include="EnumConverter.cs" />
     <Compile Include="GraphicsObject.cs" />
+    <Compile Include="RenderContext.cs" />
+    <Compile Include="RenderState.cs" />
+    <Compile Include="Shader.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="VertexBuffer.cs" />

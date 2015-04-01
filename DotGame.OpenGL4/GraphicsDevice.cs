@@ -17,6 +17,10 @@ namespace DotGame.OpenGL4
     {
         public bool IsDisposed { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
+        public IRenderContext RenderContext
+        {
+            get { throw new NotImplementedException(); }
+        }
 
         public IGameWindow DefaultWindow { get; private set; }
         public bool VSync

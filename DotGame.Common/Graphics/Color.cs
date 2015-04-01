@@ -913,6 +913,10 @@ namespace DotGame.Graphics
         {
         }
 
+        /// <summary>
+        /// Wandelt die Farbe in einen ARGB-Integer um.
+        /// </summary>
+        /// <returns></returns>
         public int ToArgb()
         {
             return (int)((byte)(R * 255) << 16) | (int)((byte)(G * 255) << 8) | (int)((byte)(B * 255)) | (int)((byte)(A * 255) << 24);

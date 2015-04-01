@@ -14,7 +14,7 @@ namespace DotGame.DirectX11
         public int Width { get { return Handle.Description.Width; } }
         public int Height { get { return Handle.Description.Height; } }
         public int MipLevels { get { return Handle.Description.MipLevels; } }
-        public TextureFormat Format { get { return FormatConverter.ConvertToTexture(Handle.Description.Format); } }
+        public TextureFormat Format { get { return EnumConverter.ConvertToTexture(Handle.Description.Format); } }
         public int ArraySize { get { return Handle.Description.ArraySize; } }
 
         internal SharpDX.Direct3D11.Texture2D Handle { get; private set; }
@@ -42,7 +42,7 @@ namespace DotGame.DirectX11
             {
                 Width = width,
                 Height = height,
-                Format = FormatConverter.Convert(format),
+                Format = EnumConverter.Convert(format),
                 ArraySize = arraySize,
                 SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
                 CpuAccessFlags = CpuAccessFlags.None,

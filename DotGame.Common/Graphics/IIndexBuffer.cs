@@ -15,5 +15,10 @@ namespace DotGame.Graphics
         /// Gibt die Anzahl der Indices in diesem IndexBuffer an.
         /// </summary>
         int IndexCount { get; }
+
+        /// <summary>
+        /// Gibt die Größe des IndexBuffers in Bytes an.
+        /// </summary>
+        int SizeBytes { get; }
     }
 }

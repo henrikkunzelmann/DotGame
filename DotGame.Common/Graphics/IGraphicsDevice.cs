@@ -22,6 +22,11 @@ namespace DotGame.Graphics
         IGraphicsFactory Factory { get; }
 
         /// <summary>
+        /// Ruft den IRenderContext ab, der zu für das Senden von Befehlen an das IGraphicsDevice zuständig ist.
+        /// </summary>
+        IRenderContext RenderContext { get; }
+
+        /// <summary>
         /// Das Fenster welches das GraphicsDevice nutzt.
         /// </summary>
         IGameWindow DefaultWindow { get; }
@@ -68,7 +73,7 @@ namespace DotGame.Graphics
         /// </summary>
         /// <param name="clearOptions">Die <see cref="ClearOptions"/>-Flags, die die angesprochenen Channel angeben.</param>
         /// <param name="color">Die Farbe für Farbchannel benutzt wird.</param>
-        /// <param name="depth">Der Wert für den Tiefenchannel (standardmäßig 0).</param>
+        /// <param name="depth">Der Wert für den Tiefenchannel (standardmäßig 1).</param>
         /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
         void Clear(ClearOptions clearOptions, Color color, float depth, int stencil);
 

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
-    public class VertexDescription
+    public class VertexDescription : IEquatable<VertexDescription>
     {
         private VertexElement[] elements;
 
@@ -33,6 +33,30 @@ namespace DotGame.Graphics
         public VertexElement[] GetElements()
         {
             return (VertexElement[])elements.Clone();
+        }
+
+        public override bool Equals(object obj)
+        {
+            if (obj is VertexDescription)
+                return Equals((VertexDescription)obj);
+            return false;
+        }
+
+        public bool Equals(VertexDescription other)
+        {
+            return Enumerable.SequenceEqual(elements, other.elements);
+        }
+
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + elements.Length.GetHashCode();
+                for (int i = 0; i < elements.Length; i++)
+                    hash = hash * 23 + elements[i].GetHashCode();
+                return hash;
+            }
         }
     }
 }

@@ -17,5 +17,10 @@ namespace DotGame.Graphics
         /// Die Anzahl aller Vertices in diesem VertexBuffer.
         /// </summary>
         int VertexCount { get; }
+
+        /// <summary>
+        /// Die Größe des VertexBuffers in Bytes.
+        /// </summary>
+        int SizeBytes { get; }
     }
 }

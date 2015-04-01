@@ -13,6 +13,11 @@ namespace DotGame.OpenGL4
     {
         public int IndexCount { get; private set; }
 
+        public int SizeBytes
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         private int iboId;
  
         public IndexBuffer(GraphicsDevice graphicsDevice) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))

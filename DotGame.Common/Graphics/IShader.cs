@@ -17,9 +17,10 @@ namespace DotGame.Graphics
         string Name { get; }
 
         /// <summary>
-        /// Der Type des Shaders.
+        /// Erstellt einen passenden ConstantBuffer für alle globale Variablen. Der Constant-Buffer wird beim erneuten Aufrufen nicht neu erstellt.
         /// </summary>
-        ShaderType Type { get; }
+        /// <returns></returns>
+        IConstantBuffer CreateConstantBuffer();
 
         /// <summary>
         /// Erstellt für die Variable name im Shader einen passenden Constant-Buffer. Der Constant-Buffer wird beim erneuten Aufrufen nicht neu erstellt.
@@ -27,6 +28,12 @@ namespace DotGame.Graphics
         /// <param name="name"></param>
         /// <returns></returns>
         IConstantBuffer CreateConstantBuffer(string name);
+
+        /// <summary>
+        /// Setzt den aktuellen ConstantBuffer für alle globale Variablen.
+        /// </summary>
+        /// <param name="buffer"></param>
+        void SetConstantBuffer(IConstantBuffer buffer);
 
         /// <summary>
         /// Setzt den aktuellen ConstantBuffer für die Variable name.

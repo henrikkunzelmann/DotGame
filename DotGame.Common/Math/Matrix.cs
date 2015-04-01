@@ -9,13 +9,13 @@ namespace DotGame
 {
     [Serializable]
     [StructLayout(LayoutKind.Sequential)]
-    public struct Matrix4 : IEquatable<Matrix4>
+    public struct Matrix : IEquatable<Matrix>
     {
         public float M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44;
 
         #region Konstanten
-        public static Matrix4 Identity { get { return identity; } }
-        private static Matrix4 identity = new Matrix4(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f);
+        public static Matrix Identity { get { return identity; } }
+        private static Matrix identity = new Matrix(1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f, 0f, 0f, 0f, 0f, 1f);
         #endregion
 
         #region this[] Accessor
@@ -84,14 +84,14 @@ namespace DotGame
         #endregion
 
         #region Factory Methoden
-        public static Matrix4 CreateLookAt(Vector3 cameraPosition, Vector3 cameraTarget, Vector3 cameraUpVector)
+        public static Matrix CreateLookAt(Vector3 cameraPosition, Vector3 cameraTarget, Vector3 cameraUpVector)
         {
-            Matrix4 matrix;
+            Matrix matrix;
             CreateLookAt(ref cameraPosition, ref cameraTarget, ref cameraUpVector, out matrix);
             return matrix;
         }
 
-        public static void CreateLookAt(ref Vector3 cameraPosition, ref Vector3 cameraTarget, ref Vector3 cameraUpVector, out Matrix4 result)
+        public static void CreateLookAt(ref Vector3 cameraPosition, ref Vector3 cameraTarget, ref Vector3 cameraUpVector, out Matrix result)
         {
             var vector = Vector3.Normalize(cameraPosition - cameraTarget);
             var vector2 = Vector3.Normalize(Vector3.Cross(cameraUpVector, vector));
@@ -115,15 +115,15 @@ namespace DotGame
         }
 
 
-        public static Matrix4 CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane)
+        public static Matrix CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane)
         {
-            Matrix4 matrix;
+            Matrix matrix;
             CreateOrthographic(width, height, zNearPlane, zFarPlane, out matrix);
             return matrix;
         }
 
 
-        public static void CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane, out Matrix4 result)
+        public static void CreateOrthographic(float width, float height, float zNearPlane, float zFarPlane, out Matrix result)
         {
             result.M11 = 2f / width;
             result.M12 = result.M13 = result.M14 = 0f;
@@ -136,27 +136,27 @@ namespace DotGame
             result.M44 = 1f;
         }
 
-        public static Matrix4 CreateOrthographicOffCenter(Viewport viewport)
+        public static Matrix CreateOrthographicOffCenter(Viewport viewport)
         {
-            Matrix4 matrix;
+            Matrix matrix;
             CreateOrthographicOffCenter(viewport.X, viewport.X + viewport.Width, viewport.Y + viewport.Height, viewport.Y, viewport.MinDepth, viewport.MaxDepth, out matrix);
             return matrix;
         }
 
-        public static void CreateOrthographicOffCenter(Viewport viewport, out Matrix4 result)
+        public static void CreateOrthographicOffCenter(Viewport viewport, out Matrix result)
         {
             CreateOrthographicOffCenter(viewport.X, viewport.X + viewport.Width, viewport.Y + viewport.Height, viewport.Y, viewport.MinDepth, viewport.MaxDepth, out result);
         }
 
-        public static Matrix4 CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane)
+        public static Matrix CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane)
         {
-            Matrix4 matrix;
+            Matrix matrix;
             CreateOrthographicOffCenter(left, right, bottom, top, zNearPlane, zFarPlane, out matrix);
             return matrix;
         }
 
 
-        public static void CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane, out Matrix4 result)
+        public static void CreateOrthographicOffCenter(float left, float right, float bottom, float top, float zNearPlane, float zFarPlane, out Matrix result)
         {
             result.M11 = (float)(2.0 / ((double)right - (double)left));
             result.M12 = 0.0f;
@@ -176,14 +176,14 @@ namespace DotGame
             result.M44 = 1.0f;
         }
 
-        public static Matrix4 CreatePerspective(float width, float height, float nearPlaneDistance, float farPlaneDistance)
+        public static Matrix CreatePerspective(float width, float height, float nearPlaneDistance, float farPlaneDistance)
         {
-            Matrix4 matrix;
+            Matrix matrix;
             CreatePerspective(width, height, nearPlaneDistance, farPlaneDistance, out matrix);
             return matrix;
         }
 
-        public static void CreatePerspective(float width, float height, float nearPlaneDistance, float farPlaneDistance, out Matrix4 result)
+        public static void CreatePerspective(float width, float height, float nearPlaneDistance, float farPlaneDistance, out Matrix result)
         {
             if (nearPlaneDistance <= 0f)
             {
@@ -208,14 +208,14 @@ namespace DotGame
             result.M43 = (nearPlaneDistance * farPlaneDistance) / (nearPlaneDistance - farPlaneDistance);
         }
 
-        public static Matrix4 CreatePerspectiveFieldOfView(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance)
+        public static Matrix CreatePerspectiveFieldOfView(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance)
         {
-            Matrix4 result;
+            Matrix result;
             CreatePerspectiveFieldOfView(fieldOfView, aspectRatio, nearPlaneDistance, farPlaneDistance, out result);
             return result;
         }
 
-        public static void CreatePerspectiveFieldOfView(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance, out Matrix4 result)
+        public static void CreatePerspectiveFieldOfView(float fieldOfView, float aspectRatio, float nearPlaneDistance, float farPlaneDistance, out Matrix result)
         {
             if ((fieldOfView <= 0f) || (fieldOfView >= 3.141593f))
             {
@@ -246,15 +246,15 @@ namespace DotGame
             result.M43 = (nearPlaneDistance * farPlaneDistance) / (nearPlaneDistance - farPlaneDistance);
         }
 
-        public static Matrix4 CreateTranslation(float xPosition, float yPosition, float zPosition)
+        public static Matrix CreateTranslation(float xPosition, float yPosition, float zPosition)
         {
-            Matrix4 result;
+            Matrix result;
             CreateTranslation(xPosition, yPosition, zPosition, out result);
             return result;
         }
 
 
-        public static void CreateTranslation(ref Vector3 position, out Matrix4 result)
+        public static void CreateTranslation(ref Vector3 position, out Matrix result)
         {
             result.M11 = 1;
             result.M12 = 0;
@@ -274,14 +274,14 @@ namespace DotGame
             result.M44 = 1;
         }
 
-        public static Matrix4 CreateTranslation(Vector3 position)
+        public static Matrix CreateTranslation(Vector3 position)
         {
-            Matrix4 result;
+            Matrix result;
             CreateTranslation(ref position, out result);
             return result;
         }
 
-        public static void CreateTranslation(float xPosition, float yPosition, float zPosition, out Matrix4 result)
+        public static void CreateTranslation(float xPosition, float yPosition, float zPosition, out Matrix result)
         {
             result.M11 = 1;
             result.M12 = 0;
@@ -301,26 +301,26 @@ namespace DotGame
             result.M44 = 1;
         }
 
-        public static Matrix4 CreateScale(float scale)
+        public static Matrix CreateScale(float scale)
         {
-            Matrix4 result;
+            Matrix result;
             CreateScale(scale, scale, scale, out result);
             return result;
         }
 
-        public static void CreateScale(float scale, out Matrix4 result)
+        public static void CreateScale(float scale, out Matrix result)
         {
             CreateScale(scale, scale, scale, out result);
         }
 
-        public static Matrix4 CreateScale(float xScale, float yScale, float zScale)
+        public static Matrix CreateScale(float xScale, float yScale, float zScale)
         {
-            Matrix4 result;
+            Matrix result;
             CreateScale(xScale, yScale, zScale, out result);
             return result;
         }
 
-        public static void CreateScale(float xScale, float yScale, float zScale, out Matrix4 result)
+        public static void CreateScale(float xScale, float yScale, float zScale, out Matrix result)
         {
             result.M11 = xScale;
             result.M12 = 0;
@@ -340,14 +340,14 @@ namespace DotGame
             result.M44 = 1;
         }
 
-        public static Matrix4 CreateScale(Vector3 scales)
+        public static Matrix CreateScale(Vector3 scales)
         {
-            Matrix4 result;
+            Matrix result;
             CreateScale(ref scales, out result);
             return result;
         }
 
-        public static void CreateScale(ref Vector3 scales, out Matrix4 result)
+        public static void CreateScale(ref Vector3 scales, out Matrix result)
         {
             result.M11 = scales.X;
             result.M12 = 0;
@@ -367,16 +367,16 @@ namespace DotGame
             result.M44 = 1;
         }
 
-        public static Matrix4 CreateRotationX(float radians)
+        public static Matrix CreateRotationX(float radians)
         {
-            Matrix4 result;
+            Matrix result;
             CreateRotationX(radians, out result);
             return result;
         }
 
-        public static void CreateRotationX(float radians, out Matrix4 result)
+        public static void CreateRotationX(float radians, out Matrix result)
         {
-            result = Matrix4.Identity;
+            result = Matrix.Identity;
 
             var val1 = (float)Math.Cos(radians);
             var val2 = (float)Math.Sin(radians);
@@ -387,16 +387,16 @@ namespace DotGame
             result.M33 = val1;
         }
 
-        public static Matrix4 CreateRotationY(float radians)
+        public static Matrix CreateRotationY(float radians)
         {
-            Matrix4 result;
+            Matrix result;
             CreateRotationY(radians, out result);
             return result;
         }
 
-        public static void CreateRotationY(float radians, out Matrix4 result)
+        public static void CreateRotationY(float radians, out Matrix result)
         {
-            result = Matrix4.Identity;
+            result = Matrix.Identity;
 
             var val1 = (float)Math.Cos(radians);
             var val2 = (float)Math.Sin(radians);
@@ -407,16 +407,16 @@ namespace DotGame
             result.M33 = val1;
         }
 
-        public static Matrix4 CreateRotationZ(float radians)
+        public static Matrix CreateRotationZ(float radians)
         {
-            Matrix4 result;
+            Matrix result;
             CreateRotationZ(radians, out result);
             return result;
         }
 
-        public static void CreateRotationZ(float radians, out Matrix4 result)
+        public static void CreateRotationZ(float radians, out Matrix result)
         {
-            result = Matrix4.Identity;
+            result = Matrix.Identity;
 
             var val1 = (float)Math.Cos(radians);
             var val2 = (float)Math.Sin(radians);
@@ -427,14 +427,14 @@ namespace DotGame
             result.M22 = val1;
         }
 
-        public static Matrix4 CreateFromQuaternion(Quaternion quaternion)
+        public static Matrix CreateFromQuaternion(Quaternion quaternion)
         {
-            Matrix4 result;
+            Matrix result;
             CreateFromQuaternion(quaternion, out result);
             return result;
         }
 
-        public static void CreateFromQuaternion(Quaternion quaternion, out Matrix4 result)
+        public static void CreateFromQuaternion(Quaternion quaternion, out Matrix result)
         {
             float num9 = quaternion.X * quaternion.X;
             float num8 = quaternion.Y * quaternion.Y;
@@ -465,22 +465,22 @@ namespace DotGame
         #endregion
 
         #region Operatoren
-        public static Matrix4 operator *(Matrix4 M1, Matrix4 M2)
+        public static Matrix operator *(Matrix M1, Matrix M2)
         {
-            Matrix4 result;
-            Matrix4.Multiply(ref M1, ref M2, out result);
+            Matrix result;
+            Matrix.Multiply(ref M1, ref M2, out result);
             return result;
         }
         #endregion
 
         #region Methoden
-        public static Matrix4 Invert(Matrix4 matrix)
+        public static Matrix Invert(Matrix matrix)
         {
             Invert(ref matrix, out matrix);
             return matrix;
         }
 
-        public static void Invert(ref Matrix4 matrix, out Matrix4 result)
+        public static void Invert(ref Matrix matrix, out Matrix result)
         {
             float num1 = matrix.M11;
             float num2 = matrix.M12;
@@ -540,7 +540,7 @@ namespace DotGame
             result.M44 = (float)((double)num1 * (double)num36 - (double)num2 * (double)num38 + (double)num3 * (double)num39) * num27;
         }
 
-        public static Matrix4 Multiply(Matrix4 matrix1, Matrix4 matrix2)
+        public static Matrix Multiply(Matrix matrix1, Matrix matrix2)
         {
             var m11 = (((matrix1.M11 * matrix2.M11) + (matrix1.M12 * matrix2.M21)) + (matrix1.M13 * matrix2.M31)) + (matrix1.M14 * matrix2.M41);
             var m12 = (((matrix1.M11 * matrix2.M12) + (matrix1.M12 * matrix2.M22)) + (matrix1.M13 * matrix2.M32)) + (matrix1.M14 * matrix2.M42);
@@ -578,7 +578,7 @@ namespace DotGame
         }
 
 
-        public static void Multiply(ref Matrix4 matrix1, ref Matrix4 matrix2, out Matrix4 result)
+        public static void Multiply(ref Matrix matrix1, ref Matrix matrix2, out Matrix result)
         {
             var m11 = (((matrix1.M11 * matrix2.M11) + (matrix1.M12 * matrix2.M21)) + (matrix1.M13 * matrix2.M31)) + (matrix1.M14 * matrix2.M41);
             var m12 = (((matrix1.M11 * matrix2.M12) + (matrix1.M12 * matrix2.M22)) + (matrix1.M13 * matrix2.M32)) + (matrix1.M14 * matrix2.M42);
@@ -613,9 +613,38 @@ namespace DotGame
             result.M43 = m43;
             result.M44 = m44;
         }
+
+        public static Matrix Transpose(Matrix value)
+        {
+            Matrix result;
+            Matrix.Transpose(ref value, out result);
+            return result;
+        }
+
+        public static void Transpose(ref Matrix value, out Matrix result)
+        {
+            Matrix temp = new Matrix();
+            temp.M11 = value.M11;
+            temp.M12 = value.M21;
+            temp.M13 = value.M31;
+            temp.M14 = value.M41;
+            temp.M21 = value.M12;
+            temp.M22 = value.M22;
+            temp.M23 = value.M32;
+            temp.M24 = value.M42;
+            temp.M31 = value.M13;
+            temp.M32 = value.M23;
+            temp.M33 = value.M33;
+            temp.M34 = value.M43;
+            temp.M41 = value.M14;
+            temp.M42 = value.M24;
+            temp.M43 = value.M34;
+            temp.M44 = value.M44;
+            result = temp;
+        }
         #endregion
 
-        public Matrix4(float m11, float m12, float m13, float m14, float m21, float m22, float m23, float m24, float m31, float m32, float m33, float m34, float m41, float m42, float m43, float m44)
+        public Matrix(float m11, float m12, float m13, float m14, float m21, float m22, float m23, float m24, float m31, float m32, float m33, float m34, float m41, float m42, float m43, float m44)
         {
             this.M11 = m11;
             this.M12 = m12;
@@ -640,7 +669,12 @@ namespace DotGame
             return new float[] { M11, M12, M13, M14, M21, M22, M23, M24, M31, M32, M33, M34, M41, M42, M43, M44 };
         }
 
-        public bool Equals(Matrix4 other)
+        public void Transpose()
+        {
+            Matrix.Transpose(ref this, out this);
+        }
+
+        public bool Equals(Matrix other)
         {
             return M11 == other.M11
                 && M12 == other.M12
@@ -662,26 +696,9 @@ namespace DotGame
 
         public override bool Equals(object obj)
         {
-            if (!(obj is Matrix4))
-                return false;
-
-            var other = (Matrix4)obj;
-            return M11 == other.M11
-                && M12 == other.M12
-                && M13 == other.M13
-                && M14 == other.M14
-                && M21 == other.M21
-                && M22 == other.M22
-                && M23 == other.M23
-                && M24 == other.M24
-                && M31 == other.M31
-                && M32 == other.M32
-                && M33 == other.M33
-                && M34 == other.M34
-                && M41 == other.M41
-                && M42 == other.M42
-                && M43 == other.M43
-                && M44 == other.M44;
+            if (obj is Matrix)
+                return Equals((Matrix)obj);
+            return false;
         }
 
         public override int GetHashCode()

@@ -13,11 +13,11 @@ namespace DotGame.Geometry
         public Vector3 Position;
         public Color Color;
 
-        private static readonly VertexDescription description = new VertexDescription(
+        public static readonly VertexDescription Description = new VertexDescription(
             new VertexElement(VertexElementUsage.Position, 0, VertexElementType.Vector3),
             new VertexElement(VertexElementUsage.Color, 0, VertexElementType.Vector4));
 
-        public VertexDescription Description { get { return description; } }
+        public VertexDescription VertexDescription { get { return Description; } }
 
         public VertexPositionColor(Vector3 position, Color color)
         {
