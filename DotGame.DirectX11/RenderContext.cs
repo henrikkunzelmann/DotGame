@@ -103,7 +103,11 @@ namespace DotGame.DirectX11
                 graphicsDevice.Context.InputAssembler.SetVertexBuffers(0, currentVertexBuffer.Binding);
             }
             if (indexBufferDirty)
-                graphicsDevice.Context.InputAssembler.SetIndexBuffer(currentIndexBuffer.Buffer, currentIndexBuffer.Format, 0);
+                graphicsDevice.Context.InputAssembler.SetIndexBuffer(currentIndexBuffer.Buffer, currentIndexBuffer.IndexFormat, 0);
+
+            stateDirty = false;
+            vertexBufferDirty = false;
+            indexBufferDirty = false;
         }
 
         public void Draw()

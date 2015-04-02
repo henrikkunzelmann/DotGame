@@ -11,6 +11,7 @@ namespace DotGame.Graphics
     /// </summary>
     public interface IGraphicsFactory : IGraphicsObject
     {
+        ITexture2D LoadTexture2D(string file);
         ITexture2D CreateTexture2D(int width, int height, TextureFormat format);
         ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format);
         ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, int arraySize);
@@ -21,7 +22,11 @@ namespace DotGame.Graphics
         IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, int arraySize);
 
         IVertexBuffer CreateVertexBuffer<T>(T[] vertices, VertexDescription description) where T : struct;
-        IIndexBuffer CreateIndexBuffer<T>(T[] indices) where T : struct;
+        IIndexBuffer CreateIndexBuffer<T>(T[] indices, IndexFormat format) where T : struct;
+        IIndexBuffer CreateIndexBuffer(int[] indices);
+        IIndexBuffer CreateIndexBuffer(uint[] indices);
+        IIndexBuffer CreateIndexBuffer(short[] indices);
+        IIndexBuffer CreateIndexBuffer(ushort[] indices);
 
         IConstantBuffer CreateConstantBuffer(int size);
 

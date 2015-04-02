@@ -36,6 +36,12 @@ namespace DotGame.OpenGL4
             DeferredDispose = new List<GraphicsObject>();
             objects = new List<WeakReference<GraphicsObject>>();
         }
+        
+        public ITexture2D LoadTexture2D(string file)
+        {
+            AssertCurrent();
+            throw new NotImplementedException();
+        }
 
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
         {
@@ -88,17 +94,37 @@ namespace DotGame.OpenGL4
         public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct
         {
             AssertCurrent();
-            VertexBuffer buffer = new VertexBuffer((GraphicsDevice)GraphicsDevice, description);
+            VertexBuffer buffer = new VertexBuffer(graphicsDevice, description);
             buffer.SetData<T>(data);
             return buffer;
         }
 
-        public IIndexBuffer CreateIndexBuffer<T>(T[] data) where T : struct
+        public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format) where T : struct
         {
             AssertCurrent();
-            IndexBuffer buffer = new IndexBuffer((GraphicsDevice)GraphicsDevice);
-            buffer.SetData<T>(data);
+            IndexBuffer buffer = new IndexBuffer(graphicsDevice);
+            buffer.SetData<T>(data, format);
             return buffer;
+        }
+
+        public IIndexBuffer CreateIndexBuffer(int[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.Int32);
+        }
+
+        public IIndexBuffer CreateIndexBuffer(uint[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.UInt32);
+        }
+
+        public IIndexBuffer CreateIndexBuffer(short[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.Short16);
+        }
+
+        public IIndexBuffer CreateIndexBuffer(ushort[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.UShort16);
         }
 
         public IConstantBuffer CreateConstantBuffer(int size)

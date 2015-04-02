@@ -22,6 +22,11 @@ namespace DotGame.DirectX11
             this.graphicsDevice = graphicsDevice;
         }
 
+        public ITexture2D LoadTexture2D(string file)
+        {
+            return new Texture2D(graphicsDevice, (SharpDX.Direct3D11.Texture2D)SharpDX.Direct3D11.Texture2D.FromFile(graphicsDevice.Context.Device, file));
+        }
+
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
         {
             return new Texture2D(graphicsDevice, width, height, 0, format, 1, false);
@@ -69,11 +74,31 @@ namespace DotGame.DirectX11
             return buffer;
         }
 
-        public IIndexBuffer CreateIndexBuffer<T>(T[] data) where T : struct
+        public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format) where T : struct
         {
             IndexBuffer buffer = new IndexBuffer(graphicsDevice);
-            buffer.SetData(data);
+            buffer.SetData(data, format);
             return buffer;
+        }
+
+        public IIndexBuffer CreateIndexBuffer(int[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.Int32);
+        }
+
+        public IIndexBuffer CreateIndexBuffer(uint[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.UInt32);
+        }
+
+        public IIndexBuffer CreateIndexBuffer(short[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.Short16);
+        }
+
+        public IIndexBuffer CreateIndexBuffer(ushort[] data)
+        {
+            return CreateIndexBuffer(data, IndexFormat.UShort16);
         }
 
         public IConstantBuffer CreateConstantBuffer(int size)

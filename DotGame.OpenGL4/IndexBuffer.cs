@@ -11,8 +11,11 @@ namespace DotGame.OpenGL4
 {
     public class IndexBuffer : GraphicsObject, IIndexBuffer
     {
+        public IndexFormat Format
+        {
+            get { throw new NotImplementedException(); }
+        }
         public int IndexCount { get; private set; }
-
         public int SizeBytes
         {
             get { throw new NotImplementedException(); }
@@ -30,13 +33,14 @@ namespace DotGame.OpenGL4
             iboId = GL.GenBuffer();
         }
 
-        public void SetData<T>(T[] data) where T : struct
+        public void SetData<T>(T[] data, IndexFormat format) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException("data");
             if (data.Length == 0)
                 throw new ArgumentException("data must not be empty.");
 
+            // TODO (henrik1235) Format und SizeBytes supporten
             this.IndexCount = data.Length;
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, iboId);

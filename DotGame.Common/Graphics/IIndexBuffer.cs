@@ -12,6 +12,11 @@ namespace DotGame.Graphics
     public interface IIndexBuffer : IGraphicsObject
     {
         /// <summary>
+        /// Gibt das Format der Indices in diesem IndexBuffer an.
+        /// </summary>
+        IndexFormat Format { get; }
+
+        /// <summary>
         /// Gibt die Anzahl der Indices in diesem IndexBuffer an.
         /// </summary>
         int IndexCount { get; }

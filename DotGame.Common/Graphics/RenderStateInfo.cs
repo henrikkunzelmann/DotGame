@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
+    /// <summary>
+    /// Speichert die ganze Information über die Pipeline.
+    /// </summary>
     public struct RenderStateInfo : IEquatable<RenderStateInfo>
     {
         public IShader Shader;

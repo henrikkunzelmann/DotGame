@@ -66,6 +66,7 @@
     <Compile Include="GraphicsObject.cs" />
     <Compile Include="RenderContext.cs" />
     <Compile Include="RenderState.cs" />
+    <Compile Include="Sampler.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="Texture2D.cs" />
     <Compile Include="IndexBuffer.cs" />

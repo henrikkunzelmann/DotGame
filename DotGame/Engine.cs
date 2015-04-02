@@ -55,6 +55,7 @@ namespace DotGame
         private IShader shader;
         private IConstantBuffer constantBuffer;
         private IVertexBuffer vertexBuffer;
+        private ITexture2D texture;
 
         public Engine()
             : this(new EngineSettings())
@@ -72,6 +73,8 @@ namespace DotGame
                 throw new ArgumentException("Container is disposed.", "container");
             this.Settings = settings;
 
+            Log.Info("");
+            Log.Info("===========");
             Log.Info("DotGame {0}", Version);
             Log.Info("===========");
             Log.Info("Engine starting...");
@@ -127,51 +130,53 @@ namespace DotGame
 
 
             // TODO (henrik1235) Test, entfernen
+            texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg");
             shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
             constantBuffer = shader.CreateConstantBuffer();
             vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
-                -1.0f, -1.0f, -1.0f,
-                -1.0f,  1.0f, -1.0f,
-                 1.0f,  1.0f, -1.0f,
-                -1.0f, -1.0f, -1.0f,
-                 1.0f,  1.0f, -1.0f,
-                 1.0f, -1.0f, -1.0f,
+                // 3D coordinates              UV Texture coordinates
+                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, // Front
+                -1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
+                 1.0f,  1.0f, -1.0f,    1.0f, 0.0f,
+                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
+                 1.0f,  1.0f, -1.0f,    1.0f, 0.0f,
+                 1.0f, -1.0f, -1.0f,    1.0f, 1.0f,
                 
-                -1.0f, -1.0f,  1.0f,
-                 1.0f,  1.0f,  1.0f,
-                -1.0f,  1.0f,  1.0f,
-                -1.0f, -1.0f,  1.0f,
-                 1.0f, -1.0f,  1.0f,
-                 1.0f,  1.0f,  1.0f,
+                -1.0f, -1.0f,  1.0f,    1.0f, 0.0f, // BACK
+                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
+                -1.0f,  1.0f,  1.0f,    1.0f, 1.0f,
+                -1.0f, -1.0f,  1.0f,    1.0f, 0.0f,
+                 1.0f, -1.0f,  1.0f,    0.0f, 0.0f,
+                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
                 
-                -1.0f, 1.0f, -1.0f, 
-                -1.0f, 1.0f,  1.0f, 
-                 1.0f, 1.0f,  1.0f, 
-                -1.0f, 1.0f, -1.0f, 
-                 1.0f, 1.0f,  1.0f, 
-                 1.0f, 1.0f, -1.0f, 
+                -1.0f, 1.0f, -1.0f,     0.0f, 1.0f, // Top
+                -1.0f, 1.0f,  1.0f,     0.0f, 0.0f,
+                 1.0f, 1.0f,  1.0f,     1.0f, 0.0f,
+                -1.0f, 1.0f, -1.0f,     0.0f, 1.0f,
+                 1.0f, 1.0f,  1.0f,     1.0f, 0.0f,
+                 1.0f, 1.0f, -1.0f,     1.0f, 1.0f,
                 
-                -1.0f,-1.0f, -1.0f, 
-                 1.0f,-1.0f,  1.0f, 
-                -1.0f,-1.0f,  1.0f, 
-                -1.0f,-1.0f, -1.0f, 
-                 1.0f,-1.0f, -1.0f, 
-                 1.0f,-1.0f,  1.0f, 
+                -1.0f,-1.0f, -1.0f,     1.0f, 0.0f, // Bottom
+                 1.0f,-1.0f,  1.0f,     0.0f, 1.0f,
+                -1.0f,-1.0f,  1.0f,     1.0f, 1.0f,
+                -1.0f,-1.0f, -1.0f,     1.0f, 0.0f,
+                 1.0f,-1.0f, -1.0f,     0.0f, 0.0f,
+                 1.0f,-1.0f,  1.0f,     0.0f, 1.0f,
                 
-                -1.0f, -1.0f, -1.0f,
-                -1.0f, -1.0f,  1.0f,
-                -1.0f,  1.0f,  1.0f,
-                -1.0f, -1.0f, -1.0f,
-                -1.0f,  1.0f,  1.0f,
-                -1.0f,  1.0f, -1.0f,
+                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, // Left
+                -1.0f, -1.0f,  1.0f,    0.0f, 0.0f,
+                -1.0f,  1.0f,  1.0f,    1.0f, 0.0f,
+                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
+                -1.0f,  1.0f,  1.0f,    1.0f, 0.0f,
+                -1.0f,  1.0f, -1.0f,    1.0f, 1.0f,
                 
-                 1.0f, -1.0f, -1.0f,
-                 1.0f,  1.0f,  1.0f,
-                 1.0f, -1.0f,  1.0f,
-                 1.0f, -1.0f, -1.0f,
-                 1.0f,  1.0f, -1.0f,
-                 1.0f,  1.0f,  1.0f,
-            }, Geometry.VertexPosition.Description);
+                 1.0f, -1.0f, -1.0f,    1.0f, 0.0f, // Right
+                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
+                 1.0f, -1.0f,  1.0f,    1.0f, 1.0f,
+                 1.0f, -1.0f, -1.0f,    1.0f, 0.0f,
+                 1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
+                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
+            }, Geometry.VertexPositionTexture.Description);
         }
 
         private void Run()
@@ -252,6 +257,7 @@ namespace DotGame
             GraphicsDevice.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
             GraphicsDevice.RenderContext.SetShader(shader);
             shader.SetConstantBuffer(constantBuffer);
+            shader.SetTexture("picture", texture);
             constantBuffer.UpdateData(worldViewProj);
             GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
             GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);

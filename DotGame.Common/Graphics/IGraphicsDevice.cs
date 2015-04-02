@@ -56,6 +56,13 @@ namespace DotGame.Graphics
         int GetSizeOf(VertexElementType format);
 
         /// <summary>
+        /// Gibt die Größe in Bytes des IndexFormates zurück.
+        /// </summary>
+        /// <param name="format"></param>
+        /// <returns></returns>
+        int GetSizeOf(IndexFormat format);
+
+        /// <summary>
         /// Gibt die Größe in Bytes der VertexDescription zurück.
         /// </summary>
         /// <param name="description">Die VertexDescription.</param>
@@ -76,6 +83,10 @@ namespace DotGame.Graphics
         /// <param name="depth">Der Wert für den Tiefenchannel (standardmäßig 1).</param>
         /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
         void Clear(ClearOptions clearOptions, Color color, float depth, int stencil);
+
+        void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth);
+        void SetRenderTargetColor(IRenderTarget2D color);
+        void SetRenderTargetDepth(IRenderTarget2D depth);
 
         /// <summary>
         /// Tauscht den Backbuffer mit dem Frontbuffer, was zum Anzeigen des Bildes führt.

@@ -106,7 +106,22 @@ namespace DotGame.OpenGL4
                 case VertexElementType.Vector4:
                     return 16;
                 default:
-                    return 0;
+                    throw new NotSupportedException("Format is not supported.");
+            }
+        }
+
+        public int GetSizeOf(IndexFormat format)
+        {
+            switch (format)
+            {
+                case IndexFormat.Int32:
+                case IndexFormat.UInt32:
+                    return 4;
+                case IndexFormat.Short16:
+                case IndexFormat.UShort16:
+                    return 2;
+                default:
+                    throw new NotSupportedException("Format is not supported.");
             }
         }
 
@@ -207,6 +222,22 @@ namespace DotGame.OpenGL4
             IsDisposed = true;
             // Wird hinter IsDisposed = true; aufgerufen, damit die GraphicsObject Dispose Implementationen bescheid wissen, dass nicht mehr auf das GraphicsDevice zugegriffen werden kann.
             Factory.Dispose();
+        }
+
+
+        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRenderTargetColor(IRenderTarget2D color)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRenderTargetDepth(IRenderTarget2D depth)
+        {
+            throw new NotImplementedException();
         }
     }
 }

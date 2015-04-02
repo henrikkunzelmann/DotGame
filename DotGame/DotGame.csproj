@@ -58,6 +58,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
     <Compile Include="GameTime.cs" />
+    <Compile Include="Geometry\VertexPositionTexture.cs" />
     <Compile Include="Geometry\VertexPositionColor.cs" />
     <Compile Include="Geometry\VertexPosition.cs" />
     <Compile Include="GraphicsAPI.cs" />

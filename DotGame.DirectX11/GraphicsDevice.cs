@@ -69,13 +69,13 @@ namespace DotGame.DirectX11
         {
             backBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
             depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth16);
+            SetRenderTarget(backBuffer, depthBuffer);
 
-            currentRenderTarget = backBuffer.RenderView;
-            currentDepthTarget = depthBuffer.DepthView;
-
-            Context.OutputMerger.SetTargets(currentDepthTarget, currentRenderTarget);
-            Context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, backBuffer.Width, backBuffer.Height, 0.0f, 1.0f));
-
+            Context.Rasterizer.State = new RasterizerState(Context.Device, new RasterizerStateDescription()
+            {
+                CullMode = CullMode.Back,
+                FillMode = FillMode.Solid,
+            });
         }
 
         public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
@@ -94,6 +94,11 @@ namespace DotGame.DirectX11
         }
 
         public int GetSizeOf(VertexElementType format)
+        {
+            return SharpDX.DXGI.FormatHelper.SizeOfInBytes(EnumConverter.Convert(format));
+        }
+
+        public int GetSizeOf(IndexFormat format)
         {
             return SharpDX.DXGI.FormatHelper.SizeOfInBytes(EnumConverter.Convert(format));
         }
@@ -151,6 +156,8 @@ namespace DotGame.DirectX11
 
         public void Clear(Color color)
         {
+            if (currentRenderTarget == null)
+                throw new InvalidOperationException("No render target set for color.");
             Context.ClearRenderTargetView(currentRenderTarget, new SharpDX.Color4(color.R, color.G, color.B, color.A));
         }
 
@@ -166,7 +173,70 @@ namespace DotGame.DirectX11
                 clearFlags |= DepthStencilClearFlags.Stencil;
 
             if (clearFlags != 0)
+            {
+                if (currentDepthTarget == null)
+                    throw new InvalidOperationException("No render target set for depth.");
                 Context.ClearDepthStencilView(currentDepthTarget, clearFlags, depth, (byte)stencil);
+            }
+        }
+
+        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
+        {
+            if (color == null)
+                throw new ArgumentNullException("color");
+            var dxColor = Cast<Texture2D>(color, "color");
+            if (depth == null)
+                throw new ArgumentNullException("depth");
+            var dxDepth = Cast<Texture2D>(depth, "depth");
+
+            if (dxColor.RenderView == null)
+                throw new ArgumentException("Texture is not a color render target.", "color");
+            if (dxDepth.DepthView == null)
+                throw new ArgumentException("Texture is not a depth render target.", "depth");
+
+            if (currentRenderTarget == dxColor.RenderView && currentDepthTarget == dxDepth.DepthView)
+                return;
+
+            currentRenderTarget = dxColor.RenderView;
+            currentDepthTarget = dxDepth.DepthView;
+
+            Context.OutputMerger.SetTargets(currentDepthTarget, currentRenderTarget);
+            Context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
+        }
+
+        public void SetRenderTargetColor(IRenderTarget2D color)
+        {
+            if (color == null)
+                throw new ArgumentNullException("color");
+            var dxColor = Cast<Texture2D>(color, "color");
+
+            if (dxColor.RenderView == null)
+                throw new ArgumentException("Texture is not a color render target.", "color");
+
+            if (dxColor.RenderView == currentRenderTarget)
+                return;
+
+            currentRenderTarget = dxColor.RenderView;
+
+            Context.OutputMerger.SetTargets(currentDepthTarget, currentRenderTarget);
+            Context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
+        }
+
+        public void SetRenderTargetDepth(IRenderTarget2D depth)
+        {
+            if (depth == null)
+                throw new ArgumentNullException("depth");
+            var dxDepth = Cast<Texture2D>(depth, "depth");
+
+            if (dxDepth.DepthView == null)
+                throw new ArgumentException("Texture is not a depth render target.", "depth");
+
+            if (dxDepth.DepthView == currentDepthTarget)
+                return;
+
+            currentDepthTarget = dxDepth.DepthView;
+
+            Context.OutputMerger.SetTargets(currentDepthTarget, currentRenderTarget);
         }
     }
 }

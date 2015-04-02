@@ -35,12 +35,12 @@ namespace DotGame.DirectX11
             if (data == null)
                 throw new ArgumentNullException("data");
             if (data.Length == 0)
-                throw new ArgumentException("data must not be empty.");
+                throw new ArgumentException("Data must not be empty.", "data");
 
             int descriptionSize = graphicsDevice.GetSizeOf(Description);
             this.SizeBytes = SharpDX.Utilities.SizeOf(data);
             if (SizeBytes % descriptionSize != 0)
-                throw new ArgumentException("Data does not match vertex description", "data");
+                throw new ArgumentException("Data does not match vertex description.", "data");
             this.VertexCount = SizeBytes / descriptionSize;
 
             Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.VertexBuffer, data);

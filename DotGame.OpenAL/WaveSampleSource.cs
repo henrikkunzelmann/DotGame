@@ -64,7 +64,7 @@ namespace DotGame.OpenAL
             if (channels > 2)
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count > 2."));
             this.Channels = channels;
-            // TODO (henrik1235 (͡° ͜ʖ ͡°)): Herausfinden, warum dataSize bei veränderter SampleRate gleich bleibt.
+            // TODO Herausfinden, warum dataSize bei veränderter SampleRate gleich bleibt.
             this.TotalSamples = dataSize / (bitDepth / 8) / channels;
             this.SampleRate = sampleRate;
         }

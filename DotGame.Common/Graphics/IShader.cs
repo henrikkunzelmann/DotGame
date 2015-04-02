@@ -41,5 +41,10 @@ namespace DotGame.Graphics
         /// <param name="name"></param>
         /// <param name="buffer"></param>
         void SetConstantBuffer(string name, IConstantBuffer buffer);
+
+        void SetTexture(string name, ITexture2D texture);
+        void SetTexture(string name, ITexture2DArray texture);
+        void SetTexture(string name, ITexture3D texture);
+        void SetTexture(string name, ITexture3DArray texture);
     }
 }

@@ -51,6 +51,27 @@ namespace DotGame.DirectX11
             { VertexElementUsage.Binormal, "BINORMAL" },
         };
 
+        private static readonly Dictionary<IndexFormat, Format> indexFormats = new Dictionary<IndexFormat, Format>()
+        {
+            { IndexFormat.Int32, Format.R32_SInt },
+            { IndexFormat.UInt32, Format.R32_UInt },
+            { IndexFormat.Short16, Format.R16_SInt },
+            { IndexFormat.UShort16, Format.R16_UInt },
+        };
+
+        private static readonly Dictionary<Tuple<TextureFilter, TextureFilter, TextureFilter>, Filter> filters = new Dictionary<Tuple<TextureFilter, TextureFilter, TextureFilter>, Filter>()
+        {
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Point, TextureFilter.Point), Filter.MinMagMipPoint },
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Point, TextureFilter.Linear), Filter.MinMagMipLinear },
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Linear, TextureFilter.Point), Filter.MinPointMagLinearMipPoint },
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Linear, TextureFilter.Linear), Filter.MinPointMagMipLinear },
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Point, TextureFilter.Point), Filter.MinLinearMagMipPoint },
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Point, TextureFilter.Linear), Filter.MinLinearMagPointMipLinear },
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Linear, TextureFilter.Point), Filter.MinMagLinearMipPoint },
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Linear, TextureFilter.Linear), Filter.MinMagMipLinear },
+            { Tuple.Create(TextureFilter.Anisotropic, TextureFilter.Anisotropic, TextureFilter.Anisotropic), Filter.Anisotropic }
+        };
+
         public static Format Convert(TextureFormat format)
         {
             if (!textureFormats.ContainsKey(format))
@@ -77,6 +98,39 @@ namespace DotGame.DirectX11
             if (!vertexElementUsages.ContainsKey(usage))
                 throw new NotSupportedException("Usage is not supported.");
             return vertexElementUsages[usage];
+        }
+
+        public static Format Convert(IndexFormat format)
+        {
+            if (!indexFormats.ContainsKey(format))
+                throw new NotSupportedException("Format is not supported.");
+            return indexFormats[format];
+        }
+
+        public static Filter Convert(SamplerType type, TextureFilter min, TextureFilter mag, TextureFilter mip)
+        {
+            int offset;
+            switch(type)
+            {
+                case SamplerType.Normal:
+                    offset = 0;
+                    break;
+                case SamplerType.Comparison:
+                    offset = 0x80;
+                    break;
+                case SamplerType.Minimum:
+                    offset = 0x100;
+                    break;
+                case SamplerType.Maximum:
+                    offset = 0x180;
+                    break;
+                default:
+                    throw new NotSupportedException("SamplerType is not supported.");
+            }
+            Filter f;
+            if (!filters.TryGetValue(new Tuple<TextureFilter, TextureFilter, TextureFilter>(min, mag, mip), out f))
+                throw new NotSupportedException("TextureFilter variant not supported.");
+            return (Filter)(f + offset);
         }
 
         public static TextureFormat ConvertToTexture(Format format)
@@ -107,6 +161,13 @@ namespace DotGame.DirectX11
             if (!vertexElementUsages.ContainsValue(name))
                 throw new NotImplementedException();
             return vertexElementUsages.First((f) => f.Value == name).Key;
+        }
+
+        public static IndexFormat Convert(Format format)
+        {
+            if (!indexFormats.ContainsValue(format))
+                throw new NotImplementedException();
+            return indexFormats.First((f) => f.Value == format).Key;
         }
     }
 }

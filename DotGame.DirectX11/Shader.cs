@@ -9,6 +9,8 @@ using SharpDX.D3DCompiler;
 using SharpDX.DXGI;
 using SharpDX.Direct3D11;
 using DotGame.Graphics;
+using DotGame.Utils;
+using Texture2D = DotGame.DirectX11.Texture2D;
 
 namespace DotGame.DirectX11
 {
@@ -26,6 +28,9 @@ namespace DotGame.DirectX11
         private Dictionary<string, int> resourcesPixel = new Dictionary<string, int>();
         private Dictionary<string, int> constantBufferSizes = new Dictionary<string, int>();
         private Dictionary<string, IConstantBuffer> cachedConstantBuffers = new Dictionary<string, IConstantBuffer>();
+
+        // TODO (henrik1235) Test, entfernen und mit ISampler ersetzen
+        private SamplerState sampler;
 
         public Shader(GraphicsDevice graphicsDevice, string name, ShaderBytecode vertex, ShaderBytecode pixel)
             : base(graphicsDevice, new StackTrace(1))
@@ -69,6 +74,21 @@ namespace DotGame.DirectX11
 
             VertexShaderHandle = new VertexShader(graphicsDevice.Context.Device, VertexCode.Data);
             PixelShaderHandle = new PixelShader(graphicsDevice.Context.Device, PixelCode.Data);
+
+            // TODO (henrik1235) Test, entfernen und mit ISampler ersetzen
+            sampler = new SamplerState(graphicsDevice.Context.Device, new SamplerStateDescription()
+            {
+                Filter = Filter.MinMagMipPoint,
+                AddressU = TextureAddressMode.Wrap,
+                AddressV = TextureAddressMode.Wrap,
+                AddressW = TextureAddressMode.Wrap,
+                BorderColor = SharpDX.Color.Black,
+                ComparisonFunction = SharpDX.Direct3D11.Comparison.Never,
+                MaximumAnisotropy = 16,
+                MipLodBias = 0,
+                MinimumLod = 0,
+                MaximumLod = 16,
+            });
         }
 
         protected override void Dispose(bool isDisposing)
@@ -133,6 +153,73 @@ namespace DotGame.DirectX11
 
             if (!vertexFound && !pixelFound)
                 throw new ArgumentException("ConstantBuffer not found in shader.", "name");
+        }
+
+        public void SetTexture(string name, ITexture2D texture)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+
+            SetTexture(name, graphicsDevice.Cast<Texture2D>(texture, "texture").ResourceView);
+        }
+
+        public void SetTexture(string name, ITexture2DArray texture)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+
+            SetTexture(name, graphicsDevice.Cast<Texture2D>(texture, "texture").ResourceView);
+        }
+
+        public void SetTexture(string name, ITexture3D texture)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+
+            throw new NotImplementedException();
+            //SetTexture(name, graphicsDevice.Cast<Texture3D>(texture, "texture").ResourceView);
+        }
+
+        public void SetTexture(string name, ITexture3DArray texture)
+        {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+
+            throw new NotImplementedException();
+            //SetTexture(name, graphicsDevice.Cast<Texture3D>(texture, "texture").ResourceView);
+        }
+
+        private void SetTexture(string name, ShaderResourceView view)
+        {
+            if (view == null)
+                throw new ArgumentException("Texture does not support being used in a shader.", "texture");
+
+            int slot;
+            bool vertexFound = false, pixelFound = false;
+            if (resourcesVertex.TryGetValue(name, out slot))
+            {
+                graphicsDevice.Context.PixelShader.SetSampler(slot, sampler); // TODO (henrik1235) Test, entfernen und mit ISampler ersetzen
+                graphicsDevice.Context.VertexShader.SetShaderResource(slot, view);
+                vertexFound = true;
+            }
+
+            if (resourcesPixel.TryGetValue(name, out slot))
+            {
+                graphicsDevice.Context.PixelShader.SetSampler(slot, sampler); // TODO (henrik1235) Test, entfernen und mit ISampler ersetzen
+                graphicsDevice.Context.PixelShader.SetShaderResource(slot, view);
+                pixelFound = true;
+            }
+
+            if (!vertexFound && !pixelFound)
+                Log.Warning("Shader.SetTexture({0}) did nothing because the variable name does not exist in the shader.", name);
         }
     }
 }
