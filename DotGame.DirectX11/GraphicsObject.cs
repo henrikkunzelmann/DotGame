@@ -17,7 +17,8 @@ namespace DotGame.DirectX11
         public event EventHandler<EventArgs> OnDisposed;
 
         protected GraphicsDevice graphicsDevice;
-        private StackTrace creationStack;
+
+        public StackTrace CreationStack { get; private set; }
 
         public GraphicsObject(GraphicsDevice graphicsDevice, StackTrace creationStack)
         {
@@ -29,7 +30,9 @@ namespace DotGame.DirectX11
                 throw new ArgumentNullException("creationStack");
 
             this.graphicsDevice = graphicsDevice;
-            this.creationStack = creationStack;
+            this.CreationStack = creationStack;
+
+            graphicsDevice.CreatedObjects.Add(this);
         }
 
         ~GraphicsObject()
@@ -44,11 +47,12 @@ namespace DotGame.DirectX11
 
             if (OnDisposing != null)
                 OnDisposing(this, EventArgs.Empty);
-
             
             Dispose(true);
             IsDisposed = true;
             GC.SuppressFinalize(this);
+
+            graphicsDevice.CreatedObjects.Remove(this);
 
             if (OnDisposed != null)
                 OnDisposed(this, EventArgs.Empty);

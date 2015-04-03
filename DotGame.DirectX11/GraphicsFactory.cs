@@ -24,7 +24,7 @@ namespace DotGame.DirectX11
 
         public ITexture2D LoadTexture2D(string file)
         {
-            return new Texture2D(graphicsDevice, (SharpDX.Direct3D11.Texture2D)SharpDX.Direct3D11.Texture2D.FromFile(graphicsDevice.Context.Device, file));
+            return new Texture2D(graphicsDevice, (SharpDX.Direct3D11.Texture2D)SharpDX.Direct3D11.Texture2D.FromFile(graphicsDevice.Device, file));
         }
 
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
@@ -146,9 +146,13 @@ namespace DotGame.DirectX11
             return new Shader(graphicsDevice, name, new ShaderBytecode(vertex), new ShaderBytecode(pixel));
         }
 
+        public ISampler CreateSampler(SamplerInfo info)
+        {
+            return new Sampler(graphicsDevice, info);  
+        }
+
         protected override void Dispose(bool isDisposing)
         {
-            // TODO (henrik1235) Alle erzeugten Objekte disposen
         }
 
         private class IncludeHandler : Include

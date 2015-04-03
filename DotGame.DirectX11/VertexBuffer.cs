@@ -43,7 +43,7 @@ namespace DotGame.DirectX11
                 throw new ArgumentException("Data does not match vertex description.", "data");
             this.VertexCount = SizeBytes / descriptionSize;
 
-            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.VertexBuffer, data);
+            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Device, BindFlags.VertexBuffer, data);
             Binding = new VertexBufferBinding(Buffer, descriptionSize, 0);
         }
 

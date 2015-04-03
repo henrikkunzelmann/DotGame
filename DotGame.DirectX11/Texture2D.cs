@@ -60,7 +60,7 @@ namespace DotGame.DirectX11
                 desc.BindFlags |= BindFlags.ShaderResource; // TODO (henrik1235) ShaderResource auch für RenderTargets und DepthBuffer erlauben
             }
 
-            this.Handle = new SharpDX.Direct3D11.Texture2D(graphicsDevice.Context.Device, desc);
+            this.Handle = new SharpDX.Direct3D11.Texture2D(graphicsDevice.Device, desc);
             CreateViews();
         }
 
@@ -80,11 +80,11 @@ namespace DotGame.DirectX11
         private void CreateViews()
         {
             if (Handle.Description.BindFlags.HasFlag(BindFlags.DepthStencil))
-                DepthView = new DepthStencilView(graphicsDevice.Context.Device, Handle);
+                DepthView = new DepthStencilView(graphicsDevice.Device, Handle);
             if (Handle.Description.BindFlags.HasFlag(BindFlags.RenderTarget))
-                RenderView = new RenderTargetView(graphicsDevice.Context.Device, Handle);
+                RenderView = new RenderTargetView(graphicsDevice.Device, Handle);
             if (Handle.Description.BindFlags.HasFlag(BindFlags.ShaderResource))
-                ResourceView = new ShaderResourceView(graphicsDevice.Context.Device, Handle);
+                ResourceView = new ShaderResourceView(graphicsDevice.Device, Handle);
         }
 
         protected override void Dispose(bool isDisposing)

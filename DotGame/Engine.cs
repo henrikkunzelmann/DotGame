@@ -56,6 +56,7 @@ namespace DotGame
         private IConstantBuffer constantBuffer;
         private IVertexBuffer vertexBuffer;
         private ITexture2D texture;
+        private ISampler sampler;
 
         public Engine()
             : this(new EngineSettings())
@@ -133,8 +134,12 @@ namespace DotGame
             // TODO (henrik1235) Test, entfernen
             texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg");
 
-            //shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
-            shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
+            if (Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
+            else if (Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
+                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
+            else
+                throw new NotImplementedException();
 
             constantBuffer = shader.CreateConstantBuffer();
             vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
@@ -181,6 +186,9 @@ namespace DotGame
                  1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
                  1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
             }, Geometry.VertexPositionTexture.Description);
+
+            if (Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+                sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
 
             GraphicsDevice.DetachCurrent();
         }
@@ -260,11 +268,13 @@ namespace DotGame
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();
 
-            GraphicsDevice.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
+            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
             GraphicsDevice.RenderContext.SetShader(shader);
-            shader.SetConstantBuffer(constantBuffer);
-            shader.SetTexture("picture", texture);
-            constantBuffer.UpdateData(worldViewProj);
+            GraphicsDevice.RenderContext.SetConstantBuffer(shader, constantBuffer);
+            GraphicsDevice.RenderContext.SetTexture(shader, "picture", texture);
+            if (Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+                GraphicsDevice.RenderContext.SetSampler(shader, "pictureSampler", sampler);
+            GraphicsDevice.RenderContext.Update(constantBuffer, worldViewProj);
             GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
             GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);
             GraphicsDevice.RenderContext.Draw();

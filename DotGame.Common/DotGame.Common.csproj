@@ -79,6 +79,7 @@
     <Compile Include="Graphics\IVertexBuffer.cs" />
     <Compile Include="Graphics\IVertexType.cs" />
     <Compile Include="Graphics\RenderStateInfo.cs" />
+    <Compile Include="Graphics\SamplerInfo.cs" />
     <Compile Include="Graphics\SamplerType.cs" />
     <Compile Include="Graphics\ShaderCompileInfo.cs" />
     <Compile Include="Graphics\TextureFilter.cs" />

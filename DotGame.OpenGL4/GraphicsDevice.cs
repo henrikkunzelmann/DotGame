@@ -36,9 +36,6 @@ namespace DotGame.OpenGL4
         internal StateMachine StateMachine { get; private set; }
 
         private IWindowContainer container;
-        private Color clearColor;
-        private float clearDepth;
-        private int clearStencil;
 
         internal int GLSLVersionMajor { get; private set; }
         internal int GLSLVersionMinor { get; private set; }
@@ -220,69 +217,12 @@ namespace DotGame.OpenGL4
             return size;
         }
 
-        public void Clear(Color color)
-        {
-            Clear(ClearOptions.ColorDepth, color, 1.0f, 0);
-        }
-
-        public void Clear(ClearOptions options, Color color, float depth, int stencil)
-        {
-            ClearBufferMask mask = ClearBufferMask.None;
-
-            if (options.HasFlag(ClearOptions.Color))
-            {
-                SetClearColor(ref color);
-                mask |= ClearBufferMask.ColorBufferBit;
-            }
-
-            if (options.HasFlag(ClearOptions.Depth))
-            {
-                SetClearDepth(ref depth);
-                mask |= ClearBufferMask.DepthBufferBit;
-            }
-
-            if (options.HasFlag(ClearOptions.Stencil))
-            {
-                SetClearStencil(ref stencil);
-                mask |= ClearBufferMask.StencilBufferBit;
-            }
-
-            GL.Clear(mask);
-        }
-
         public void SwapBuffers()
         {
             // TODO (Joex3): Evtl. woanders hinschieben.
             ((GraphicsFactory)Factory).DisposeUnused();
 
             Context.SwapBuffers();
-        }
-
-        private void SetClearColor(ref Color color)
-        {
-            if (color != clearColor)
-            {
-                clearColor = color;
-                GL.ClearColor(color.R, color.G, color.B, color.A);
-            }
-        }
-
-        private void SetClearDepth(ref float depth)
-        {
-            if (depth != clearDepth)
-            {
-                clearDepth = depth;
-                GL.ClearDepth(depth);
-            }
-        }
-
-        private void SetClearStencil(ref int stencil)
-        {
-            if (stencil != clearStencil)
-            {
-                clearStencil = stencil;
-                GL.ClearStencil(stencil);
-            }
         }
 
         internal static void CheckGLError()
@@ -306,22 +246,6 @@ namespace DotGame.OpenGL4
             IsDisposed = true;
             // Wird hinter IsDisposed = true; aufgerufen, damit die GraphicsObject Dispose Implementationen bescheid wissen, dass nicht mehr auf das GraphicsDevice zugegriffen werden kann.
             Factory.Dispose();
-        }
-
-
-        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetRenderTargetColor(IRenderTarget2D color)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetRenderTargetDepth(IRenderTarget2D depth)
-        {
-            throw new NotImplementedException();
         }
     }
 }

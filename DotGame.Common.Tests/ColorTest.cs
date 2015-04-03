@@ -15,6 +15,10 @@ namespace DotGame.Common.Tests
             var argb = color1.ToArgb();
             var color2 = Color.FromArgb(argb);
             Assert.AreEqual(color1, color2);
+
+            var rgba = color1.ToRgba();
+            var color3 = Color.FromRgba(rgba);
+            Assert.AreEqual(color1, color2);
         }
     }
 }

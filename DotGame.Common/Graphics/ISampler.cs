@@ -6,21 +6,8 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
-    public interface ISampler
+    public interface ISampler : IGraphicsObject
     {
-        SamplerType Type { get; }
-        TextureFilter MinFilter { get; }
-        TextureFilter MagFilter { get; }
-        TextureFilter MipFilter { get; }
-        Comparison ComparisonFunction { get; }
-
-        Color BorderColor { get; }
-        AddressMode AddressU { get; }
-        AddressMode AddressV { get; }
-        AddressMode AddressW { get; }
-
-        int MinimumLod { get; }
-        int MaximumLod { get; }
-        int MaximumAnisotropy { get; }
+        SamplerInfo Info { get; }
     }
 }

@@ -138,7 +138,7 @@ namespace DotGame.OpenGL4
 
         public IConstantBuffer CreateConstantBuffer(int size)
         {
-            throw new NotImplementedException();
+            return new ConstantBuffer(graphicsDevice, size);
         }
 
         public IShader CompileShader(string name, ShaderCompileInfo vertex, ShaderCompileInfo pixel)
@@ -159,7 +159,7 @@ namespace DotGame.OpenGL4
             string pixelCode = File.ReadAllText(pixel.File);
             pixelCode = CheckShaderVersion(name, pixelCode, pixel);
 
-            return new Shader((GraphicsDevice)GraphicsDevice, vertexCode, pixelCode);
+            return new Shader(graphicsDevice, vertexCode, pixelCode);
         }
 
         private string CheckShaderVersion(string shaderName, string shaderCode, ShaderCompileInfo info)
@@ -209,6 +209,11 @@ namespace DotGame.OpenGL4
         public IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode)
         {
             throw new NotSupportedException("Creating shader from byte code is not supported.");
+        }
+
+        public ISampler CreateSampler(SamplerInfo info)
+        {
+            throw new NotImplementedException();
         }
 
         internal static void CheckGLError()

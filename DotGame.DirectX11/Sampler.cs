@@ -17,29 +17,34 @@ namespace DotGame.DirectX11
 {
     public class Sampler : GraphicsObject, ISampler
     {
-        public SamplerType Type { get; private set; }
-        public TextureFilter MinFilter { get; private set; }
-        public TextureFilter MagFilter { get; private set; }
-        public TextureFilter MipFilter { get; private set; }
-        public Comparison ComparisonFunction { get; private set; }
-        public Color BorderColor { get; private set; }
-        public AddressMode AddressU { get; private set; }
-        public AddressMode AddressV { get; private set; }
-        public AddressMode AddressW { get; private set; }
+        public SamplerInfo Info { get; private set;}
 
-        public int MinimumLod { get; private set; }
-        public int MaximumLod { get; private set; }
-        public int MaximumAnisotropy { get; private set; }
+        internal SamplerState Handle { get; private set; }
 
-        public Sampler(GraphicsDevice graphicsDevice)
+        public Sampler(GraphicsDevice graphicsDevice, SamplerInfo info)
             : base(graphicsDevice, new StackTrace(1))
         {
+            this.Info = info;
 
+            Handle = new SamplerState(graphicsDevice.Device, new SamplerStateDescription()
+            {
+                Filter = EnumConverter.Convert(info.Type, info.MinFilter, info.MagFilter, info.MipFilter),
+                AddressU = EnumConverter.Convert(info.AddressU),
+                AddressV = EnumConverter.Convert(info.AddressV),
+                AddressW = EnumConverter.Convert(info.AddressW),
+                BorderColor = SharpDX.Color.FromRgba(info.BorderColor.ToRgba()),
+                ComparisonFunction = EnumConverter.Convert(info.ComparisonFunction),
+                MaximumAnisotropy = info.MaximumAnisotropy,
+                MinimumLod = info.MinimumLod,
+                MaximumLod = info.MaximumLod,
+                MipLodBias = info.MipLodBias
+            });
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            throw new NotImplementedException();
+            if (Handle != null)
+                Handle.Dispose();
         }
     }
 }

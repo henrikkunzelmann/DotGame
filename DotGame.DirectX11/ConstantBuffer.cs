@@ -24,18 +24,13 @@ namespace DotGame.DirectX11
                 throw new ArgumentException("Size is smaller then 0.", "size");
             this.Size = size;
 
-            Handle = new Buffer(graphicsDevice.Context.Device, size, ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+            Handle = new Buffer(graphicsDevice.Device, size, ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
         }
 
         protected override void Dispose(bool disposing)
         {
             if (Handle != null)
                 Handle.Dispose();
-        }
-
-        public void UpdateData<T>(T Data) where T : struct
-        {
-            graphicsDevice.Context.UpdateSubresource(ref Data, Handle);
         }
     }
 }

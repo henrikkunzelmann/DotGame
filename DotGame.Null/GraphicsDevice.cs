@@ -24,17 +24,7 @@ namespace DotGame.Null
             get { throw new NotImplementedException(); }
         }
 
-        public bool VSync
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
-        }
+        public bool VSync { get; set; }
 
         public int GetSizeOf(TextureFormat format)
         {
@@ -59,17 +49,9 @@ namespace DotGame.Null
 
         public int GetSizeOf(IndexFormat format)
         {
-            throw new NotImplementedException();
+            return 1;
         }
-        
-
-        public void Clear(Color color)
-        {
-        }
-
-        public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
-        {
-        }
+  
 
         public void SwapBuffers()
         {
@@ -81,21 +63,6 @@ namespace DotGame.Null
         public IRenderContext RenderContext
         {
             get { throw new NotImplementedException(); }
-        }
-
-        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetRenderTargetColor(IRenderTarget2D color)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetRenderTargetDepth(IRenderTarget2D depth)
-        {
-            throw new NotImplementedException();
         }
 
         public void Dispose()

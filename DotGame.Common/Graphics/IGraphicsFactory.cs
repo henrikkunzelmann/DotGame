@@ -32,5 +32,7 @@ namespace DotGame.Graphics
 
         IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo);
         IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode);
+
+        ISampler CreateSampler(SamplerInfo info);
     }
 }

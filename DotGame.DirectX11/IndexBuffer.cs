@@ -46,7 +46,7 @@ namespace DotGame.DirectX11
                 throw new ArgumentException("Data does not match index format.", "data");
 
             this.IndexCount = this.SizeBytes / formatSize;
-            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Context.Device, BindFlags.IndexBuffer, data);
+            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Device, BindFlags.IndexBuffer, data);
         }
 
         protected override void Dispose(bool isDisposing)

@@ -77,68 +77,34 @@ namespace DotGame.OpenGL4
             }
         }
 
+        public IConstantBuffer CreateConstantBuffer()
+        {
+            return new ConstantBuffer(graphicsDevice, -1);
+        }
+
         public IConstantBuffer CreateConstantBuffer(string name)
         {
-            ConstantBuffer constantBuffer = new ConstantBuffer((GraphicsDevice)GraphicsDevice);
+            ConstantBuffer constantBuffer = new ConstantBuffer(graphicsDevice, -1);
 
             return constantBuffer;
         }
 
-        public void SetConstantBuffer(string name, IConstantBuffer buffer)
+        internal int GetUniform(string name)
         {
-            // TODO (Robin) Durch GraphicsDevice Methode ersetzen
-            graphicsDevice.StateMachine.Shader = this;
+            return uniformLocations[name];
+        }
 
-            ConstantBuffer internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
-
+        internal int GetUniformBuffer(string name)
+        {
             if (!uniformBufferLocations.ContainsKey(name))
             {
                 int blockIndex = GL.GetUniformBlockIndex(ProgramID, name);
                 int bindingPoint = uniformBufferLocations.Count;
                 GL.UniformBlockBinding(ProgramID, blockIndex, bindingPoint);
                 uniformBufferLocations[name] = bindingPoint;
+                return bindingPoint;
             }
-
-            graphicsDevice.StateMachine.ConstantBuffer = buffer;
-            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, uniformBufferLocations[name], internalBuffer.UniformBufferObjectID);
-            OpenGL4.GraphicsDevice.CheckGLError();
-        }
-
-
-        public IConstantBuffer CreateConstantBuffer()
-        {
-            return new ConstantBuffer((GraphicsDevice)GraphicsDevice);
-        }
-
-        public void SetConstantBuffer(IConstantBuffer buffer)
-        {
-            SetConstantBuffer("global", buffer);
-        }
-
-
-        public void SetTexture(string name, ITexture2D texture)
-        {
-            GL.ActiveTexture(TextureUnit.Texture0);
-
-            Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
-            GL.BindTexture(TextureTarget.Texture2D, internalTexture.TextureID);
-
-            // TODO (Robin) Texture setzen, das ist nur ein Test
-        }
-
-        public void SetTexture(string name, ITexture2DArray texture)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetTexture(string name, ITexture3D texture)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void SetTexture(string name, ITexture3DArray texture)
-        {
-            throw new NotImplementedException();
+            return uniformBufferLocations[name];
         }
 
         protected override void Dispose(bool isDisposing)

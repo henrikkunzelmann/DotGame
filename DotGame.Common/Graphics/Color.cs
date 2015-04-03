@@ -790,6 +790,15 @@ namespace DotGame.Graphics
         {
             return new Color(r, g, b, a);
         }
+
+        public static Color FromRgba(uint rgba)
+        {
+            byte r = (byte)(rgba >> 24 & 0xFF);
+            byte g = (byte)(rgba >> 16 & 0xFF);
+            byte b = (byte)(rgba >> 8 & 0xFF);
+            byte a = (byte)(rgba & 0xFF);
+            return new Color(r, g, b, a);
+        }
         #endregion
 
         #region Statische Methoden
@@ -917,9 +926,18 @@ namespace DotGame.Graphics
         /// Wandelt die Farbe in einen ARGB-Integer um.
         /// </summary>
         /// <returns></returns>
-        public int ToArgb()
+        public uint ToArgb()
         {
-            return (int)((byte)(R * 255) << 16) | (int)((byte)(G * 255) << 8) | (int)((byte)(B * 255)) | (int)((byte)(A * 255) << 24);
+            return (uint)((byte)(R * 255) << 16) | (uint)((byte)(G * 255) << 8) | (uint)((byte)(B * 255)) | (uint)((byte)(A * 255) << 24);
+        }
+
+        /// <summary>
+        /// Wandelt die Farbe in einen RGBA-Integer um.
+        /// </summary>
+        /// <returns></returns>
+        public uint ToRgba()
+        {
+            return (uint)((byte)(R * 255) << 16) | (uint)((byte)(G * 255) << 8) | (uint)((byte)(B * 255)) | (uint)((byte)(A * 255) << 24);
         }
 
         /// <inheritdoc/>

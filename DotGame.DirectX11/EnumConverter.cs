@@ -72,39 +72,65 @@ namespace DotGame.DirectX11
             { Tuple.Create(TextureFilter.Anisotropic, TextureFilter.Anisotropic, TextureFilter.Anisotropic), Filter.Anisotropic }
         };
 
+        private static readonly Dictionary<AddressMode, TextureAddressMode> addressModes = new Dictionary<AddressMode, TextureAddressMode>()
+        {
+            { AddressMode.Border, TextureAddressMode.Border },
+            { AddressMode.Clamp, TextureAddressMode.Clamp },
+            { AddressMode.Mirror, TextureAddressMode.Mirror },
+            { AddressMode.MirrorOnce, TextureAddressMode.MirrorOnce },
+            { AddressMode.Wrap, TextureAddressMode.Wrap },
+        };
+
+        private static readonly Dictionary<DotGame.Graphics.Comparison, SharpDX.Direct3D11.Comparison> comparsionFunctions = new Dictionary<Graphics.Comparison, SharpDX.Direct3D11.Comparison>()
+        {
+            { DotGame.Graphics.Comparison.Always, SharpDX.Direct3D11.Comparison.Always },
+            { DotGame.Graphics.Comparison.Equal, SharpDX.Direct3D11.Comparison.Equal },
+            { DotGame.Graphics.Comparison.Greater, SharpDX.Direct3D11.Comparison.Greater },
+            { DotGame.Graphics.Comparison.GreaterEqual, SharpDX.Direct3D11.Comparison.GreaterEqual },
+            { DotGame.Graphics.Comparison.Less, SharpDX.Direct3D11.Comparison.Less },
+            { DotGame.Graphics.Comparison.LessEqual, SharpDX.Direct3D11.Comparison.LessEqual },
+            { DotGame.Graphics.Comparison.Never, SharpDX.Direct3D11.Comparison.Never },
+            { DotGame.Graphics.Comparison.NotEqual, SharpDX.Direct3D11.Comparison.NotEqual },
+        };
+
         public static Format Convert(TextureFormat format)
         {
-            if (!textureFormats.ContainsKey(format))
+            Format f;
+            if (!textureFormats.TryGetValue(format, out f))
                 throw new NotSupportedException("Format is not supported.");
-            return textureFormats[format];
+            return f;
         }
 
         public static Format Convert(VertexElementType format)
         {
-            if (!vertexFormats.ContainsKey(format))
+            Format f;
+            if (!vertexFormats.TryGetValue(format, out f))
                 throw new NotSupportedException("Format is not supported.");
-            return vertexFormats[format];
+            return f;
         }
 
         public static PrimitiveTopology Convert(PrimitiveType type)
         {
-            if (!primitiveTypes.ContainsKey(type))
+            PrimitiveTopology t;
+            if (!primitiveTypes.TryGetValue(type, out t))
                 throw new NotSupportedException("Type is not supported.");
-            return primitiveTypes[type];
+            return t;
         }
 
         public static string Convert(VertexElementUsage usage)
         {
-            if (!vertexElementUsages.ContainsKey(usage))
+            string str;
+            if (!vertexElementUsages.TryGetValue(usage, out str))
                 throw new NotSupportedException("Usage is not supported.");
-            return vertexElementUsages[usage];
+            return str;
         }
 
         public static Format Convert(IndexFormat format)
         {
-            if (!indexFormats.ContainsKey(format))
+            Format f;
+            if (!indexFormats.TryGetValue(format, out f))
                 throw new NotSupportedException("Format is not supported.");
-            return indexFormats[format];
+            return f;
         }
 
         public static Filter Convert(SamplerType type, TextureFilter min, TextureFilter mag, TextureFilter mip)
@@ -131,6 +157,22 @@ namespace DotGame.DirectX11
             if (!filters.TryGetValue(new Tuple<TextureFilter, TextureFilter, TextureFilter>(min, mag, mip), out f))
                 throw new NotSupportedException("TextureFilter variant not supported.");
             return (Filter)(f + offset);
+        }
+
+        public static TextureAddressMode Convert(AddressMode mode)
+        {
+            TextureAddressMode m;
+            if (!addressModes.TryGetValue(mode, out m))
+                throw new NotSupportedException("Address mode not supported.");
+            return m;
+        }
+
+        public static SharpDX.Direct3D11.Comparison Convert(DotGame.Graphics.Comparison comparison)
+        {
+            SharpDX.Direct3D11.Comparison c;
+            if (!comparsionFunctions.TryGetValue(comparison, out c))
+                throw new NotSupportedException("Comparison function not supported.");
+            return c;
         }
 
         public static TextureFormat ConvertToTexture(Format format)
@@ -168,6 +210,20 @@ namespace DotGame.DirectX11
             if (!indexFormats.ContainsValue(format))
                 throw new NotImplementedException();
             return indexFormats.First((f) => f.Value == format).Key;
+        }
+
+        public static AddressMode Convert(TextureAddressMode mode)
+        {
+            if (!addressModes.ContainsValue(mode))
+                throw new NotImplementedException();
+            return addressModes.First((f) => f.Value == mode).Key;
+        }
+
+        public static DotGame.Graphics.Comparison Convert(SharpDX.Direct3D11.Comparison comparsionFunction)
+        {
+            if (!comparsionFunctions.ContainsValue(comparsionFunction))
+                throw new NotImplementedException();
+            return comparsionFunctions.First((f) => f.Value == comparsionFunction).Key;
         }
     }
 }

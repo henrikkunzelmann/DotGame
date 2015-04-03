@@ -28,23 +28,5 @@ namespace DotGame.Graphics
         /// <param name="name"></param>
         /// <returns></returns>
         IConstantBuffer CreateConstantBuffer(string name);
-
-        /// <summary>
-        /// Setzt den aktuellen ConstantBuffer für alle globale Variablen.
-        /// </summary>
-        /// <param name="buffer"></param>
-        void SetConstantBuffer(IConstantBuffer buffer);
-
-        /// <summary>
-        /// Setzt den aktuellen ConstantBuffer für die Variable name.
-        /// </summary>
-        /// <param name="name"></param>
-        /// <param name="buffer"></param>
-        void SetConstantBuffer(string name, IConstantBuffer buffer);
-
-        void SetTexture(string name, ITexture2D texture);
-        void SetTexture(string name, ITexture2DArray texture);
-        void SetTexture(string name, ITexture3D texture);
-        void SetTexture(string name, ITexture3DArray texture);
     }
 }

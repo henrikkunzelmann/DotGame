@@ -13,25 +13,14 @@ namespace DotGame.OpenGL4
     {
         internal int UniformBufferObjectID { get; private set; }
 
-        public int Size { get; private set; }
+        public int Size { get; internal set; }
 
-        internal ConstantBuffer(GraphicsDevice graphicsDevice)
+        internal ConstantBuffer(GraphicsDevice graphicsDevice, int size)
             : base(graphicsDevice, new System.Diagnostics.StackTrace())
         {
+            this.Size = size;
+
             UniformBufferObjectID = GL.GenBuffer();
-            OpenGL4.GraphicsDevice.CheckGLError();
-        }
-
-        public void UpdateData<T>(T data) where T : struct
-        {
-            if (Size == 0)
-            {
-                Size = Marshal.SizeOf(data);
-            }
-
-            graphicsDevice.StateMachine.ConstantBuffer = this;
-            // TODO (Robin) BufferUsageHint
-            GL.BufferData<T>(BufferTarget.UniformBuffer, new IntPtr(Size), ref data, BufferUsageHint.DynamicDraw);
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
