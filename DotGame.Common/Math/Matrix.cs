@@ -465,6 +465,16 @@ namespace DotGame
         #endregion
 
         #region Operatoren
+        public static bool operator ==(Matrix a, Matrix b)
+        {
+            return a.Equals(b);
+        }
+
+        public static bool operator !=(Matrix a, Matrix b)
+        {
+            return !(a == b);
+        }
+
         public static Matrix operator *(Matrix M1, Matrix M2)
         {
             Matrix result;

@@ -11,15 +11,9 @@ namespace DotGame.OpenGL4
 {
     public class IndexBuffer : GraphicsObject, IIndexBuffer
     {
-        public IndexFormat Format
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public IndexFormat Format { get; private set; }
         public int IndexCount { get; private set; }
-        public int SizeBytes
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public int SizeBytes { get; private set; }
 
         internal int IndexBufferID { get; private set; }
  
@@ -39,21 +33,20 @@ namespace DotGame.OpenGL4
             if (data == null)
                 throw new ArgumentNullException("data");
             if (data.Length == 0)
-                throw new ArgumentException("data must not be empty.");
+                throw new ArgumentException("Data must not be empty.", "data");
 
             // TODO (henrik1235) Format und SizeBytes supporten
+            this.Format = format;
             this.IndexCount = data.Length;
+            this.SizeBytes = Marshal.SizeOf(data[0]) * data.Length;
 
             GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
-            GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(Marshal.SizeOf(data[0]) * data.Length), data, BufferUsageHint.StaticDraw);
+            GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(this.SizeBytes), data, BufferUsageHint.StaticDraw);
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            if (IsDisposed)
-                return;
-
             if (!GraphicsDevice.IsDisposed)
                 GL.DeleteBuffer(IndexBufferID);
         }

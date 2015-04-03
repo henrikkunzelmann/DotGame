@@ -285,8 +285,22 @@ namespace DotGame
         {
             if (IsRunning)
                 Stop();
+
+            Dispose(true);
             Log.Info("Engine.Dispose() called!");
             Log.FlushBuffer();
+
+            GC.SuppressFinalize(this);
+        }
+
+        protected virtual void Dispose(bool isDisposing)
+        {
+            if (GraphicsDevice != null)
+                GraphicsDevice.Dispose();
+            if (AudioDevice != null)
+                AudioDevice.Dispose();
+            if (onStart != null)
+                onStart.Dispose();
         }
     }
 }

@@ -117,6 +117,10 @@ namespace DotGame.DirectX11
             if (IsDisposed)
                 return;
 
+            backBuffer.Dispose();
+            depthBuffer.Dispose();
+            Factory.Dispose();
+
             GraphicsObject[] created = CreatedObjects.ToArray();
             for (int i = 0; i < created.Length; i++)
                 created[i].Dispose();

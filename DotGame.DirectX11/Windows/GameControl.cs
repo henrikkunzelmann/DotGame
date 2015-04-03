@@ -16,7 +16,7 @@ namespace DotGame.DirectX11.Windows
 {
     public class GameControl : IGameWindow
     {
-        private IGraphicsDevice graphicsDevice;
+        private GraphicsDevice graphicsDevice;
         private Control control;
 
         public int Width
