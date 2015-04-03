@@ -8,6 +8,9 @@ using OpenTK.Graphics.OpenGL4;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
 using DotGame.Utils;
+using System.IO;
+using System.Drawing;
+using System.Drawing.Imaging;
 
 namespace DotGame.OpenGL4
 {
@@ -40,7 +43,13 @@ namespace DotGame.OpenGL4
         public ITexture2D LoadTexture2D(string file)
         {
             AssertCurrent();
-            throw new NotImplementedException();
+
+            Bitmap bitmap = new Bitmap(file);
+            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            Texture2D texture = new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, TextureFormat.RGBA16_UIntNorm, bmpData.Scan0);
+            bitmap.UnlockBits(bmpData);
+
+            return texture;
         }
 
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
@@ -134,7 +143,67 @@ namespace DotGame.OpenGL4
 
         public IShader CompileShader(string name, ShaderCompileInfo vertex, ShaderCompileInfo pixel)
         {
-            throw new NotImplementedException();
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (string.IsNullOrWhiteSpace(name))
+                throw new ArgumentException("Name is empty or whitespace.", "name");
+            
+            if (vertex.File == null)
+                throw new ArgumentException("File of info is null.", "vertex");
+            if (pixel.File == null)
+                throw new ArgumentException("File of info is null.", "pixel");
+            
+            string vertexCode = File.ReadAllText(vertex.File);
+            vertexCode = CheckShaderVersion(name, vertexCode, vertex);
+
+            string pixelCode = File.ReadAllText(pixel.File);
+            pixelCode = CheckShaderVersion(name, pixelCode, pixel);
+
+            return new Shader((GraphicsDevice)GraphicsDevice, vertexCode, pixelCode);
+        }
+
+        private string CheckShaderVersion(string shaderName, string shaderCode, ShaderCompileInfo info)
+        {
+            string code = shaderCode.TrimStart('\r', '\n', ' ');
+
+            string[] shaderVersion = code.Substring(0, shaderCode.IndexOf(Environment.NewLine)).Split(' ');
+            if (shaderVersion.Length > 1 && shaderVersion[0] == "#version")
+            {
+                //GLSL Version string auslesen
+                string glslVersionString = shaderVersion[1];
+                if (string.IsNullOrWhiteSpace(glslVersionString) || glslVersionString.Length < 2)
+                    throw new Exception("Could not determine GLSL version for shader " + shaderName);
+
+                string glslVersionStringMajor = glslVersionString.Substring(0, 1);
+                string glslVersionStringMinor = glslVersionString.Substring(1, 1);
+
+                int glslVersionMajor;
+                int glslVersionMinor;
+                if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
+                    throw new Exception("Could not determine GLSL version for shader " + shaderName);
+
+                //Überprüfen, ob angegebene GLSL version vom Treiber unterstützt wird
+                GraphicsDevice internalGraphicsDevice = (GraphicsDevice)GraphicsDevice;
+                if (internalGraphicsDevice.GLSLVersionMajor < glslVersionMajor || (internalGraphicsDevice.GLSLVersionMajor == glslVersionMajor && internalGraphicsDevice.GLSLVersionMinor < glslVersionMinor))
+                    throw new PlatformNotSupportedException(string.Format("GLSL version of shader {0} is not supported by the driver.", shaderName));
+            }
+            else
+            {
+                //Keine Version im Sourcecode angegeben => Version aus info benutzen
+
+                if (string.IsNullOrWhiteSpace(info.Version))
+                    throw new ArgumentException("Neither the shader source nor info provide a version for the compiler");
+
+                code = "#version " + EnumConverter.ConvertToGLSLVersion(info.Version) + " core" + Environment.NewLine + code;
+            }
+
+            return code;
+        }
+
+        private void CheckCompileInfo(ShaderCompileInfo info, string parameterName)
+        {
+            if (info.File == null)
+                throw new ArgumentException("File of info is null.", parameterName);
         }
 
         public IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode)
@@ -142,6 +211,20 @@ namespace DotGame.OpenGL4
             throw new NotSupportedException("Creating shader from byte code is not supported.");
         }
 
+        internal static void CheckGLError()
+        {
+            var error = GL.GetError();
+            if (error != ErrorCode.NoError)
+            {
+                throw new InvalidOperationException(error.ToString());
+            }
+        }
+
+        private T Register<T>(T obj) where T : GraphicsObject
+        {
+            objects.Add(new WeakReference<GraphicsObject>(obj));
+            return obj;
+        }
 
         internal void DisposeUnused()
         {
@@ -170,12 +253,6 @@ namespace DotGame.OpenGL4
                 }
                 DeferredDispose.Clear();
             }
-        }
-
-        private T Register<T>(T obj) where T : GraphicsObject
-        {
-            objects.Add(new WeakReference<GraphicsObject>(obj));
-            return obj;
         }
 
         protected override void Dispose(bool isDisposing)

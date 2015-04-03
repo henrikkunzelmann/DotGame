@@ -30,7 +30,7 @@ namespace DotGame.OpenGL4
                 throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
             if (format == TextureFormat.Unknown)
                 throw new ArgumentException("format is TextureFormat.Unkown.", "format");
-
+            
             this.Width = width;
             this.Height = height;
             this.MipLevels = mipLevels == 0 ? OpenGL4.GraphicsDevice.MipLevels(width, height) : mipLevels;
@@ -42,10 +42,42 @@ namespace DotGame.OpenGL4
             GL.BindTexture(TextureTarget.Texture2D, TextureID);
             GL.TexImage2D(TextureTarget.Texture2D, 0, GraphicsFactory.TextureFormats[format], this.Width, this.Height, 0, PixelFormat.Alpha, PixelType.Byte, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            OpenGL4.GraphicsDevice.CheckGLError();
+        }
+
+        public Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format, IntPtr data)
+            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        {
+            if (graphicsDevice == null)
+                throw new ArgumentNullException("graphicsDevice");
+            if (width <= 0)
+                throw new ArgumentOutOfRangeException("width", "Width must be positive.");
+            if (height <= 0)
+                throw new ArgumentOutOfRangeException("height", "Height must be positive.");
+            if (mipLevels < 0)
+                throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
+            if (format == TextureFormat.Unknown)
+                throw new ArgumentException("format is TextureFormat.Unkown.", "format");
+
+            this.Width = width;
+            this.Height = height;
+            this.MipLevels = mipLevels == 0 ? OpenGL4.GraphicsDevice.MipLevels(width, height) : mipLevels;
+            this.Format = format;
+
+            this.TextureID = GL.GenTexture();
+
+            //TODO (Robin) Replace by GraphicsDevice Method.
+            GL.BindTexture(TextureTarget.Texture2D, TextureID);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, GraphicsFactory.TextureFormats[format], this.Width, this.Height, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data);
+            GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            OpenGL4.GraphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)
         {
+            if (IsDisposed)
+                return;
+
             if (!GraphicsDevice.IsDisposed)
                 GL.DeleteTexture(TextureID);
         }

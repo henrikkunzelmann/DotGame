@@ -21,7 +21,7 @@ namespace DotGame.OpenGL4
             get { throw new NotImplementedException(); }
         }
 
-        private int iboId;
+        internal int IndexBufferID { get; private set; }
  
         public IndexBuffer(GraphicsDevice graphicsDevice) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
@@ -29,8 +29,9 @@ namespace DotGame.OpenGL4
                 throw new ArgumentNullException("graphicsDevice");
             if (graphicsDevice.IsDisposed)
                 throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
-            
-            iboId = GL.GenBuffer();
+
+            IndexBufferID = GL.GenBuffer();
+            OpenGL4.GraphicsDevice.CheckGLError();
         }
 
         public void SetData<T>(T[] data, IndexFormat format) where T : struct
@@ -43,8 +44,9 @@ namespace DotGame.OpenGL4
             // TODO (henrik1235) Format und SizeBytes supporten
             this.IndexCount = data.Length;
 
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, iboId);
+            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
             GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(Marshal.SizeOf(data[0]) * data.Length), data, BufferUsageHint.StaticDraw);
+            OpenGL4.GraphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)
@@ -53,7 +55,7 @@ namespace DotGame.OpenGL4
                 return;
 
             if (!GraphicsDevice.IsDisposed)
-                GL.DeleteTexture(iboId);
+                GL.DeleteBuffer(IndexBufferID);
         }
     }
 }

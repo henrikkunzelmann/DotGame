@@ -48,8 +48,13 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="FormatConverter.cs" />
+    <Compile Include="ConstantBuffer.cs" />
+    <Compile Include="EnumConverter.cs" />
     <Compile Include="IndexBuffer.cs" />
+    <Compile Include="RenderContext.cs" />
+    <Compile Include="Shader.cs" />
+    <Compile Include="ShaderPart.cs" />
+    <Compile Include="StateMachine.cs" />
     <Compile Include="VertexBuffer.cs" />
     <Compile Include="Windows\GameControl.cs" />
     <Compile Include="GraphicsDevice.cs" />

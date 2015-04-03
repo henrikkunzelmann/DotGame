@@ -17,10 +17,7 @@ namespace DotGame.OpenGL4
     {
         public bool IsDisposed { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
-        public IRenderContext RenderContext
-        {
-            get { throw new NotImplementedException(); }
-        }
+        public IRenderContext RenderContext { get; private set; }
 
         public IGameWindow DefaultWindow { get; private set; }
         public bool VSync
@@ -36,10 +33,19 @@ namespace DotGame.OpenGL4
         internal GraphicsContext Context { get; private set; }
         internal bool IsCurrent { get { return Context.IsCurrent; } }
 
+        internal StateMachine StateMachine { get; private set; }
+
         private IWindowContainer container;
         private Color clearColor;
         private float clearDepth;
         private int clearStencil;
+
+        internal int GLSLVersionMajor { get; private set; }
+        internal int GLSLVersionMinor { get; private set; }
+        internal int OpenGLVersionMajor { get; private set; }
+        internal int OpenGLVersionMinor { get; private set; }
+        internal bool HasAnisotropicFiltering { get; private set; }
+        internal bool HasS3TextureCompression { get; private set; }
 
         internal static int MipLevels(int width, int height, int depth = 0)
         {
@@ -62,7 +68,7 @@ namespace DotGame.OpenGL4
             this.DefaultWindow = window;
             this.container = container;
             this.Context = context;
-
+            
             Log.Debug("Got context: [ColorFormat: {0}, Depth: {1}, Stencil: {2}, FSAA Samples: {3}, AccumulatorFormat: {4}, Buffers: {5}, Stereo: {6}]",
                 Context.GraphicsMode.ColorFormat,
                 Context.GraphicsMode.Depth,
@@ -74,7 +80,12 @@ namespace DotGame.OpenGL4
 
             Context.LoadAll();
 
+            CheckVersion();
+
             Factory = new GraphicsFactory(this);
+            StateMachine = new OpenGL4.StateMachine(this);
+            this.RenderContext = new RenderContext(this);
+
             Context.MakeCurrent(null);
         }
         ~GraphicsDevice()
@@ -86,6 +97,63 @@ namespace DotGame.OpenGL4
         public void MakeCurrent()
         {
             Context.MakeCurrent(container.WindowInfo);
+        }
+        public void DetachCurrent()
+        {
+            Context.MakeCurrent(null);
+        }
+
+        private void CheckVersion()
+        {
+            OpenGLVersionMajor = GL.GetInteger(GetPName.MajorVersion);
+            OpenGLVersionMinor = GL.GetInteger(GetPName.MinorVersion);
+
+            Log.Debug(string.Format("OpenGL Version: {0}.{1}",OpenGLVersionMajor,OpenGLVersionMinor));
+
+            //GLSL Version string auslesen
+            string glslVersionString = GL.GetString(StringName.ShadingLanguageVersion);
+            if(string.IsNullOrWhiteSpace(glslVersionString))
+                throw new Exception("Could not determine supported GLSL version");
+
+            string glslVersionStringMajor = glslVersionString.Substring(0, glslVersionString.IndexOf('.'));
+            string glslVersionStringMinor = glslVersionString.Substring(glslVersionString.IndexOf('.') + 1, 1);
+
+            int glslVersionMajor;
+            int glslVersionMinor;
+            if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
+                throw new Exception("Could not determine supported GLSL version");
+
+            GLSLVersionMajor = glslVersionMajor;
+            GLSLVersionMinor = glslVersionMinor;
+
+            Log.Debug(string.Format("GLSL Version: {0}.{1}",GLSLVersionMajor,GLSLVersionMinor));
+
+            //Extensions überprüfen
+            int extensionCount = GL.GetInteger(GetPName.NumExtensions);
+            for (int i = 0; i < extensionCount; i++)
+            {
+                string extension = GL.GetString(StringNameIndexed.Extensions, i);
+                if (extension == "GL_EXT_texture_compression_s3tc")
+                {
+                    HasS3TextureCompression = true;
+                }
+
+                if (extension == "GL_EXT_texture_filter_anisotropic")
+                {
+                    HasAnisotropicFiltering = true;
+                }
+            }
+            OpenGL4.GraphicsDevice.CheckGLError();
+        }
+
+        public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
+        {
+            T ret = obj as T;
+            if (ret == null)
+                throw new ArgumentException("GraphicsObject is not part of this api.", parameterName);
+            if (obj.GraphicsDevice != this)
+                throw new ArgumentException("GraphicsObject is not part of this graphics device.", parameterName);
+            return ret;
         }
 
         public int GetSizeOf(TextureFormat format)
@@ -105,6 +173,23 @@ namespace DotGame.OpenGL4
                     return 12;
                 case VertexElementType.Vector4:
                     return 16;
+                default:
+                    throw new NotSupportedException("Format is not supported.");
+            }
+        }
+
+        public int GetComponentsOf(VertexElementType format)
+        {
+            switch (format)
+            {
+                case VertexElementType.Single:
+                    return 1;
+                case VertexElementType.Vector2:
+                    return 2;
+                case VertexElementType.Vector3:
+                    return 3;
+                case VertexElementType.Vector4:
+                    return 4;
                 default:
                     throw new NotSupportedException("Format is not supported.");
             }
@@ -137,8 +222,7 @@ namespace DotGame.OpenGL4
 
         public void Clear(Color color)
         {
-            SetClearColor(ref color);
-            GL.Clear(ClearBufferMask.ColorBufferBit | ClearBufferMask.DepthBufferBit);
+            Clear(ClearOptions.ColorDepth, color, 1.0f, 0);
         }
 
         public void Clear(ClearOptions options, Color color, float depth, int stencil)

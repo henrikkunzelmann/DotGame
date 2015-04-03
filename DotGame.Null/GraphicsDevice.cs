@@ -24,6 +24,18 @@ namespace DotGame.Null
             get { throw new NotImplementedException(); }
         }
 
+        public bool VSync
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+            set
+            {
+                throw new NotImplementedException();
+            }
+        }
+
         public int GetSizeOf(TextureFormat format)
         {
             return 1;
@@ -44,6 +56,13 @@ namespace DotGame.Null
             return size;
         }
 
+
+        public int GetSizeOf(IndexFormat format)
+        {
+            throw new NotImplementedException();
+        }
+        
+
         public void Clear(Color color)
         {
         }
@@ -57,23 +76,32 @@ namespace DotGame.Null
         }
 
         public void MakeCurrent() { }
+        public void DetachCurrent() { }
+
+        public IRenderContext RenderContext
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRenderTargetColor(IRenderTarget2D color)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRenderTargetDepth(IRenderTarget2D depth)
+        {
+            throw new NotImplementedException();
+        }
 
         public void Dispose()
         {
             // wir haben nichts wirklich zu disposen
             IsDisposed = true;
-        }
-
-        public bool VSync
-        {
-            get
-            {
-                throw new NotImplementedException();
-            }
-            set
-            {
-                throw new NotImplementedException();
-            }
         }
     }
 }

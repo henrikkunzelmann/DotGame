@@ -13,6 +13,7 @@ namespace DotGame.Graphics
     {
         public IShader Shader;
         public PrimitiveType PrimitiveType;
+        public CullMode CullMode;
 
         /// <inheritdoc/>
         public override bool Equals(object obj)

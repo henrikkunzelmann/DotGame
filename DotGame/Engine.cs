@@ -115,6 +115,7 @@ namespace DotGame
         private void Init()
         {
             this.GraphicsDevice = window.CreateDevice();
+            GraphicsDevice.MakeCurrent();
             Log.Debug("Got GraphicsDevice: " + GraphicsDevice.GetType().FullName);
             Log.Debug("Got window: [width: {0}, height: {1}]", GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height);
             Log.WriteFields(LogLevel.Verbose, Settings);
@@ -131,7 +132,10 @@ namespace DotGame
 
             // TODO (henrik1235) Test, entfernen
             texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg");
-            shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
+
+            //shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
+            shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
+
             constantBuffer = shader.CreateConstantBuffer();
             vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
                 // 3D coordinates              UV Texture coordinates
@@ -177,6 +181,8 @@ namespace DotGame
                  1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
                  1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
             }, Geometry.VertexPositionTexture.Description);
+
+            GraphicsDevice.DetachCurrent();
         }
 
         private void Run()

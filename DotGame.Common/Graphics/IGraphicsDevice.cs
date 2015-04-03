@@ -42,6 +42,11 @@ namespace DotGame.Graphics
         void MakeCurrent();
 
         /// <summary>
+        /// Setzt das GraphicsDevice auf den aktuellen Thread.
+        /// </summary>
+        void DetachCurrent();
+
+        /// <summary>
         /// Gibt die Größe in Bytes des TextureFormats zurück.
         /// </summary>
         /// <param name="format">Das TextureFormat.</param>

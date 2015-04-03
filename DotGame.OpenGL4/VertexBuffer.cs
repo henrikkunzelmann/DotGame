@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using System.Runtime.InteropServices;
 
 namespace DotGame.OpenGL4
 {
@@ -16,6 +17,8 @@ namespace DotGame.OpenGL4
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
 
+        internal Shader Shader { get; set; }
+
         public int SizeBytes 
         { 
             get { throw new NotImplementedException(); } 
@@ -26,6 +29,7 @@ namespace DotGame.OpenGL4
         {
             VertexArrayObjectID = GL.GenVertexArray();
             VertexBufferObjectID = GL.GenBuffer();
+            OpenGL4.GraphicsDevice.CheckGLError();
 
             this.Description = description;
         }
@@ -37,18 +41,35 @@ namespace DotGame.OpenGL4
             if(data.Length == 0) 
                 throw new ArgumentException("data must not be empty.");
 
+            int sizePerVertex = GraphicsDevice.GetSizeOf(Description);
+            int size = 0;
 
-            int size = GraphicsDevice.GetSizeOf(Description);
-            this.VertexCount = data.Length / size; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
+            if (typeof(T) == typeof(IVertexType))
+            {
+                size = data.Length * sizePerVertex;
+                VertexCount = data.Length;
+            }
+            else
+            {
+                size = data.Length * Marshal.SizeOf(typeof(T));
+                VertexCount = size / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
+            }
             
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObjectID);
-            GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw); 
+            GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw);
+            OpenGL4.GraphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            GL.DeleteVertexArray(VertexArrayObjectID);
-            GL.DeleteBuffer(VertexBufferObjectID);
+            if (IsDisposed)
+                return;
+
+            if (!GraphicsDevice.IsDisposed)
+            {
+                GL.DeleteVertexArray(VertexArrayObjectID);
+                GL.DeleteBuffer(VertexBufferObjectID);
+            }
         }
     }
 }

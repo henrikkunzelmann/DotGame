@@ -73,7 +73,7 @@ namespace DotGame.DirectX11
 
             Context.Rasterizer.State = new RasterizerState(Context.Device, new RasterizerStateDescription()
             {
-                CullMode = CullMode.Back,
+                CullMode = SharpDX.Direct3D11.CullMode.Back,
                 FillMode = FillMode.Solid,
             });
         }
@@ -130,7 +130,9 @@ namespace DotGame.DirectX11
 
         public void MakeCurrent()
         {
-
+        }
+        public void DetachCurrent()
+        {
         }
 
         public InputLayout GetLayout(VertexDescription description, Shader shader)
