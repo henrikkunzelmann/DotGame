@@ -58,11 +58,6 @@
     <Compile Include="Graphics\AddressMode.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
-    <Compile Include="Graphics\ColorConstants.cs">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ColorConstants.tt</DependentUpon>
-    </Compile>
     <Compile Include="Graphics\Comparison.cs" />
     <Compile Include="Graphics\FillMode.cs" />
     <Compile Include="Graphics\IConstantBuffer.cs" />
@@ -128,7 +123,7 @@
   <ItemGroup>
     <None Include="Graphics\ColorConstants.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ColorConstants.cs</LastGenOutput>
+      <LastGenOutput>ColorConstants.txt</LastGenOutput>
     </None>
     <None Include="Math\Manager.ttinclude" />
     <None Include="Math\Vector.tt">
@@ -138,6 +133,13 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Graphics\ColorConstants.txt">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ColorConstants.tt</DependentUpon>
+    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

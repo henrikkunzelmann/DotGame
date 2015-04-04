@@ -41,6 +41,54 @@ namespace DotGame.OpenGL4
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
+        public void Update<T>(ITexture2D texture, T[] data) where T : struct
+        {
+            Update(texture, 0, data);
+        }
+
+        public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
+        {
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+        
+            throw new NotImplementedException();
+        }
+
+        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
+        {
+            Update(textureArray, arrayIndex, 0, data);
+        }
+
+        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct
+        {
+            if (textureArray == null)
+                throw new ArgumentNullException("texture");
+            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
+                throw new ArgumentOutOfRangeException("arrayIndex");
+            if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+
+            throw new NotImplementedException();
+        }
+
+        public void GenerateMips(ITexture2D texture)
+        {
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+            throw new NotImplementedException();
+        }
+
+        public void GenerateMips(ITexture2DArray textureArray)
+        {
+            if (textureArray == null)
+                throw new ArgumentNullException("textureArray");
+
+            throw new NotImplementedException();
+        }
+        
+
         public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
         {
             throw new NotImplementedException();

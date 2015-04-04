@@ -12,6 +12,14 @@ namespace DotGame.Graphics
     public interface IRenderContext : IGraphicsObject
     {
         void Update<T>(IConstantBuffer buffer, T data) where T : struct;
+        void Update<T>(ITexture2D texture, T[] data) where T : struct;
+        void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct;
+        void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct;
+        void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct;
+
+        void GenerateMips(ITexture2D texture);
+        void GenerateMips(ITexture2DArray textureArray);
+
 
         /// <summary>
         /// Leert den Inhalt des aktuell gebundenen RenderTargets. Ist kein RenderTarget gebunden, wird der Backbuffer angesprochen.

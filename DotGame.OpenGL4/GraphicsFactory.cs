@@ -40,8 +40,9 @@ namespace DotGame.OpenGL4
             objects = new List<WeakReference<GraphicsObject>>();
         }
         
-        public ITexture2D LoadTexture2D(string file)
+        public ITexture2D LoadTexture2D(string file, bool generateMipMaps)
         {
+            // TODO (henrik1235) generateMipMaps benutzen
             AssertCurrent();
 
             Bitmap bitmap = new Bitmap(file);
@@ -52,49 +53,49 @@ namespace DotGame.OpenGL4
             return texture;
         }
 
-        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format)
+        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
             return Register(new Texture2D(graphicsDevice, width, height, 0, format));
         }
 
-        public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format)
+        public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
             throw new NotImplementedException();
         }
 
-        public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, int arraySize)
+        public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
             throw new NotImplementedException();
         }
 
-        public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, int arraySize)
+        public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
             throw new NotImplementedException();
         }
 
-        public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format)
+        public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
             throw new NotImplementedException();
         }
 
-        public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format)
+        public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
             throw new NotImplementedException();
         }
 
-        public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, int arraySize)
+        public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
             throw new NotImplementedException();
         }
 
-        public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, int arraySize)
+        public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
             throw new NotImplementedException();

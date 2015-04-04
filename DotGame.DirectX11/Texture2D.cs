@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
 using System.Diagnostics;
+using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
 
 namespace DotGame.DirectX11
@@ -18,11 +19,11 @@ namespace DotGame.DirectX11
         public int ArraySize { get { return Handle.Description.ArraySize; } }
 
         internal SharpDX.Direct3D11.Texture2D Handle { get; private set; }
-        internal SharpDX.Direct3D11.ShaderResourceView ResourceView { get; private set; }
-        internal SharpDX.Direct3D11.RenderTargetView RenderView { get; private set; }
-        internal SharpDX.Direct3D11.DepthStencilView DepthView { get; private set; }
+        internal ShaderResourceView ResourceView { get; private set; }
+        internal RenderTargetView RenderView { get; private set; }
+        internal DepthStencilView DepthView { get; private set; }
 
-        internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format, int arraySize, bool isRenderTarget)
+        internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format, int arraySize, bool isRenderTarget, bool generateMipMaps)
             : base(graphicsDevice, new StackTrace(1))
         {
             if (width <= 0)
@@ -46,7 +47,7 @@ namespace DotGame.DirectX11
                 ArraySize = arraySize,
                 SampleDescription = new SharpDX.DXGI.SampleDescription(1, 0),
                 CpuAccessFlags = CpuAccessFlags.None,
-                MipLevels = isRenderTarget ? 1 : 0,
+                MipLevels = !generateMipMaps ? 1 : 0,
                 Usage = ResourceUsage.Default
             };
             if (isRenderTarget)
@@ -54,11 +55,12 @@ namespace DotGame.DirectX11
                     desc.BindFlags |= BindFlags.DepthStencil;
                 else
                     desc.BindFlags |= BindFlags.RenderTarget;
-            else
+            if (generateMipMaps)
             {
-                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps; // TODO (Robin) GenerateMipMaps benötigt das RenderTarget BindFlag.
-                desc.BindFlags |= BindFlags.ShaderResource; // TODO (henrik1235) ShaderResource auch für RenderTargets und DepthBuffer erlauben
+                desc.BindFlags |= BindFlags.RenderTarget;
+                desc.OptionFlags |= ResourceOptionFlags.GenerateMipMaps; 
             }
+            desc.BindFlags |= BindFlags.ShaderResource; 
 
             this.Handle = new SharpDX.Direct3D11.Texture2D(graphicsDevice.Device, desc);
             CreateViews();
@@ -80,12 +82,43 @@ namespace DotGame.DirectX11
         private void CreateViews()
         {
             if (Handle.Description.BindFlags.HasFlag(BindFlags.DepthStencil))
-                DepthView = new DepthStencilView(graphicsDevice.Device, Handle);
+                DepthView = new DepthStencilView(graphicsDevice.Device, Handle,
+                    new DepthStencilViewDescription()
+                    {
+                        Format = EnumConverter.ConvertDepthView(Format),
+                        Dimension = ArraySize > 0 ? DepthStencilViewDimension.Texture2DArray : DepthStencilViewDimension.Texture2D,
+                        Texture2D = new DepthStencilViewDescription.Texture2DResource() {
+                            MipSlice = 0
+                        },
+                        Texture2DArray = new DepthStencilViewDescription.Texture2DArrayResource()
+                        {
+                            ArraySize = this.ArraySize,
+                            FirstArraySlice = 0,
+                        }
+                    });
             if (Handle.Description.BindFlags.HasFlag(BindFlags.RenderTarget))
                 RenderView = new RenderTargetView(graphicsDevice.Device, Handle);
             if (Handle.Description.BindFlags.HasFlag(BindFlags.ShaderResource))
-                ResourceView = new ShaderResourceView(graphicsDevice.Device, Handle);
+                ResourceView = new ShaderResourceView(graphicsDevice.Device, Handle,
+                    new ShaderResourceViewDescription()
+                    {
+                        Format = Format.IsDepth() ? EnumConverter.ConvertDepthShaderView(Format) : EnumConverter.Convert(Format),
+                        Dimension = ArraySize > 0 ? ShaderResourceViewDimension.Texture2DArray : ShaderResourceViewDimension.Texture2D,
+                        Texture2D = new ShaderResourceViewDescription.Texture2DResource()
+                        {
+                            MipLevels = -1,
+                            MostDetailedMip = 0
+                        },
+                        Texture2DArray = new ShaderResourceViewDescription.Texture2DArrayResource()
+                        {
+                            ArraySize = this.ArraySize,
+                            FirstArraySlice = 0,
+                            MipLevels = -1,
+                            MostDetailedMip = 0
+                        }
+                    });
         }
+
 
         protected override void Dispose(bool isDisposing)
         {

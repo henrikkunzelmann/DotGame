@@ -48,8 +48,66 @@ namespace DotGame.DirectX11
 
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
         {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+
             var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
             context.UpdateSubresource(ref data, dxBuffer.Handle);
+        }
+
+        public void Update<T>(ITexture2D texture, T[] data) where T : struct
+        {
+            Update(texture, 0, data);
+        }
+
+        public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
+        {
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+
+            var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
+            context.UpdateSubresource<T>(data, dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, 0, texture.MipLevels), texture.Width * graphicsDevice.GetSizeOf(texture.Format), texture.Width * texture.Height * graphicsDevice.GetSizeOf(texture.Format));
+        }
+
+        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
+        {
+            Update(textureArray, arrayIndex, 0, data);
+        }
+
+        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct
+        {
+            if (textureArray == null)
+                throw new ArgumentNullException("texture");
+            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
+                throw new ArgumentOutOfRangeException("arrayIndex");
+            if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+
+            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "texture");
+            context.UpdateSubresource<T>(data, dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels), textureArray.Width * graphicsDevice.GetSizeOf(textureArray.Format), textureArray.Width * textureArray.Height * graphicsDevice.GetSizeOf(textureArray.Format));
+        }
+
+        public void GenerateMips(ITexture2D texture)
+        {
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+            var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
+            if (!dxTexture.Handle.Description.OptionFlags.HasFlag(SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps))
+                throw new ArgumentException("Texture does not have the GenerateMipMaps flag.", "texture");
+            context.GenerateMips(dxTexture.ResourceView);
+        }
+
+        public void GenerateMips(ITexture2DArray textureArray)
+        {
+            if (textureArray == null)
+                throw new ArgumentNullException("textureArray");
+            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "textureArray");
+            if (!dxTexture.Handle.Description.OptionFlags.HasFlag(SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps))
+                throw new ArgumentException("TextureArray does not have the GenerateMipMaps flag.", "textureArray");
+
+            context.GenerateMips(dxTexture.ResourceView);
         }
 
         public void Clear(Color color)

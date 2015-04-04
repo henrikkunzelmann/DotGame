@@ -29,10 +29,10 @@ namespace DotGame.DirectX11
                 DepthBias = info.DepthBias,
                 DepthBiasClamp = info.DepthBiasClamp,
                 SlopeScaledDepthBias = info.SlopeScaledDepthBias,
-                IsAntialiasedLineEnabled = info.IsAntialiasedLineEnable,
-                IsDepthClipEnabled = info.IsDepthClipEnable,
-                IsScissorEnabled = info.IsScissorEnable,
-                IsMultisampleEnabled = info.IsMultisampleEnable
+                IsAntialiasedLineEnabled = info.IsAntialiasedLineEnabled,
+                IsDepthClipEnabled = info.IsDepthClipEnabled,
+                IsScissorEnabled = info.IsScissorEnabled,
+                IsMultisampleEnabled = info.IsMultisampleEnabled
             });
         }
 

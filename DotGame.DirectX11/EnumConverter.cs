@@ -18,10 +18,24 @@ namespace DotGame.DirectX11
             { TextureFormat.RGB32_Float, Format.R32G32B32_Float },
             { TextureFormat.RGBA32_Float, Format.R32G32B32A32_Float },
             { TextureFormat.RGBA8_UIntNorm, Format.R8G8B8A8_UNorm },
-            { TextureFormat.Depth16, Format.D16_UNorm },
+            { TextureFormat.Depth16, Format.R16_Typeless },
+            { TextureFormat.Depth24Stencil8, Format.R24G8_Typeless },
+            { TextureFormat.Depth32, Format.R32_Typeless }
+            // TODO (henrik1235) Mehr TextureFormate hinzufügen
+        };
+
+        private static readonly Dictionary<TextureFormat, Format> depthFormats = new Dictionary<TextureFormat, Format>()
+        {
+            { TextureFormat.Depth16, Format.D16_UNorm},
             { TextureFormat.Depth24Stencil8, Format.D24_UNorm_S8_UInt },
             { TextureFormat.Depth32, Format.D32_Float }
-            // TODO (henrik1235) Mehr TextureFormate hinzufügen
+        };
+
+        private static readonly Dictionary<TextureFormat, Format> depthShaderViewFormats = new Dictionary<TextureFormat, Format>()
+        {
+            { TextureFormat.Depth16, Format.R16_UNorm },
+            { TextureFormat.Depth24Stencil8, Format.R24_UNorm_X8_Typeless },
+            { TextureFormat.Depth32, Format.R32_Float }
         };
 
         private static readonly Dictionary<VertexElementType, Format> vertexFormats = new Dictionary<VertexElementType, Format>()
@@ -110,6 +124,22 @@ namespace DotGame.DirectX11
         {
             Format f;
             if (!textureFormats.TryGetValue(format, out f))
+                throw new NotSupportedException("Format is not supported.");
+            return f;
+        }
+
+        public static Format ConvertDepthView(TextureFormat format)
+        {
+            Format f;
+            if (!depthFormats.TryGetValue(format, out f))
+                throw new NotSupportedException("Format is not supported.");
+            return f;
+        }
+
+        public static Format ConvertDepthShaderView(TextureFormat format)
+        {
+            Format f;
+            if (!depthShaderViewFormats.TryGetValue(format, out f))
                 throw new NotSupportedException("Format is not supported.");
             return f;
         }

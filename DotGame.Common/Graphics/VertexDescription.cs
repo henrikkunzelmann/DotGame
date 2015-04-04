@@ -26,8 +26,12 @@ namespace DotGame.Graphics
                 throw new ArgumentException("Elements must not be empty", "elements");
 
             this.elements = elements;
-            
-            // TODO (henrik1235) Auf doppelte Elemente prüfen (gleicher Usage + UsageIndex)
+
+            for (int i = 0; i < elements.Length; i++)
+                for (int j = 0; j < elements.Length; j++)
+                    if (i != j)
+                        if (elements[i].Usage == elements[j].Usage && elements[i].UsageIndex == elements[j].UsageIndex)
+                            throw new ArgumentException(string.Format("VertexElement {0} and {1} are duplicates: they share the same usage and usage index.", i, j), "elements");
         }
 
         public VertexElement[] GetElements()

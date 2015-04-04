@@ -14,9 +14,9 @@ namespace DotGame.Graphics
         public int DepthBias;
         public float DepthBiasClamp;
         public float SlopeScaledDepthBias;
-        public bool IsDepthClipEnable;
-        public bool IsScissorEnable;
-        public bool IsMultisampleEnable;
-        public bool IsAntialiasedLineEnable;
+        public bool IsDepthClipEnabled;
+        public bool IsScissorEnabled;
+        public bool IsMultisampleEnabled;
+        public bool IsAntialiasedLineEnabled;
     }
 }

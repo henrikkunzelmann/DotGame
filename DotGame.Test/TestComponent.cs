@@ -28,7 +28,7 @@ namespace DotGame.Test
 
         public override void Init()
         {
-            texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg");
+            texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg", true);
 
             if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
                 shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));

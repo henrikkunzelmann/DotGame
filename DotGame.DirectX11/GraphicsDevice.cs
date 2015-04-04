@@ -66,7 +66,7 @@ namespace DotGame.DirectX11
         private void InitBackbuffer()
         {
             backBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
-            depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth16);
+            depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth16, false);
             RenderContext.SetRenderTarget(backBuffer, depthBuffer);
         }
 
