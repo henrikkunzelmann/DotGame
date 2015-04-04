@@ -42,7 +42,7 @@ namespace DotGame.Graphics
         void MakeCurrent();
 
         /// <summary>
-        /// Setzt das GraphicsDevice auf den aktuellen Thread.
+        /// Trennt das GraphicsDevice vom aktuellen Thread.
         /// </summary>
         void DetachCurrent();
 

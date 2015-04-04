@@ -54,7 +54,7 @@
     <Compile Include="RenderContext.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="ShaderPart.cs" />
-    <Compile Include="StateMachine.cs" />
+    <Compile Include="StateManager.cs" />
     <Compile Include="VertexBuffer.cs" />
     <Compile Include="Windows\GameControl.cs" />
     <Compile Include="GraphicsDevice.cs" />

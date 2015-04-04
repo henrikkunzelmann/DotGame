@@ -54,7 +54,7 @@ namespace DotGame.OpenGL4
                 size = data.Length * Marshal.SizeOf(typeof(T));
                 VertexCount = size / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
             }
-            
+
             GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObjectID);
             GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw);
             OpenGL4.GraphicsDevice.CheckGLError();

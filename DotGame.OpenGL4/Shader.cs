@@ -17,8 +17,10 @@ namespace DotGame.OpenGL4
         internal ShaderPart FragmentShader { get; private set; }
         internal int ProgramID { get; private set; }
 
-        private Dictionary<string, int> uniformBufferLocations = new Dictionary<string, int>();
+        private Dictionary<string, int> uniformBindingPoints = new Dictionary<string, int>();
+        private Dictionary<string, int> uniformBlockLocations = new Dictionary<string, int>();
         private Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
+        private Dictionary<string, int> textureUnits = new Dictionary<string, int>();
 
         internal Shader(GraphicsDevice device, string vertexShaderCode, string fragmentShaderCode)
             : base(device, new System.Diagnostics.StackTrace())
@@ -56,6 +58,7 @@ namespace DotGame.OpenGL4
 
 
             FindUniforms();
+            FindUniformBlocks();
 
             // TODO (Robin) Custom Exception
             // TODO (Robin) Im Fall einer Exception Shader freigeben
@@ -77,6 +80,22 @@ namespace DotGame.OpenGL4
             }
         }
 
+        private void FindUniformBlocks()
+        {
+            int count;
+            GL.GetProgram(ProgramID, GetProgramParameterName.ActiveUniformBlocks, out count);
+
+            for (int i = 0; i < count; i++)
+            {
+                int length;
+                StringBuilder nameBuilder = new StringBuilder(255);
+                GL.GetActiveUniformBlockName(ProgramID, i, 255, out length, nameBuilder);
+                string name = nameBuilder.ToString(0, length);
+
+                uniformBlockLocations[name] = GL.GetUniformBlockIndex(ProgramID, name);
+            }
+        }
+
         public IConstantBuffer CreateConstantBuffer()
         {
             return new ConstantBuffer(graphicsDevice, -1);
@@ -89,22 +108,51 @@ namespace DotGame.OpenGL4
             return constantBuffer;
         }
 
-        internal int GetUniform(string name)
+        /// <summary>
+        /// Ruft die Location einer Uniform ab
+        /// </summary>
+        /// <param name="name">Name der Uniform</param>
+        /// <returns></returns>
+        internal int GetUniformLocation(string name)
         {
             return uniformLocations[name];
         }
 
-        internal int GetUniformBuffer(string name)
+        /// <summary>
+        /// Ruft den BindingPoint des UniformBuffers + UniformBlocks ab oder verbindet diese
+        /// </summary>
+        /// <param name="name">Name des Uniform Blocks</param>
+        /// <returns></returns>
+        internal int GetUniformBindingPoint(string name)
         {
-            if (!uniformBufferLocations.ContainsKey(name))
+            if (!uniformBindingPoints.ContainsKey(name))
             {
-                int blockIndex = GL.GetUniformBlockIndex(ProgramID, name);
-                int bindingPoint = uniformBufferLocations.Count;
+                int blockIndex = uniformBlockLocations[name];
+                int bindingPoint = uniformBindingPoints.Count;
                 GL.UniformBlockBinding(ProgramID, blockIndex, bindingPoint);
-                uniformBufferLocations[name] = bindingPoint;
-                return bindingPoint;
+
+                uniformBindingPoints[name] = bindingPoint;
             }
-            return uniformBufferLocations[name];
+
+            return uniformBindingPoints[name];
+        }
+
+        /// <summary>
+        /// Ruft die TextureUnit der Texture ab oder weist der Texture eine TextureUnit zu
+        /// </summary>
+        /// <param name="name">Name der Texture Uniform</param>
+        /// <returns></returns>
+        internal int GetTextureUnit(string name)
+        {
+            if (!textureUnits.ContainsKey(name))
+            {
+                int textureUnit = textureUnits.Count;
+                GL.Uniform1(uniformLocations[name], textureUnit);
+
+                textureUnits[name] = textureUnit;
+            }
+
+            return textureUnits[name];            
         }
 
         protected override void Dispose(bool isDisposing)
@@ -114,11 +162,17 @@ namespace DotGame.OpenGL4
 
             if (!GraphicsDevice.IsDisposed)
             {
-                GL.DetachShader(ProgramID, VertexShader.ID);
-                VertexShader.Dispose();
+                if (VertexShader != null)
+                {
+                    GL.DetachShader(ProgramID, VertexShader.ID);
+                    VertexShader.Dispose();
+                }
 
-                GL.DetachShader(ProgramID, FragmentShader.ID);
-                FragmentShader.Dispose();
+                if (FragmentShader != null)
+                {
+                    GL.DetachShader(ProgramID, FragmentShader.ID);
+                    FragmentShader.Dispose();
+                }
 
                 GL.DeleteProgram(ProgramID);
             }

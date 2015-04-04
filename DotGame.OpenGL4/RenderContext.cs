@@ -26,7 +26,7 @@ namespace DotGame.OpenGL4
         public RenderContext(GraphicsDevice graphicsDevice)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
- 
+
         }
 
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
@@ -35,7 +35,7 @@ namespace DotGame.OpenGL4
             if (internalBuffer.Size < 0)
                 internalBuffer.Size = Marshal.SizeOf(data);
 
-            graphicsDevice.StateMachine.ConstantBuffer = buffer;
+            graphicsDevice.StateManager.ConstantBuffer = buffer;
             // TODO (Robin) BufferUsageHint
             GL.BufferData<T>(BufferTarget.UniformBuffer, new IntPtr(buffer.Size), ref data, BufferUsageHint.DynamicDraw);
             OpenGL4.GraphicsDevice.CheckGLError();
@@ -184,12 +184,12 @@ namespace DotGame.OpenGL4
         {
             var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
             // TODO (Robin) Durch GraphicsDevice Methode ersetzen
-            graphicsDevice.StateMachine.Shader = shader;
+            graphicsDevice.StateManager.Shader = shader;
 
             ConstantBuffer internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
 
-            graphicsDevice.StateMachine.ConstantBuffer = buffer;
-            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, internalShader.GetUniformBuffer(name), internalBuffer.UniformBufferObjectID);
+            graphicsDevice.StateManager.ConstantBuffer = buffer;
+            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, internalShader.GetUniformBindingPoint(name), internalBuffer.UniformBufferObjectID);
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
@@ -201,7 +201,9 @@ namespace DotGame.OpenGL4
 
         public void SetTexture(IShader shader, string name, ITexture2D texture)
         {
-            GL.ActiveTexture(TextureUnit.Texture0);
+            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
+            
+            GL.ActiveTexture(TextureUnit.Texture0 + internalShader.GetTextureUnit(name));
 
             Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
             GL.BindTexture(TextureTarget.Texture2D, internalTexture.TextureID);
@@ -223,7 +225,7 @@ namespace DotGame.OpenGL4
         {
             throw new NotImplementedException();
         }
-        
+
         public void SetSampler(IShader shader, string name, ISampler sampler)
         {
             throw new NotImplementedException();
@@ -234,7 +236,7 @@ namespace DotGame.OpenGL4
             var shader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
             if (stateDirty)
             {
-                graphicsDevice.StateMachine.Shader = shader;
+                graphicsDevice.StateManager.Shader = shader;
 
                 if (currentState.CullMode != CullMode.None)
                 {
@@ -246,13 +248,35 @@ namespace DotGame.OpenGL4
             }
             if (vertexBufferDirty)
             {
-                graphicsDevice.StateMachine.VertexBuffer = currentVertexBuffer;
+                graphicsDevice.StateManager.VertexBuffer = currentVertexBuffer;
+
+                if (currentState.Shader == null)
+                    throw new Exception("No shader set!");
+
+                Shader internalShader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
+                if (currentVertexBuffer.Shader != currentState.Shader)
+                {
+                    GL.BindBuffer(BufferTarget.ArrayBuffer, currentVertexBuffer.VertexBufferObjectID);
+
+                    int offset = 0;
+                    VertexElement[] elements = currentVertexBuffer.Description.GetElements();
+                    for (int i = 0; i < currentVertexBuffer.Description.ElementCount; i++)
+                    {
+                        GL.EnableVertexAttribArray(i);
+                        GL.BindAttribLocation(internalShader.ProgramID, i, EnumConverter.Convert(elements[i].Usage));
+
+                        GL.VertexAttribPointer(i, graphicsDevice.GetComponentsOf(elements[i].Type), VertexAttribPointerType.Float, false, graphicsDevice.GetSizeOf(currentVertexBuffer.Description), offset);
+                        offset += graphicsDevice.GetSizeOf(elements[i].Type);
+                    }
+                    currentVertexBuffer.Shader = internalShader;
+                }
             }
             if (indexBufferDirty)
-                graphicsDevice.StateMachine.IndexBuffer = currentIndexBuffer;
+                graphicsDevice.StateManager.IndexBuffer = currentIndexBuffer;
 
             //TEST
             GL.Enable(EnableCap.DepthTest);
+            GL.FrontFace(FrontFaceDirection.Cw);
             GL.Enable(EnableCap.CullFace);
             GL.CullFace(CullFaceMode.Back);
 
@@ -285,7 +309,7 @@ namespace DotGame.OpenGL4
 
         protected override void Dispose(bool isDisposing)
         {
-            
+
         }
     }
 }

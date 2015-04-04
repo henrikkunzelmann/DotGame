@@ -40,7 +40,7 @@ namespace DotGame.OpenGL4
             this.IndexCount = data.Length;
             this.SizeBytes = Marshal.SizeOf(data[0]) * data.Length;
 
-            GL.BindBuffer(BufferTarget.ElementArrayBuffer, IndexBufferID);
+            graphicsDevice.StateManager.IndexBuffer = this;
             GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(this.SizeBytes), data, BufferUsageHint.StaticDraw);
             OpenGL4.GraphicsDevice.CheckGLError();
         }

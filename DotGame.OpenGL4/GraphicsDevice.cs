@@ -33,7 +33,7 @@ namespace DotGame.OpenGL4
         internal GraphicsContext Context { get; private set; }
         internal bool IsCurrent { get { return Context.IsCurrent; } }
 
-        internal StateMachine StateMachine { get; private set; }
+        internal StateManager StateManager { get; private set; }
 
         private IWindowContainer container;
 
@@ -80,7 +80,7 @@ namespace DotGame.OpenGL4
             CheckVersion();
 
             Factory = new GraphicsFactory(this);
-            StateMachine = new OpenGL4.StateMachine(this);
+            StateManager = new OpenGL4.StateManager(this);
             this.RenderContext = new RenderContext(this);
 
             Context.MakeCurrent(null);

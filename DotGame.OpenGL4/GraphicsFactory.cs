@@ -200,12 +200,6 @@ namespace DotGame.OpenGL4
             return code;
         }
 
-        private void CheckCompileInfo(ShaderCompileInfo info, string parameterName)
-        {
-            if (info.File == null)
-                throw new ArgumentException("File of info is null.", parameterName);
-        }
-
         public IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode)
         {
             throw new NotSupportedException("Creating shader from byte code is not supported.");

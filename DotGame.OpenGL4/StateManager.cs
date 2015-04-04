@@ -11,7 +11,7 @@ namespace DotGame.OpenGL4
     /// <summary>
     /// Changes OpenGL states and prevents redundant changes.
     /// </summary>
-    public class StateMachine
+    public class StateManager
     {
         private GraphicsDevice graphicsDevice;
 
@@ -25,36 +25,12 @@ namespace DotGame.OpenGL4
             get { return currentVertexBuffer; }
             set
             {
-                VertexBuffer internalVertexBuffer = graphicsDevice.Cast<VertexBuffer>(value, "value");
-                if (value != currentVertexBuffer || (currentVertexBuffer != null && internalVertexBuffer.Shader != Shader)) 
+                if (value != currentVertexBuffer ) 
                 {
                     currentVertexBuffer = value;
+                    VertexBuffer internalVertexBuffer = graphicsDevice.Cast<VertexBuffer>(value, "value");
 
                     GL.BindVertexArray(internalVertexBuffer.VertexArrayObjectID);
-
-                    if (Shader == null)
-                        throw new Exception("No Shader set!");
-
-                    //VAO speichert VertexAttributePointer für einen bestimmten Shader
-                    //Falls dieser Shader gerade nicht aktiv ist, müssen neue VertexAttributePointer gesetzt werden
-                    if (internalVertexBuffer.Shader != Shader)
-                    {
-                        Shader internalShader = graphicsDevice.Cast<Shader>(Shader, "CurrentShader");
-
-                        GL.BindBuffer(BufferTarget.ArrayBuffer, internalVertexBuffer.VertexBufferObjectID);
-
-                        int offset = 0;
-                        VertexElement[] elements = currentVertexBuffer.Description.GetElements();
-                        for (int i = 0; i < currentVertexBuffer.Description.ElementCount; i++)
-                        {
-                            GL.EnableVertexAttribArray(i);
-                            GL.BindAttribLocation(internalShader.ProgramID, i, EnumConverter.Convert(elements[i].Usage));
-
-                            GL.VertexAttribPointer(i, graphicsDevice.GetComponentsOf(elements[i].Type), VertexAttribPointerType.Float, false, graphicsDevice.GetSizeOf(internalVertexBuffer.Description), offset);
-                            offset += graphicsDevice.GetSizeOf(elements[i].Type);
-                        }
-                        internalVertexBuffer.Shader = internalShader;
-                    }
                 }
             } 
         }
@@ -106,7 +82,7 @@ namespace DotGame.OpenGL4
             }
         }
         
-        public StateMachine(GraphicsDevice graphicsDevice)
+        public StateManager(GraphicsDevice graphicsDevice)
         {
             this.graphicsDevice = graphicsDevice;
         }
