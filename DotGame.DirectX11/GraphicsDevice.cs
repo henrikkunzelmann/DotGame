@@ -68,13 +68,6 @@ namespace DotGame.DirectX11
             backBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
             depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth16);
             RenderContext.SetRenderTarget(backBuffer, depthBuffer);
-
-            Device.ImmediateContext.Rasterizer.State = new RasterizerState(Device, new RasterizerStateDescription()
-            {
-                CullMode = SharpDX.Direct3D11.CullMode.Back,
-                FillMode = FillMode.Solid,
-                IsFrontCounterClockwise = true,
-            });
         }
 
         public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
@@ -123,7 +116,11 @@ namespace DotGame.DirectX11
 
             GraphicsObject[] created = CreatedObjects.ToArray();
             for (int i = 0; i < created.Length; i++)
-                created[i].Dispose();
+                if (!created[i].IsDisposed)
+                {
+                    Log.Warning("{0} was not disposed! Created at:\r\n{1}", created[i].GetType().Name, created[i].CreationStack);
+                    created[i].Dispose();
+                }
             CreatedObjects.Clear();
 
             IsDisposed = true;

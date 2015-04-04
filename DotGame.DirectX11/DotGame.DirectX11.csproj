@@ -64,6 +64,7 @@
     <Compile Include="ConstantBuffer.cs" />
     <Compile Include="EnumConverter.cs" />
     <Compile Include="GraphicsObject.cs" />
+    <Compile Include="RasterizerState.cs" />
     <Compile Include="RenderContext.cs" />
     <Compile Include="RenderState.cs" />
     <Compile Include="Sampler.cs" />

@@ -45,6 +45,12 @@ namespace DotGame.Graphics
         void SetPrimitiveType(PrimitiveType type);
 
         /// <summary>
+        /// Setzt den Raterizer in der Pipeline.
+        /// </summary>
+        /// <param name="rasterizerState"></param>
+        void SetRasterizer(IRasterizerState rasterizerState);
+
+        /// <summary>
         /// Setzt die Pipeline auf den neuen Zustand.
         /// </summary>
         /// <param name="state"></param>

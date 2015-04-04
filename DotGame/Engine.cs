@@ -42,6 +42,8 @@ namespace DotGame
         /// </summary>
         public bool IsRunning { get; private set; }
 
+        private object locker = new object();
+
         private IGameWindow window;
         private Thread thread;
         private bool shouldStop = false;
@@ -51,12 +53,10 @@ namespace DotGame
         /// </summary>
         private ManualResetEvent onStart = new ManualResetEvent(false);
 
-        // TODO (henrik1235) Test, entfernen
-        private IShader shader;
-        private IConstantBuffer constantBuffer;
-        private IVertexBuffer vertexBuffer;
-        private ITexture2D texture;
-        private ISampler sampler;
+        // der Grund für drei Liste erlaubt es das man Komponenten flexibler hinzufügen bzw. entfernen kann
+        private List<GameComponent> components = new List<GameComponent>();
+        private List<GameComponent> componentsToAdd = new List<GameComponent>();
+        private List<GameComponent> componentsToRemove = new List<GameComponent>();
 
         public Engine()
             : this(new EngineSettings())
@@ -129,67 +129,6 @@ namespace DotGame
             }
 
             Log.Debug("Got AudioDevice: " + this.AudioDevice.GetType().FullName);
-
-
-            // TODO (henrik1235) Test, entfernen
-            texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg");
-
-            if (Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
-            else if (Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
-                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
-            else
-                throw new NotImplementedException();
-
-            constantBuffer = shader.CreateConstantBuffer();
-            vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
-                // 3D coordinates              UV Texture coordinates
-                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, // Front
-                -1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
-                 1.0f,  1.0f, -1.0f,    1.0f, 0.0f,
-                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
-                 1.0f,  1.0f, -1.0f,    1.0f, 0.0f,
-                 1.0f, -1.0f, -1.0f,    1.0f, 1.0f,
-                
-                -1.0f, -1.0f,  1.0f,    1.0f, 0.0f, // BACK
-                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
-                -1.0f,  1.0f,  1.0f,    1.0f, 1.0f,
-                -1.0f, -1.0f,  1.0f,    1.0f, 0.0f,
-                 1.0f, -1.0f,  1.0f,    0.0f, 0.0f,
-                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
-                
-                -1.0f, 1.0f, -1.0f,     0.0f, 1.0f, // Top
-                -1.0f, 1.0f,  1.0f,     0.0f, 0.0f,
-                 1.0f, 1.0f,  1.0f,     1.0f, 0.0f,
-                -1.0f, 1.0f, -1.0f,     0.0f, 1.0f,
-                 1.0f, 1.0f,  1.0f,     1.0f, 0.0f,
-                 1.0f, 1.0f, -1.0f,     1.0f, 1.0f,
-                
-                -1.0f,-1.0f, -1.0f,     1.0f, 0.0f, // Bottom
-                 1.0f,-1.0f,  1.0f,     0.0f, 1.0f,
-                -1.0f,-1.0f,  1.0f,     1.0f, 1.0f,
-                -1.0f,-1.0f, -1.0f,     1.0f, 0.0f,
-                 1.0f,-1.0f, -1.0f,     0.0f, 0.0f,
-                 1.0f,-1.0f,  1.0f,     0.0f, 1.0f,
-                
-                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, // Left
-                -1.0f, -1.0f,  1.0f,    0.0f, 0.0f,
-                -1.0f,  1.0f,  1.0f,    1.0f, 0.0f,
-                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
-                -1.0f,  1.0f,  1.0f,    1.0f, 0.0f,
-                -1.0f,  1.0f, -1.0f,    1.0f, 1.0f,
-                
-                 1.0f, -1.0f, -1.0f,    1.0f, 0.0f, // Right
-                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
-                 1.0f, -1.0f,  1.0f,    1.0f, 1.0f,
-                 1.0f, -1.0f, -1.0f,    1.0f, 0.0f,
-                 1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
-                 1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
-            }, Geometry.VertexPositionTexture.Description);
-
-            if (Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-                sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
-
             GraphicsDevice.DetachCurrent();
         }
 
@@ -234,24 +173,35 @@ namespace DotGame
         /// <exception cref="InvalidOperationException">Wenn die Engine schon gestoppt wurde.</exception>
         public void Stop()
         {
-            if (!IsRunning)
-                throw new InvalidOperationException("Engine is not running.");
-
-            Log.Info("Engine.Stop() called!");
-
-            // Thread sagen er soll stoppen
-            shouldStop = true;
-            thread.Join(2000); // 2000ms warten
-            // wenn Thread zu lange brauch (sich z.B. aufgehängt hat)
-            if (thread.IsAlive) 
+            lock (locker)
             {
-                // per Gewalt stoppen
-                thread.Abort();
-                IsRunning = false;
+                if (!IsRunning)
+                    throw new InvalidOperationException("Engine is not running.");
 
-                Log.Warning("Engine force stopped!");
+                Log.Info("Engine.Stop() called!");
+
+                // Thread sagen er soll stoppen
+                shouldStop = true;
+                thread.Join(2000); // 2000ms warten
+                // wenn Thread zu lange brauch (sich z.B. aufgehängt hat)
+                if (thread.IsAlive)
+                {
+                    // per Gewalt stoppen
+                    thread.Abort();
+                    IsRunning = false;
+
+                    Log.Warning("Engine force stopped!");
+                }
+
+                lock (components)
+                {
+                    foreach (GameComponent component in components)
+                        component.Unload();
+                }
+
+
+                Log.FlushBuffer();
             }
-            Log.FlushBuffer();
         }
 
         /// <summary>
@@ -259,38 +209,81 @@ namespace DotGame
         /// </summary>
         private void Tick(GameTime gameTime)
         {
-            float time = (float)gameTime.TotalTime.TotalSeconds;
-            var view = Matrix.CreateLookAt(new Vector3(0, 0, 5f), new Vector3(0, 0, 0), Vector3.UnitY);
-            var proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.PI / 4f, GraphicsDevice.DefaultWindow.Width / (float)GraphicsDevice.DefaultWindow.Height, 0.1f, 100.0f);
-            var worldViewProj = 
-                  Matrix.CreateRotationX(time)
-                * Matrix.CreateRotationY(time * 2)
-                * Matrix.CreateRotationZ(time * .7f) * view * proj;
-            worldViewProj.Transpose();
+            lock (components)
+            {
+                // alle Komponenten die noch nicht hinzugefügt wurden hinzufügen und initialisieren
+                foreach (GameComponent component in componentsToAdd)
+                    if (!components.Contains(component))
+                    {
+                        components.Add(component);
+                        component.Init();
+                    }
 
-            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
-            GraphicsDevice.RenderContext.SetShader(shader);
-            GraphicsDevice.RenderContext.SetConstantBuffer(shader, constantBuffer);
-            GraphicsDevice.RenderContext.SetTexture(shader, "picture", texture);
-            if (Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-                GraphicsDevice.RenderContext.SetSampler(shader, "pictureSampler", sampler);
-            GraphicsDevice.RenderContext.Update(constantBuffer, worldViewProj);
-            GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
-            GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);
-            GraphicsDevice.RenderContext.Draw();
+                // alle Komponenten die entfernt werden sollen entfernen und entladen
+                foreach (GameComponent component in componentsToRemove)
+                {
+                    components.Remove(component);
+                    component.Unload();
+                }
+
+                // alle Komponenten aktualisieren
+                foreach (GameComponent component in components)
+                    if (!componentsToRemove.Contains(component))
+                        component.Update(gameTime);
+
+                // alle Komponenten zeichnen
+                foreach (GameComponent component in components)
+                    if (!componentsToRemove.Contains(component))
+                        component.Draw(gameTime);
+
+                componentsToAdd.Clear();
+                componentsToRemove.Clear();
+            }
+
             GraphicsDevice.SwapBuffers();
         }
 
         public void Dispose()
         {
-            if (IsRunning)
-                Stop();
+            lock (locker)
+            {
+                if (IsRunning)
+                    Stop();
 
-            Dispose(true);
-            Log.Info("Engine.Dispose() called!");
-            Log.FlushBuffer();
+                Dispose(true);
+                Log.Info("Engine.Dispose() called!");
+                Log.FlushBuffer();
 
-            GC.SuppressFinalize(this);
+                GC.SuppressFinalize(this);
+            }
+        }
+
+        public void AddComponent(GameComponent component)
+        {
+            if (component == null)
+                throw new ArgumentNullException("component");
+
+            lock (components)
+            {
+                if (componentsToRemove.Contains(component))
+                    componentsToRemove.Remove(component);
+                if (!components.Contains(component))
+                    componentsToAdd.Add(component);
+            }
+        }
+
+        public void RemoveComponent(GameComponent component)
+        {
+            if (component == null)
+                throw new ArgumentNullException("component");
+
+            lock (components)
+            {
+                if (componentsToAdd.Contains(component))
+                    componentsToAdd.Remove(component);
+                if (components.Contains(component))
+                    componentsToRemove.Add(component);
+            }
         }
 
         protected virtual void Dispose(bool isDisposing)

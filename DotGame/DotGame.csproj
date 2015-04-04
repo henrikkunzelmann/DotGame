@@ -57,6 +57,7 @@
     <Compile Include="AudioAPI.cs" />
     <Compile Include="Engine.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="GameComponent.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Geometry\VertexPositionTexture.cs" />
     <Compile Include="Geometry\VertexPositionColor.cs" />

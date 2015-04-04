@@ -13,7 +13,7 @@ namespace DotGame.Graphics
     {
         public IShader Shader;
         public PrimitiveType PrimitiveType;
-        public CullMode CullMode;
+        public IRasterizerState Rasterizer;
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
@@ -26,7 +26,7 @@ namespace DotGame.Graphics
         /// <inheritdoc/>
         public bool Equals(RenderStateInfo other)
         {
-            return this.Shader == other.Shader && this.PrimitiveType == other.PrimitiveType;
+            return this.Shader == other.Shader && this.PrimitiveType == other.PrimitiveType && this.Rasterizer == other.Rasterizer;
         }
 
         public static bool operator ==(RenderStateInfo a, RenderStateInfo b)
@@ -47,6 +47,7 @@ namespace DotGame.Graphics
                 int hash = 17;
                 hash = hash * 23 + Shader.GetHashCode();
                 hash = hash * 23 + PrimitiveType.GetHashCode();
+                hash = hash * 23 + Rasterizer.GetHashCode();
                 return hash;
             }
         }

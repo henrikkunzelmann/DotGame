@@ -70,7 +70,8 @@ namespace DotGame.OpenAL
 
         protected override void Dispose(bool isDisposing)
         {
-            AudioDeviceInternal.Efx.DeleteEffect(ID);
+            if (!AudioDeviceInternal.IsDisposed)
+                AudioDeviceInternal.Efx.DeleteEffect(ID);
 
             base.Dispose(isDisposing);
         }

@@ -25,6 +25,7 @@ namespace DotGame.DirectX11
         private RenderTargetView currentColorTarget;
         private DepthStencilView currentDepthTarget;
 
+        private IRasterizerState currentRasterizer;
         private PrimitiveType primitiveType;
         private ShaderStageCache vertexCache;
         private ShaderStageCache pixelCache;
@@ -151,6 +152,17 @@ namespace DotGame.DirectX11
             EnumConverter.Convert(type); // Type überprüfen (ob supported ist)
 
             currentState.PrimitiveType = type;
+            stateDirty = true;
+        }
+
+        public void SetRasterizer(IRasterizerState rasterizerState)
+        {
+            if (rasterizerState == null)
+                throw new ArgumentNullException("rasterizerState");
+
+            graphicsDevice.Cast<RasterizerState>(rasterizerState, "rasterizerState"); // State überprüfen
+
+            currentState.Rasterizer = rasterizerState;
             stateDirty = true;
         }
 
@@ -315,7 +327,6 @@ namespace DotGame.DirectX11
 
         private void SetSampler(CommonShaderStage stage, ShaderStageCache cache, int slot, SamplerState sampler)
         {
-
             if (cache.Samplers[slot] != sampler)
             {
                 stage.SetSampler(slot, sampler);
@@ -342,6 +353,13 @@ namespace DotGame.DirectX11
                 {
                     context.InputAssembler.PrimitiveTopology = EnumConverter.Convert(currentState.PrimitiveType);
                     primitiveType = currentState.PrimitiveType;
+                }
+                if (currentRasterizer != currentState.Rasterizer)
+                {
+                    var rasterizer = graphicsDevice.Cast<RasterizerState>(currentState.Rasterizer, "currentState.Rasterizer");
+                    context.Rasterizer.State = rasterizer.Handle;
+
+                    currentRasterizer = rasterizer;
                 }
             }
             if (vertexBufferDirty)

@@ -146,9 +146,19 @@ namespace DotGame.DirectX11
             return new Shader(graphicsDevice, name, new ShaderBytecode(vertex), new ShaderBytecode(pixel));
         }
 
+        public IRenderState CreateRenderState(RenderStateInfo info)
+        {
+            return new RenderState(graphicsDevice, info);
+        }
+
         public ISampler CreateSampler(SamplerInfo info)
         {
             return new Sampler(graphicsDevice, info);  
+        }
+
+        public IRasterizerState CreateRasterizerState(RasterizerStateInfo info)
+        {
+            return new RasterizerState(graphicsDevice, info);
         }
 
         protected override void Dispose(bool isDisposing)

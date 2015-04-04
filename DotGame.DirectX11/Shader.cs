@@ -27,7 +27,6 @@ namespace DotGame.DirectX11
         private Dictionary<string, int> resourcesVertex = new Dictionary<string, int>();
         private Dictionary<string, int> resourcesPixel = new Dictionary<string, int>();
         private Dictionary<string, int> constantBufferSizes = new Dictionary<string, int>();
-        private Dictionary<string, IConstantBuffer> cachedConstantBuffers = new Dictionary<string, IConstantBuffer>();
 
         public Shader(GraphicsDevice graphicsDevice, string name, ShaderBytecode vertex, ShaderBytecode pixel)
             : base(graphicsDevice, new StackTrace(1))
@@ -83,9 +82,6 @@ namespace DotGame.DirectX11
                 VertexCode.Dispose();
             if (PixelCode != null)
                 PixelCode.Dispose();
-
-            foreach (KeyValuePair<string, IConstantBuffer> buffer in cachedConstantBuffers)
-                buffer.Value.Dispose();
         }
 
         public IConstantBuffer CreateConstantBuffer()
@@ -100,9 +96,6 @@ namespace DotGame.DirectX11
             int size;
             if (!constantBufferSizes.TryGetValue(name, out size))
                 throw new ArgumentException("Constant buffer not bound to shader.", "name");
-            IConstantBuffer buffer;
-            if (cachedConstantBuffers.TryGetValue(name, out buffer))
-                return buffer;
             return graphicsDevice.Factory.CreateConstantBuffer(size);
         }
 

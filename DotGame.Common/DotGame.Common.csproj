@@ -56,13 +56,20 @@
     <Compile Include="Graphics\AddressMode.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
+    <Compile Include="Graphics\ColorConstants.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>ColorConstants.tt</DependentUpon>
+    </Compile>
     <Compile Include="Graphics\Comparison.cs" />
+    <Compile Include="Graphics\FillMode.cs" />
     <Compile Include="Graphics\IConstantBuffer.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />
     <Compile Include="Graphics\IGraphicsFactory.cs" />
     <Compile Include="Graphics\IGraphicsObject.cs" />
     <Compile Include="Graphics\IIndexBuffer.cs" />
     <Compile Include="Graphics\IndexFormat.cs" />
+    <Compile Include="Graphics\IRasterizerState.cs" />
     <Compile Include="Graphics\IRenderContext.cs" />
     <Compile Include="Graphics\IRenderState.cs" />
     <Compile Include="Graphics\IRenderTarget2D.cs" />
@@ -78,6 +85,7 @@
     <Compile Include="Graphics\ITextureArray.cs" />
     <Compile Include="Graphics\IVertexBuffer.cs" />
     <Compile Include="Graphics\IVertexType.cs" />
+    <Compile Include="Graphics\RasterizerStateInfo.cs" />
     <Compile Include="Graphics\RenderStateInfo.cs" />
     <Compile Include="Graphics\SamplerInfo.cs" />
     <Compile Include="Graphics\SamplerType.cs" />
@@ -118,7 +126,7 @@
   <ItemGroup>
     <None Include="Graphics\ColorConstants.tt">
       <Generator>TextTemplatingFileGenerator</Generator>
-      <LastGenOutput>ColorConstants.txt</LastGenOutput>
+      <LastGenOutput>ColorConstants.cs</LastGenOutput>
     </None>
     <None Include="Math\Manager.ttinclude" />
     <None Include="Math\Vector.tt">
@@ -128,13 +136,6 @@
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
-  </ItemGroup>
-  <ItemGroup>
-    <Content Include="Graphics\ColorConstants.txt">
-      <AutoGen>True</AutoGen>
-      <DesignTime>True</DesignTime>
-      <DependentUpon>ColorConstants.tt</DependentUpon>
-    </Content>
   </ItemGroup>
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 

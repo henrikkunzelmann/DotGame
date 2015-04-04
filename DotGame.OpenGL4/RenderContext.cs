@@ -131,12 +131,9 @@ namespace DotGame.OpenGL4
             stateDirty = true;
         }
 
-        public void SetCullMode(CullMode cullMode)
+        public void SetRasterizer(IRasterizerState rasterizerState)
         {
-            EnumConverter.Convert(cullMode); // Type überprüfen (ob supported ist)
-
-            currentState.CullMode = cullMode;
-            stateDirty = true;
+            throw new NotImplementedException();
         }
 
         public void SetState(IRenderState state)
@@ -238,13 +235,14 @@ namespace DotGame.OpenGL4
             {
                 graphicsDevice.StateManager.Shader = shader;
 
-                if (currentState.CullMode != CullMode.None)
+                // TODO (henrik1235) RasterizerState einbauen
+                /*if (currentState.CullMode != CullMode.None) 
                 {
                     GL.Enable(EnableCap.CullFace);
                     GL.CullFace(EnumConverter.Convert(currentState.CullMode));
                 }
                 else
-                    GL.Disable(EnableCap.CullFace);
+                    GL.Disable(EnableCap.CullFace);*/
             }
             if (vertexBufferDirty)
             {

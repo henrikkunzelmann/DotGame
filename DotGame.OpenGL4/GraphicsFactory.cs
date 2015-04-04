@@ -205,6 +205,16 @@ namespace DotGame.OpenGL4
             throw new NotSupportedException("Creating shader from byte code is not supported.");
         }
 
+        public IRenderState CreateRenderState(RenderStateInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IRasterizerState CreateRasterizerState(RasterizerStateInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
         public ISampler CreateSampler(SamplerInfo info)
         {
             throw new NotImplementedException();

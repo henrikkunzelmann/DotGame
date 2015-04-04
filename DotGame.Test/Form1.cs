@@ -36,7 +36,7 @@ namespace DotGame.Test
 
             Engine = new Engine(new EngineSettings()
             {
-                GraphicsAPI = GraphicsAPI.OpenGL4,
+                GraphicsAPI = GraphicsAPI.DirectX11,
                 AudioAPI = AudioAPI.OpenAL
             }, splitContainer1.Panel1);
 
@@ -55,6 +55,8 @@ namespace DotGame.Test
             instance.IsLooping = true;
             instance.Position = new Vector3(0, 8, 20);
             instance.Play(); // Uncommenten zum Abspielen 
+
+            Engine.AddComponent(new TestComponent(Engine));
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

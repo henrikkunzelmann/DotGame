@@ -93,6 +93,19 @@ namespace DotGame.DirectX11
             { DotGame.Graphics.Comparison.NotEqual, SharpDX.Direct3D11.Comparison.NotEqual },
         };
 
+        private static readonly Dictionary<DotGame.Graphics.CullMode, SharpDX.Direct3D11.CullMode> cullModes = new Dictionary<DotGame.Graphics.CullMode, SharpDX.Direct3D11.CullMode>()
+        {
+            { DotGame.Graphics.CullMode.None, SharpDX.Direct3D11.CullMode.None },
+            { DotGame.Graphics.CullMode.Back, SharpDX.Direct3D11.CullMode.Back },
+            { DotGame.Graphics.CullMode.Front, SharpDX.Direct3D11.CullMode.Front },
+        };
+
+        private static readonly Dictionary<DotGame.Graphics.FillMode, SharpDX.Direct3D11.FillMode> fillModes = new Dictionary<Graphics.FillMode, SharpDX.Direct3D11.FillMode>()
+        {
+            { DotGame.Graphics.FillMode.WireFrame, SharpDX.Direct3D11.FillMode.Wireframe },
+            { DotGame.Graphics.FillMode.Solid, SharpDX.Direct3D11.FillMode.Solid },
+        };
+
         public static Format Convert(TextureFormat format)
         {
             Format f;
@@ -175,6 +188,22 @@ namespace DotGame.DirectX11
             return c;
         }
 
+        public static SharpDX.Direct3D11.CullMode Convert(DotGame.Graphics.CullMode cullMode)
+        {
+            SharpDX.Direct3D11.CullMode c;
+            if (!cullModes.TryGetValue(cullMode, out c))
+                throw new NotSupportedException("Cull mode not supported.");
+            return c;
+        }
+
+        public static SharpDX.Direct3D11.FillMode Convert(DotGame.Graphics.FillMode fillMode)
+        {
+            SharpDX.Direct3D11.FillMode f;
+            if (!fillModes.TryGetValue(fillMode, out f))
+                throw new NotSupportedException("Fill mode not supported.");
+            return f;
+        }
+
         public static TextureFormat ConvertToTexture(Format format)
         {
             if (!textureFormats.ContainsValue(format))
@@ -224,6 +253,13 @@ namespace DotGame.DirectX11
             if (!comparsionFunctions.ContainsValue(comparsionFunction))
                 throw new NotImplementedException();
             return comparsionFunctions.First((f) => f.Value == comparsionFunction).Key;
+        }
+
+        public static DotGame.Graphics.CullMode Convert(SharpDX.Direct3D11.CullMode cullMode)
+        {
+            if (!cullModes.ContainsValue(cullMode))
+                throw new NotImplementedException();
+            return cullModes.First((f) => f.Value == cullMode).Key;
         }
     }
 }

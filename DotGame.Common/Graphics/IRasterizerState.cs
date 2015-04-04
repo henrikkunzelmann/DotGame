@@ -6,8 +6,8 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
-    public enum CullMode
+    public interface IRasterizerState : IGraphicsObject
     {
-        None, Front, Back
+        RasterizerStateInfo Info { get; }
     }
 }

@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 
 namespace DotGame.Graphics
 {
-    public enum CullMode
+    public enum FillMode
     {
-        None, Front, Back
+        WireFrame,
+        Solid
     }
 }
