@@ -64,11 +64,6 @@ namespace DotGame.Audio
         int MaxRoutes { get; }
 
         /// <summary>
-        /// Ruft den IMixerChannel ab, in den alle ISoundInstance-Instanzen standardmäßig geroutet werden.
-        /// </summary>
-        IMixerChannel MasterChannel { get; }
-
-        /// <summary>
         /// Ruft die IAudioListener-Instanz ab, die den Beobachter darstellt.
         /// </summary>
         IAudioListener Listener { get; }

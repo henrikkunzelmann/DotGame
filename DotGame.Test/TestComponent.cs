@@ -5,11 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
 using DotGame.Utils;
+using DotGame.Audio;
 
 namespace DotGame.Test
 {
     public class TestComponent : GameComponent
     {
+        public ISoundInstance Visualize;
+
         private IRasterizerState rasterizerState;
         private IShader shader;
         private IConstantBuffer constantBuffer;
@@ -104,7 +107,8 @@ namespace DotGame.Test
             var view = Matrix.CreateLookAt(new Vector3(0, 0, 5f), new Vector3(0, 0, 0), Vector3.UnitY);
             var proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.PI / 4f, GraphicsDevice.DefaultWindow.Width / (float)GraphicsDevice.DefaultWindow.Height, 0.1f, 100.0f);
             var worldViewProj =
-                  Matrix.CreateRotationX(time)
+                  Matrix.CreateScale(Visualize != null ? Visualize.Peak : 1.0f)
+                * Matrix.CreateRotationX(time)
                 * Matrix.CreateRotationY(time * 2)
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();

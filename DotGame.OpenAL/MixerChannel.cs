@@ -14,11 +14,16 @@ namespace DotGame.OpenAL
             get { return effect; }
             set
             {
-                effect = (Effect)value;
-                if (effect == null)
+                if (value == null)
+                {
+                    effect = null;
                     AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, 0);
+                }
                 else
+                {
+                    effect = AudioDeviceInternal.Cast<Effect>(value, "Effect");
                     AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, effect.ID);
+                }
             }
         }
         private Effect effect;

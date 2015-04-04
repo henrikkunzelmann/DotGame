@@ -9,26 +9,26 @@ namespace DotGame.Audio
     /// <summary>
     /// Stellt Methoden zum Erstellen von Ressourcen bereit.
     /// </summary>
-    public interface IAudioFactory : IEquatable<IAudioFactory>
+    public interface IAudioFactory : IDisposable, IEquatable<IAudioFactory>
     {
         /// <summary>
-        /// Erstellt einen Sound, der später zum Abspielen instanziiert werden kann.
+        /// Ruft das IAudioDevice ab, das dieser IAudioFactory zugeordnet ist.
         /// </summary>
-        /// <param name="file">Die Datei, aus der der Sound geladen wird.</param>
-        /// <param name="supports3D">Gibt an, ob der Sound für lokalisierbares 3D konfiguriert werden soll. Wenn true, wird je ein Buffer für jeden Channel erzeugt.</param>
-        /// <returns>Den Sound.</returns>
-        /// <remarks>Unterstütze Formate: wav, ogg/vorbis</remarks>
-        [Obsolete("Use CreateSound(ISampleSource, bool) instead.")]
-        ISound CreateSound(string file, bool supports3D);
+        IAudioDevice AudioDevice { get; }
+
+        /// <summary>
+        /// Ruft einen Wert ab, der angibt, ob das Objekt verworfen wurde.
+        /// </summary>
+        bool IsDisposed { get; }
 
         /// <summary>
         /// Erstellt einen Sound, der später zum Abspielen instanziiert werden kann.
         /// </summary>
-        /// <param name="source">Die SampleSource, aus der die Rohdaten geladen werden.</param>
-        /// <param name="supports3D">Gibt an, ob der Sound für lokalisierbares 3D konfiguriert werden soll. Wenn true, wird je ein Buffer für jeden Channel erzeugt.</param>
+        /// <param name="file">Die Datei, aus der der Sound geladen wird.</param>
+        /// <param name="flags">Die SoundFlags, die für diesen Sound benutzt werden sollen</param>
         /// <returns>Den Sound.</returns>
         /// <remarks>Unterstütze Formate: wav, ogg/vorbis</remarks>
-        ISound CreateSound(ISampleSource source, bool supports3D);
+        ISound CreateSound(string file, SoundFlags flags);
 
         /// <summary>
         /// Erstellt eine ISampleSource-Instanz für die angegebene Datei, die zum Laden bzw. Streamen von Audio genutzt werden kann.

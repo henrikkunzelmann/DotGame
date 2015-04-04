@@ -8,6 +8,7 @@ using DotGame.Utils;
 using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using System.Collections.ObjectModel;
+using System.Threading;
 
 namespace DotGame.OpenAL
 {
@@ -27,13 +28,14 @@ namespace DotGame.OpenAL
         public ReadOnlyCollection<string> Extensions { get; private set; }
         public int MaxRoutes { get; private set; }
 
-        public IMixerChannel MasterChannel { get; private set; }
         public IAudioListener Listener { get; private set; }
 
         internal readonly OpenTK.Audio.AudioContext Context;
         internal readonly OpenTK.Audio.OpenAL.EffectsExtension Efx;
 
-        private readonly IntPtr DeviceHandle;
+        private readonly IntPtr deviceHandle;
+        private readonly Task updateTask;
+        private readonly CancellationTokenSource updateTaskCancelation;
 
         internal static void CheckALError()
         {
@@ -44,43 +46,7 @@ namespace DotGame.OpenAL
             }
         }
 
-        internal void CheckAlcError()
-        {
-            var error = Alc.GetError(DeviceHandle);
-            if (error != AlcError.NoError)
-            {
-                throw new InvalidOperationException(error.ToString());
-            }
-        }
-
-        internal static ALFormat GetFormat(AudioFormat format, int channels)
-        {
-            switch (format)
-            {
-                case AudioFormat.Byte8:
-                    if (channels == 1)
-                        return ALFormat.Mono8;
-                    else if (channels == 2)
-                        return ALFormat.Stereo8;
-                    break;
-                case AudioFormat.Short16:
-                    if (channels == 1)
-                        return ALFormat.Mono16;
-                    else if (channels == 2)
-                        return ALFormat.Stereo16;
-                    break;
-                case AudioFormat.Float32:
-                    if (channels == 1)
-                        return ALFormat.MonoFloat32Ext;
-                    else if (channels == 2)
-                        return ALFormat.StereoFloat32Ext;
-                    break;
-            }
-
-            throw new NotImplementedException("Format {0} with {1} channels is not supported!");
-        }
-
-        public AudioDevice() : this(null)
+        public AudioDevice() : this(DefaultDevice)
         {
         }
 
@@ -94,24 +60,24 @@ namespace DotGame.OpenAL
             Efx = new EffectsExtension();
             CheckAlcError();
 
-            DeviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
+            deviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
             int[] val = new int[4];
             DeviceName = Context.CurrentDevice;
             VendorName = AL.Get(ALGetString.Vendor);
             Renderer = AL.Get(ALGetString.Renderer);
             DriverVersion = AL.Get(ALGetString.Version);
             int major, minor;
-            Alc.GetInteger(DeviceHandle, AlcGetInteger.MajorVersion, 1, val);
+            Alc.GetInteger(deviceHandle, AlcGetInteger.MajorVersion, 1, val);
             major = val[0];
-            Alc.GetInteger(DeviceHandle, AlcGetInteger.MinorVersion, 1, val);
+            Alc.GetInteger(deviceHandle, AlcGetInteger.MinorVersion, 1, val);
             minor = val[0];
             Version = new Version(major, minor);
-            Alc.GetInteger(DeviceHandle, AlcGetInteger.EfxMajorVersion, 1, val);
+            Alc.GetInteger(deviceHandle, AlcGetInteger.EfxMajorVersion, 1, val);
             major = val[0];
-            Alc.GetInteger(DeviceHandle, AlcGetInteger.EfxMinorVersion, 1, val);
+            Alc.GetInteger(deviceHandle, AlcGetInteger.EfxMinorVersion, 1, val);
             minor = val[0];
             EfxVersion = new Version(major, minor);
-            Alc.GetInteger(DeviceHandle, AlcGetInteger.EfxMaxAuxiliarySends, 1, val);
+            Alc.GetInteger(deviceHandle, AlcGetInteger.EfxMaxAuxiliarySends, 1, val);
             MaxRoutes = val[0];
             Extensions = new List<string>(AL.Get(ALGetString.Extensions).Split(' ')).AsReadOnly();
 
@@ -122,9 +88,11 @@ namespace DotGame.OpenAL
             LogDiagnostics(LogLevel.Verbose);
 
             Factory = new AudioFactory(this);
-            MasterChannel = Factory.CreateMixerChannel("Master");
             Listener = new AudioListener(this);
             Listener.Orientation(Vector3.UnitY, Vector3.UnitZ);
+
+            updateTaskCancelation = new CancellationTokenSource();
+            updateTask = Task.Factory.StartNew(Update);
         }
 
         ~AudioDevice()
@@ -149,14 +117,73 @@ namespace DotGame.OpenAL
             }
         }
 
+        public T Cast<T>(IAudioObject obj, string parameterName) where T : class, IAudioObject
+        {
+            T ret = obj as T;
+            if (ret == null)
+                throw new ArgumentException("AudioObject is not part of this api.", parameterName);
+            if (obj.AudioDevice != this)
+                throw new ArgumentException("AudioDevice is not part of this audio device.", parameterName);
+            return ret;
+        }
+
+        internal void CheckAlcError()
+        {
+            var error = Alc.GetError(deviceHandle);
+            if (error != AlcError.NoError)
+            {
+                throw new InvalidOperationException(error.ToString());
+            }
+        }
+
+        private void Update()
+        {
+            var token = updateTaskCancelation.Token;
+            token.ThrowIfCancellationRequested();
+
+            while (true)
+            {
+                if (updateTaskCancelation.Token.IsCancellationRequested)
+                {
+                    Log.Debug("Stopping Audiothread...");
+                    break;
+                }
+
+                var factory = (AudioFactory)Factory;
+                // TODO (Joex3): AudioObject.Update?
+                AudioObject obj;
+                foreach (var reference in factory.Objects)
+                {
+                    if (reference.TryGetTarget(out obj))
+                    {
+                        if (obj is Sound)
+                        {
+                            ((Sound)obj).Update();
+                        }
+                    }
+                }
+
+                Thread.Sleep(100);
+            }
+        }
+
         public void Dispose()
         {
             Log.Info("AudioDevice.Dispose() called!");
+
             Dispose(true);
+            GC.SuppressFinalize(this);
         }
 
         private void Dispose(bool isDisposing)
         {
+            updateTaskCancelation.Cancel();
+            updateTask.Wait(2000);
+
+            Factory.Dispose();
+            CheckAlcError();
+            CheckALError();
+
             Context.Dispose();
             IsDisposed = true;
         }
@@ -175,7 +202,7 @@ namespace DotGame.OpenAL
         public bool Equals(IAudioDevice other)
         {
             if (other is AudioDevice)
-                return DeviceHandle == ((AudioDevice)other).DeviceHandle;
+                return deviceHandle == ((AudioDevice)other).deviceHandle;
             return false;
         }
 
@@ -185,7 +212,7 @@ namespace DotGame.OpenAL
             unchecked
             {
                 int hash = 17;
-                hash = hash * 23 + DeviceHandle.GetHashCode();
+                hash = hash * 23 + deviceHandle.GetHashCode();
                 return hash;
             }
         }
@@ -195,7 +222,7 @@ namespace DotGame.OpenAL
         {
             var builder = new StringBuilder();
             builder.Append("[AudioDevice Handle: ");
-            builder.Append(DeviceHandle);
+            builder.Append(deviceHandle);
             builder.Append(", Device: ");
             builder.Append(DeviceName);
             builder.Append("]");

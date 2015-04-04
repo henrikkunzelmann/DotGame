@@ -6,6 +6,9 @@ using System.Threading.Tasks;
 
 namespace DotGame.Audio
 {
+    /// <summary>
+    /// Stellt einen Hall-Effekt dar.
+    /// </summary>
     public interface IEffectReverb : IEffect
     {
         /// <summary>

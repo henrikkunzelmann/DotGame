@@ -11,14 +11,16 @@ namespace DotGame.OpenAL
     public class WaveSampleSource : AudioObject, ISampleSource
     {
         public long TotalSamples { get; private set; }
-        public long Position { get { AssertNotDisposed(); return position; } set { AssertNotDisposed(); position = value; } }
+        public long Position { get { AssertNotDisposed(); return position; } set { AssertNotDisposed(); reader.BaseStream.Position = startOffset + bytesPerSample * value; position = value; } }
 
         public AudioFormat NativeFormat { get; private set; }
         public int Channels { get; private set; }
         public int SampleRate { get; private set; }
 
         private long position;
+        private long startOffset;
         private BinaryReader reader;
+        private int bytesPerSample;
 
         public WaveSampleSource(AudioDevice audioDevice, string file) : base(audioDevice)
         {
@@ -63,60 +65,76 @@ namespace DotGame.OpenAL
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count < 1."));
             if (channels > 2)
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count > 2."));
+            
             this.Channels = channels;
-            // TODO Herausfinden, warum dataSize bei veränderter SampleRate gleich bleibt.
-            this.TotalSamples = dataSize / (bitDepth / 8) / channels;
+            // TODO (Joex3): Herausfinden, warum dataSize bei veränderter SampleRate gleich bleibt.
+            this.TotalSamples = dataSize / (bitDepth / 8);
             this.SampleRate = sampleRate;
+
+            startOffset = reader.BaseStream.Position;
+            bytesPerSample = bitDepth / 8;
         }
 
         public float[] ReadSamples(int count)
         {
             AssertNotDisposed();
+            count = Math.Min(count, (int)(TotalSamples - Position));
             float[] samples = new float[count];
-            ReadSamples(samples, 0, count);
+            ReadSamples(0, count, samples);
             return samples;
         }
 
-        public void ReadSamples(float[] buffer, int offset, int count)
+        public void ReadSamples(int offset, int count, float[] buffer)
         {
             AssertNotDisposed();
+
+            if (count < 0)
+                throw new ArgumentOutOfRangeException("count", "count must be >= 0.");
+            if (offset < 0)
+                throw new ArgumentOutOfRangeException("offset");
+            if (offset + count > buffer.Length)
+                throw new ArgumentOutOfRangeException("count", "offset + count must be <= buffer.Length.");
+
+
             switch (NativeFormat)
             {
                 case AudioFormat.Byte8:
                     {
                         var arr = reader.ReadBytes(count);
-                        Parallel.For(0, count, (i) => buffer[offset + i] = (float)(arr[i] / (float)byte.MaxValue * 2) - 1);
+                        Parallel.For(0, arr.Length, (i) => buffer[offset + i] = (float)(arr[i] / (float)byte.MaxValue * 2) - 1);
                         break;
                     }
 
                 case AudioFormat.Short16:
                     {
                         var arr = reader.ReadBytes(count * 2);
-                        Parallel.For(0, count, (i) => buffer[offset + i] = (arr[i * 2] + (arr[i * 2 + 1] << 8)) / ((float)ushort.MaxValue * 2) - 1);
+                        Parallel.For(0, arr.Length / 2, (i) => buffer[offset + i] = (arr[i * 2] + (arr[i * 2 + 1] << 8)) / (float)short.MaxValue - 1);
                         break;
                     }
 
                 case AudioFormat.Float32:
                     {
                         var arr = reader.ReadBytes(count * 4);
-                        Parallel.For(0, count, (i) => buffer[offset + i] = BitConverter.ToSingle(arr, i * 4));
+                        Parallel.For(0, arr.Length / 4, (i) => buffer[offset + i] = BitConverter.ToSingle(arr, i * 4) / 2); // / 2, da sonst die Werte im Bereich von -2 bis 2 sind. Das sollte eigentlich nicht passieren...
                         break;
                     }
             }
+
+            position = Math.Min(position + count, TotalSamples);
         }
 
         public float[] ReadAll()
         {
             AssertNotDisposed();
-            float[] samples = new float[TotalSamples * Channels];
-            ReadAll(samples, 0);
+            float[] samples = new float[(int)(TotalSamples - Position)];
+            ReadAll(0, samples);
             return samples;
         }
 
-        public void ReadAll(float[] buffer, int offset)
+        public void ReadAll(int offset, float[] buffer)
         {
             AssertNotDisposed();
-            ReadSamples(buffer, offset, (int)TotalSamples * Channels);
+            ReadSamples(offset, (int)TotalSamples, buffer);
         }
 
         protected override void Dispose(bool isDisposing)

@@ -4,51 +4,104 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Audio;
+using System.Collections.ObjectModel;
+using System.IO;
 
 namespace DotGame.OpenAL
 {
-    public class AudioFactory : AudioObject, IAudioFactory
+    public sealed class AudioFactory : IAudioFactory
     {
-        public AudioFactory(AudioDevice audioDevice) : base(audioDevice)
+        public IAudioDevice AudioDevice { get; private set; }
+        public bool IsDisposed { get; private set; }
+
+        internal AudioDevice AudioDeviceInternal { get; private set; }
+
+        internal ReadOnlyCollection<WeakReference<AudioObject>> Objects { get { return objects.AsReadOnly(); } }
+        private readonly List<WeakReference<AudioObject>> objects;
+
+        public AudioFactory(AudioDevice audioDevice)
         {
+            this.AudioDevice = audioDevice;
+            this.AudioDeviceInternal = audioDevice;
+
+            objects = new List<WeakReference<AudioObject>>();
         }
 
-        public ISound CreateSound(string file, bool supports3D)
+        ~AudioFactory()
         {
-            var source = CreateSampleSource(file);
-            return new Sound(AudioDeviceInternal, source, supports3D);
+            Dispose(false);
         }
 
-        public ISound CreateSound(ISampleSource source, bool supports3D)
+        public ISound CreateSound(string file, SoundFlags flags)
         {
-            return new Sound(AudioDeviceInternal, source, supports3D);
+            return Register(new Sound(AudioDeviceInternal, file, flags));
         }
 
         public ISampleSource CreateSampleSource(string file)
         {
+            if (string.IsNullOrEmpty(file))
+                throw new ArgumentNullException("file");
+
             var magic = GetMagic(file);
             if (magic == ".wav")
-                return new WaveSampleSource(AudioDeviceInternal, file);
+                return Register(new WaveSampleSource(AudioDeviceInternal, file));
             else if (magic == ".ogg")
-                return new VorbisSampleSource(AudioDeviceInternal, file);
+                return Register(new VorbisSampleSource(AudioDeviceInternal, file));
 
             throw new NotSupportedException(magic);
         }
 
         public IMixerChannel CreateMixerChannel(string name)
         {
-            return new MixerChannel(AudioDeviceInternal, name);
+            return Register(new MixerChannel(AudioDeviceInternal, name));
         }
 
         public IEffectReverb CreateReverb()
         {
-            return new EffectReverb(AudioDeviceInternal);
+            return Register(new EffectReverb(AudioDeviceInternal));
+        }
+
+        private T Register<T>(T obj) where T : AudioObject
+        {
+            objects.Add(new WeakReference<AudioObject>(obj));
+            return obj;
         }
 
         private string GetMagic(string file)
         {
             // TODO (Joex3): besseres handlen.
             return System.IO.Path.GetExtension(file);
+        }
+
+        /// <inheritdoc/>
+        public void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            Dispose(true);
+            GC.SuppressFinalize(this);
+        }
+
+        private void AssertNotDisposed()
+        {
+            if (AudioDevice.IsDisposed)
+                throw new ObjectDisposedException(AudioDevice.GetType().FullName);
+
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        private void Dispose(bool isDisposing)
+        {
+            foreach (var obj in objects)
+            {
+                AudioObject target;
+                if (obj.TryGetTarget(out target))
+                {
+                    target.Dispose();
+                }
+            }
         }
 
         /// <inheritdoc/>

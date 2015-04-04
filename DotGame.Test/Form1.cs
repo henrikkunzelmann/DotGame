@@ -18,21 +18,15 @@ namespace DotGame.Test
     {
         public Engine Engine { get; private set; }
 
-        ISoundInstance instance;
-        IEffectReverb reverb;
-        float t;
+        private readonly TestComponent component;
+        private ISound stream;
+        private ISoundInstance streamInstance;
+        private ISound threedee; // LOOL
+        private ISoundInstance threedeeInstance;
         
         public Form1()
         {
             InitializeComponent();
-
-            var props = typeof(Color).GetProperties(System.Reflection.BindingFlags.Public | System.Reflection.BindingFlags.Static);
-            foreach (var prop in props)
-            {
-                comboBox1.Items.Add(prop.GetValue(null));
-                comboBox1.SelectedItem = Color.CornflowerBlue;
-            }
-            comboBox1.Update();
 
             Engine = new Engine(new EngineSettings()
             {
@@ -40,23 +34,16 @@ namespace DotGame.Test
                 AudioAPI = AudioAPI.OpenAL
             }, splitContainer1.Panel1);
 
+            Engine.AddComponent(component = new TestComponent(Engine));
+
             Engine.AudioDevice.Listener.Gain = 0.1f;
 
-            var source = Engine.AudioDevice.Factory.CreateSampleSource("16-44100.wav");
-            var sound = Engine.AudioDevice.Factory.CreateSound(source, true);
-            reverb = Engine.AudioDevice.Factory.CreateReverb();
-            reverb.Density = 0.2f;
-            reverb.Gain = 0.05f;
-            Engine.AudioDevice.MasterChannel.Effect = reverb;
-            propertyGrid1.SelectedObject = reverb;
+            stream = Engine.AudioDevice.Factory.CreateSound("test.ogg", SoundFlags.Streamed | SoundFlags.AllowRead);
+            streamInstance = stream.CreateInstance();
+            component.Visualize = streamInstance;
 
-            instance = sound.CreateInstance(true);
-            instance.Pitch = 1f;
-            instance.IsLooping = true;
-            instance.Position = new Vector3(0, 8, 20);
-            instance.Play(); // Uncommenten zum Abspielen 
-
-            Engine.AddComponent(new TestComponent(Engine));
+            threedee = Engine.AudioDevice.Factory.CreateSound("16-44100.wav", SoundFlags.Support3D);
+            threedeeInstance = threedee.CreateInstance();
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)
@@ -66,14 +53,100 @@ namespace DotGame.Test
             base.OnFormClosing(e);
         }
 
-        private void timer1_Tick(object sender, EventArgs e)
+        private void btnStreamPlay_Click(object sender, EventArgs e)
         {
-            Engine.AudioDevice.MasterChannel.Effect = reverb;
-            var newPos = new Vector3((float)Math.Cos(t) * 4, (float)Math.Sin(t) * 1, (float)Math.Sin(t) * 4);
-            var velocity = newPos - instance.Position;
-            instance.Position = newPos;
-            instance.Velocity = velocity;
-            t += 0.03f;
+            streamInstance.Play();
+        }
+
+        private void btnStreamPause_Click(object sender, EventArgs e)
+        {
+            streamInstance.Pause();
+        }
+
+        private void btnStreamStop_Click(object sender, EventArgs e)
+        {
+            streamInstance.Stop();
+        }
+
+        private void timer_Tick(object sender, EventArgs e)
+        {
+            lbStreamQueued.Text = streamInstance.StreamBufferCount.ToString();
+            lbStreamProcessed.Text = streamInstance.StreamBuffersProcessed.ToString();
+        }
+
+        private void tbStreamGain_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            streamInstance.Gain = (s.Value - s.Minimum) / (float)s.Maximum;
+        }
+
+        private void tbStreamPitch_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            streamInstance.Pitch = (s.Value - s.Minimum) / 25.0f;
+        }
+
+        private void cbStreamLoop_CheckedChanged(object sender, EventArgs e)
+        {
+            var s = sender as CheckBox;
+            streamInstance.IsLooping = s.Checked;
+        }
+
+        private void btn3DPlay_Click(object sender, EventArgs e)
+        {
+            threedeeInstance.Play();
+        }
+
+        private void btn3DPause_Click(object sender, EventArgs e)
+        {
+            threedeeInstance.Pause();
+        }
+
+        private void btn3DStop_Click(object sender, EventArgs e)
+        {
+            threedeeInstance.Stop();
+        }
+
+        private void cb3DLoop_CheckedChanged(object sender, EventArgs e)
+        {
+            var s = sender as CheckBox;
+            threedeeInstance.IsLooping = s.Checked;
+        }
+
+        private void tb3DGain_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            threedeeInstance.Gain = (s.Value - s.Minimum) / (float)s.Maximum;
+        }
+
+        private void tb3DPitch_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            threedeeInstance.Pitch = (s.Value - s.Minimum) / 25.0f;
+        }
+
+        private void tb3Dx_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            var pos = threedeeInstance.Position;
+            pos.X = s.Value / 10f;
+            threedeeInstance.Position = pos;
+        }
+
+        private void tb3Dy_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            var pos = threedeeInstance.Position;
+            pos.Y = s.Value / 10f;
+            threedeeInstance.Position = pos;
+        }
+
+        private void tb3Dz_Scroll(object sender, EventArgs e)
+        {
+            var s = sender as TrackBar;
+            var pos = threedeeInstance.Position;
+            pos.Z = s.Value / 10f;
+            threedeeInstance.Position = pos;
         }
     }
 }

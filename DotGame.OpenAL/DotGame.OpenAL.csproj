@@ -53,6 +53,7 @@
     <Compile Include="AudioObject.cs" />
     <Compile Include="Effect.cs" />
     <Compile Include="EffectReverb.cs" />
+    <Compile Include="EnumConverter.cs" />
     <Compile Include="MixerChannel.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="SoundInstance.cs" />

@@ -53,6 +53,8 @@
     <Compile Include="Audio\IAudioObject.cs" />
     <Compile Include="Audio\ISound.cs" />
     <Compile Include="Audio\ISoundInstance.cs" />
+    <Compile Include="Audio\SampleConverter.cs" />
+    <Compile Include="Audio\SoundFlags.cs" />
     <Compile Include="Graphics\AddressMode.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />

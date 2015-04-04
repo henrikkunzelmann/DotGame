@@ -10,17 +10,36 @@ namespace DotGame.OpenAL
 {
     public class SoundInstance : AudioObject, ISoundInstance
     {
+        public const int RINGBUFFER_SIZE = 4;
+        public const int RINGBUFFER_SAMPLES = 44100 * 4; // 4sec
+        public const int PEAK_FRAME_SIZE = 1000;
+
         public ISound Sound { get; private set; }
 
-        public Vector3 Position { get { AssertNotDisposed(); Assert3D(); return Get(ALSource3f.Position); } set { AssertNotDisposed(); Assert3D(); Set(ALSource3f.Position, value); } }
-        public Vector3 Velocity { get { AssertNotDisposed(); Assert3D(); return Get(ALSource3f.Velocity); } set { AssertNotDisposed(); Assert3D(); Set(ALSource3f.Velocity, value); } }
-        public float Gain { get { AssertNotDisposed(); return Get(ALSourcef.Gain); } set { AssertNotDisposed(); Set(ALSourcef.Gain, value); } }
-        public float Pitch { get { return Get(ALSourcef.Pitch); } set { AssertNotDisposed(); Set(ALSourcef.Pitch, value); } }
-        public bool IsLooping { get { AssertNotDisposed(); return Get(ALSourceb.Looping); } set { AssertNotDisposed(); Set(ALSourceb.Looping, value); } }
+        public float Peak { get { return GetPeak(); } }
+
+        public Vector3 Position { get { Assert3D(); return Get(ALSource3f.Position); } set { Assert3D(); Set(ALSource3f.Position, value); } }
+        public Vector3 Velocity { get { Assert3D(); return Get(ALSource3f.Velocity); } set { Assert3D(); Set(ALSource3f.Velocity, value); } }
+        public float Gain { get { return Get(ALSourcef.Gain); } set { Set(ALSourcef.Gain, value); } }
+        public float Pitch { get { return Get(ALSourcef.Pitch); } set { Set(ALSourcef.Pitch, value); } }
+        public bool IsLooping { get { return isLooping; } set { lock (locker) { if (!Sound.IsStreamed) Set(ALSourceb.Looping, value); isLooping = value; } } }
+        private bool isLooping = false;
+
+        public int StreamBufferCount { get { AssertStreamed(); return Get(ALGetSourcei.BuffersQueued); } }
+        public int StreamBuffersProcessed { get { AssertStreamed(); return Get(ALGetSourcei.BuffersProcessed); } }
 
         internal readonly List<int> IDs;
 
-        public SoundInstance(Sound sound, bool isPaused) : base(sound == null ? null : (AudioDevice)sound.AudioDevice)
+        private readonly ISampleSource source;
+        private readonly AudioBuffer<short>[,] ringbuffers;
+        private int ringBufferIndex;
+        private bool manualPause = false;
+
+        private readonly int directFilter;
+
+        private readonly object locker = new object();
+
+        public SoundInstance(Sound sound) : base(sound == null ? null : (AudioDevice)sound.AudioDevice)
         {
             if (sound == null)
                 throw new ArgumentNullException("sound");
@@ -30,64 +49,190 @@ namespace DotGame.OpenAL
             this.Sound = sound;
 
             IDs = new List<int>();
-            var buffers = sound.Buffers;
-            for (int i = 0; i < buffers.Count; i++)
+            if (sound.IsStreamed)
+                source = AudioDevice.Factory.CreateSampleSource(sound.File);
+            int bufferCount;
+            if (sound.IsStreamed)
+                bufferCount = sound.Supports3D ? source.Channels : 1;
+            else
+                bufferCount = sound.Buffers.Count;
+            
+            IDs.AddRange(AL.GenSources(bufferCount));
+            DotGame.OpenAL.AudioDevice.CheckALError();
+            
+            if (sound.IsStreamed)
             {
-                var ID = AL.GenSource();
-                DotGame.OpenAL.AudioDevice.CheckALError();
-                AL.Source(ID, ALSourcei.Buffer, buffers[i].ID);
-                DotGame.OpenAL.AudioDevice.CheckALError();
-                IDs.Add(ID);
+                ringbuffers = new AudioBuffer<short>[bufferCount, RINGBUFFER_SIZE];
+                for (int i = 0; i < bufferCount; i++)
+                    for (int j = 0; j < RINGBUFFER_SIZE; j++)
+                        ringbuffers[i, j] = new AudioBuffer<short>(AudioDeviceInternal, false);
+                ringBufferIndex = 0;
             }
-            Route(0, AudioDevice.MasterChannel);
+            else
+            {
+                var buffers = sound.Buffers;
+                for (int i = 0; i < buffers.Count; i++)
+                {
+                    AL.Source(IDs[i], ALSourcei.Buffer, buffers[i].ID);
+                    DotGame.OpenAL.AudioDevice.CheckALError();
+                }
+            }
 
-            if (!isPaused)
-                Play();
+            directFilter = AudioDeviceInternal.Efx.GenFilter();
+            AudioDeviceInternal.Efx.Filter(directFilter, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
+            Set(ALSourcei.EfxDirectFilter, directFilter);
+
+            sound.Register(this);
         }
 
         public void Route(int slot, IMixerChannel route)
         {
-            if (slot < 0 && slot >= AudioDevice.MaxRoutes)
-                throw new ArgumentOutOfRangeException("slot", "slot must be between 0 and MaxRoutes.");
-
-            for (int i = 0; i < IDs.Count; i++)
+            lock (locker)
             {
-                if (route == null)
-                    AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], 0, slot, 0);
-                else
-                    AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], ((MixerChannel)route).ID, slot, 0);
+                AssertNotDisposed();
+
+                if (slot < 0 && slot >= AudioDevice.MaxRoutes)
+                    throw new ArgumentOutOfRangeException("slot", "slot must be between 0 and MaxRoutes.");
+
+                for (int i = 0; i < IDs.Count; i++)
+                {
+                    if (route == null)
+                        AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], 0, slot, 0);
+                    else
+                        AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], ((MixerChannel)route).ID, slot, 0);
+                }
+                DotGame.OpenAL.AudioDevice.CheckALError();
             }
-            DotGame.OpenAL.AudioDevice.CheckALError();
         }
 
         public void Play()
         {
-            AssertNotDisposed();
-            for (int i = 0; i < IDs.Count; i++)
+            lock (locker)
             {
-                AL.SourcePlay(IDs[i]);
+                AssertNotDisposed();
+
+                var state = AL.GetSourceState(IDs[0]);
+                Console.WriteLine(state);
+                if (Sound.IsStreamed && ((state == ALSourceState.Stopped && !manualPause) || state == ALSourceState.Playing))
+                    Stop();
+                manualPause = false;
+
+                DotGame.OpenAL.AudioDevice.CheckALError();
+
+                for (int i = 0; i < IDs.Count; i++)
+                    AL.SourcePlay(IDs[i]);
+
+                DotGame.OpenAL.AudioDevice.CheckALError();
             }
-            DotGame.OpenAL.AudioDevice.CheckALError();
         }
 
         public void Pause()
         {
-            AssertNotDisposed();
-            for (int i = 0; i < IDs.Count; i++)
+            lock (locker)
             {
-                AL.SourcePause(IDs[i]);
+                AssertNotDisposed();
+                manualPause = true;
+
+                for (int i = 0; i < IDs.Count; i++)
+                    AL.SourcePause(IDs[i]);
+                DotGame.OpenAL.AudioDevice.CheckALError();
             }
-            DotGame.OpenAL.AudioDevice.CheckALError();
         }
 
         public void Stop()
         {
-            AssertNotDisposed();
-            for (int i = 0; i < IDs.Count; i++)
+            lock (locker)
             {
-                AL.SourceStop(IDs[i]);
+                AssertNotDisposed();
+                manualPause = false;
+
+                for (int i = 0; i < IDs.Count; i++)
+                {
+                    AL.SourceStop(IDs[i]);
+                    DotGame.OpenAL.AudioDevice.CheckALError();
+
+                    if (Sound.IsStreamed)
+                    {
+                        int processed;
+                        AL.GetSource(IDs[i], ALGetSourcei.BuffersProcessed, out processed);
+                        DotGame.OpenAL.AudioDevice.CheckALError();
+                        if (processed > 0)
+                            AL.SourceUnqueueBuffers(IDs[i], processed);
+                        DotGame.OpenAL.AudioDevice.CheckALError();
+                    }
+                }
+
+                if (Sound.IsStreamed)
+                {
+                    source.Position = 0;
+                    Refill(1);
+                }
             }
-            DotGame.OpenAL.AudioDevice.CheckALError();
+        }
+
+        internal void Update()
+        {
+            lock (locker)
+            {
+                AssertNotDisposed();
+
+                if (Sound.IsStreamed)
+                {
+                    int processed = Get(ALGetSourcei.BuffersProcessed);
+                    if (processed > 0)
+                    {
+                        int[] ids = new int[processed];
+                        foreach (var ID in IDs)
+                            AL.SourceUnqueueBuffers(ID, processed, ids);
+                        OpenAL.AudioDevice.CheckALError();
+
+                        Refill(processed);
+                    }
+
+                    int extra = RINGBUFFER_SIZE - Get(ALGetSourcei.BuffersQueued);
+                    if (extra > 0)
+                        Refill(extra);
+                }
+            }
+        }
+
+        private void Refill(int count)
+        {
+            lock (locker)
+            {
+                if (source.Position >= source.TotalSamples)
+                {
+                    if (isLooping)
+                        source.Position = 0;
+                    else
+                        return;
+                }
+
+                var state = AL.GetSourceState(IDs[0]);
+                for (int a = 0; a < count; a++)
+                {
+                    var sampleRate = source.SampleRate;
+                    var bufferCount = Sound.Supports3D ? source.Channels : 1;
+                    var channelCount = Sound.Supports3D ? 1 : source.Channels;
+                    float[] samples;
+                    samples = source.ReadSamples(RINGBUFFER_SAMPLES);
+                    if (samples.Length == 0)
+                        return;
+
+                    short[] samplesChannel = new short[samples.Length / bufferCount];
+                    for (int i = 0; i < bufferCount; i++)
+                    {
+                        SampleConverter.To16Bit(samples, samplesChannel, i, bufferCount);
+                        var buffer = ringbuffers[i, ringBufferIndex];
+                        buffer.SetData(AudioFormat.Short16, channelCount, samplesChannel, sampleRate);
+                        AL.SourceQueueBuffer(IDs[i], buffer.ID);
+                    }
+                    ringBufferIndex = (ringBufferIndex + 1) % RINGBUFFER_SIZE;
+                }
+                var newState = AL.GetSourceState(IDs[0]);
+                if (newState != ALSourceState.Playing && state == ALSourceState.Playing)
+                    Play();
+            }
         }
 
         private void Assert3D()
@@ -96,8 +241,31 @@ namespace DotGame.OpenAL
                 throw new NotSupportedException("This sound does not support 3D playback.");
         }
 
+        private void AssertStreamed()
+        {
+            if (!Sound.IsStreamed)
+                throw new NotSupportedException("This sound is not streamed.");
+        }
+
+        private void AssertReadable()
+        {
+            if (!Sound.AllowRead)
+                throw new NotSupportedException("This sound does not support reading sample data.");
+        }
+
         private void Set(ALSourceb param, bool value)
         {
+            AssertNotDisposed();
+            for (int i = 0; i < IDs.Count; i++)
+            {
+                AL.Source(IDs[i], param, value);
+            }
+            DotGame.OpenAL.AudioDevice.CheckALError();
+        }
+
+        private void Set(ALSourcei param, int value)
+        {
+            AssertNotDisposed();
             for (int i = 0; i < IDs.Count; i++)
             {
                 AL.Source(IDs[i], param, value);
@@ -107,6 +275,7 @@ namespace DotGame.OpenAL
 
         private void Set(ALSourcef param, float value)
         {
+            AssertNotDisposed();
             for (int i = 0; i < IDs.Count; i++)
             {
                 AL.Source(IDs[i], param, value);
@@ -116,6 +285,7 @@ namespace DotGame.OpenAL
 
         private void Set(ALSource3f param, Vector3 value)
         {
+            AssertNotDisposed();
             for (int i = 0; i < IDs.Count; i++)
             {
                 AL.Source(IDs[i], param, value.X, value.Y, value.Z);
@@ -125,7 +295,17 @@ namespace DotGame.OpenAL
 
         private bool Get(ALSourceb param)
         {
+            AssertNotDisposed();
             bool result;
+            AL.GetSource(IDs[0], param, out result);
+            DotGame.OpenAL.AudioDevice.CheckALError();
+            return result;
+        }
+
+        private int Get(ALGetSourcei param)
+        {
+            AssertNotDisposed();
+            int result;
             AL.GetSource(IDs[0], param, out result);
             DotGame.OpenAL.AudioDevice.CheckALError();
             return result;
@@ -133,6 +313,7 @@ namespace DotGame.OpenAL
 
         private float Get(ALSourcef param)
         {
+            AssertNotDisposed();
             float result;
             AL.GetSource(IDs[0], param, out result);
             DotGame.OpenAL.AudioDevice.CheckALError();
@@ -141,18 +322,79 @@ namespace DotGame.OpenAL
 
         private Vector3 Get(ALSource3f param)
         {
+            AssertNotDisposed();
             Vector3 result;
             AL.GetSource(IDs[0], param, out result.X, out result.Y, out result.Z);
             DotGame.OpenAL.AudioDevice.CheckALError();
             return result;
         }
 
+        private float GetPeak()
+        {
+            // TODO (Joex3): Der Code muss überarbeitet bzw optimiert werden.
+            AssertNotDisposed();
+            AssertReadable();
+            if (Sound.IsStreamed)
+            {
+                int sample = Get(ALGetSourcei.SampleOffset);
+                int bufferIndex = (ringBufferIndex + Get(ALGetSourcei.BuffersProcessed)) % RINGBUFFER_SIZE;
+                var b = ringbuffers[0, bufferIndex];
+                if (b.Data == null) // Buffer hat noch keine Daten -> 0.0f zurückgeben.
+                    return 0.0f;
+                while (sample >= b.Data.Count / b.Channels)
+                {
+                    sample -= b.Data.Count / b.Channels;
+                    if (bufferIndex + 1 == ringBufferIndex)
+                        throw new Exception();
+                    bufferIndex = (bufferIndex + 1) % RINGBUFFER_SIZE;
+                    b = ringbuffers[0, bufferIndex];
+                }
+                float maxPeak = 0.0f;
+                var bufferCount = Sound.Supports3D ? source.Channels : 1;
+                for (int i = 0; i < bufferCount; i++)
+                {
+                    var buffer = ringbuffers[i, bufferIndex];
+                    int frameSize = Math.Min(Math.Max((int)(buffer.Frequency * Pitch / PEAK_FRAME_SIZE), 1), buffer.Data.Count / buffer.Channels);
+                    int start = Math.Max(0, sample - frameSize);
+                    for (int j = 0; j < frameSize; j++)
+                        for (int k = 0; k < buffer.Channels; k++)
+                            maxPeak = Math.Max(maxPeak, Math.Abs(buffer.Data[k + (start + j) * buffer.Channels] / (float)short.MaxValue));
+                }
+
+                return maxPeak;
+            }
+            else
+            {
+                var sound = (Sound)Sound;
+                int sample = Get(ALGetSourcei.SampleOffset);
+                float maxPeak = 0.0f;
+                foreach (var buffer in sound.Buffers)
+                {
+                    int frameSize = Math.Min(Math.Max((int)(buffer.Frequency * Pitch / PEAK_FRAME_SIZE), 1), buffer.Data.Count / buffer.Channels);
+                    int start = Math.Max(0, sample - frameSize);
+                    for (int i = 0; i < frameSize; i++)
+                        for (int j = 0; j < buffer.Channels; j++)
+                            maxPeak = Math.Max(maxPeak, Math.Abs(buffer.Data[j + (start + i) * buffer.Channels] / (float)short.MaxValue));
+                }
+
+                return maxPeak;
+            }
+        }
+
         protected override void Dispose(bool isDisposing)
         {
             for (int i = 0; i < IDs.Count; i++)
-            {
                 AL.DeleteSource(IDs[i]);
+            OpenAL.AudioDevice.CheckALError();
+
+            if (Sound.IsStreamed)
+            {
+                foreach (var buffer in ringbuffers)
+                    buffer.Dispose();
             }
+
+            AudioDeviceInternal.Efx.DeleteFilter(directFilter);
+            OpenAL.AudioDevice.CheckALError();
 
             base.Dispose(isDisposing);
         }

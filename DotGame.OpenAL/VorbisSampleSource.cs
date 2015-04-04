@@ -11,7 +11,7 @@ namespace DotGame.OpenAL
     public class VorbisSampleSource : AudioObject, ISampleSource
     {
         public long TotalSamples { get; private set; }
-        public long Position { get { AssertNotDisposed(); return reader.DecodedPosition; } set { AssertNotDisposed(); reader.DecodedPosition = value; } }
+        public long Position { get { AssertNotDisposed(); return reader.DecodedPosition * Channels; } set { AssertNotDisposed(); reader.DecodedPosition = value / Channels; } }
 
         public AudioFormat NativeFormat { get; private set; }
         public int Channels { get; private set; }
@@ -22,22 +22,23 @@ namespace DotGame.OpenAL
         public VorbisSampleSource(AudioDevice audioDevice, string file) : base(audioDevice)
         {
             reader = new VorbisReader(file);
-
-            this.TotalSamples = reader.TotalSamples;
-            this.NativeFormat = AudioFormat.Float32;
+            
             this.Channels = reader.Channels;
+            this.TotalSamples = reader.TotalSamples * Channels;
+            this.NativeFormat = AudioFormat.Float32;
             this.SampleRate = reader.SampleRate;
         }
 
         public float[] ReadSamples(int count)
         {
             AssertNotDisposed();
+            count = Math.Min(count, (int)(TotalSamples - Position));
             float[] samples = new float[count];
-            ReadSamples(samples, 0, count);
+            ReadSamples(0, count, samples);
             return samples;
         }
 
-        public void ReadSamples(float[] buffer, int offset, int count)
+        public void ReadSamples(int offset, int count, float[] buffer)
         {
             AssertNotDisposed();
             reader.ReadSamples(buffer, offset, count);
@@ -46,15 +47,15 @@ namespace DotGame.OpenAL
         public float[] ReadAll()
         {
             AssertNotDisposed();
-            float[] samples = new float[TotalSamples * Channels];
-            ReadAll(samples, 0);
+            float[] samples = new float[(int)(TotalSamples - Position)];
+            ReadAll(0, samples);
             return samples;
         }
 
-        public void ReadAll(float[] buffer, int offset)
+        public void ReadAll(int offset, float[] buffer)
         {
             AssertNotDisposed();
-            reader.ReadSamples(buffer, offset, (int)TotalSamples * Channels);
+            reader.ReadSamples(buffer, offset, (int)TotalSamples);
         }
 
         protected override void Dispose(bool isDisposing)

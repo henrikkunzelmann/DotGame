@@ -11,62 +11,107 @@ namespace DotGame.OpenAL
 {
     public class Sound : AudioObject, ISound
     {
+        public string File { get; private set; }
+        public SoundFlags Flags { get; private set; }
         public bool Supports3D { get; private set; }
+        public bool IsStreamed { get; private set; }
+        public bool AllowRead { get; private set; }
 
-        internal ReadOnlyCollection<AudioBuffer> Buffers { get { return buffers.AsReadOnly(); } }
+        internal ReadOnlyCollection<AudioBuffer<short>> Buffers { get { return buffers.AsReadOnly(); } }
+        private readonly List<AudioBuffer<short>> buffers;
+        private readonly List<WeakReference<SoundInstance>> instances;
 
-        private readonly List<AudioBuffer> buffers;
-
-        public Sound(AudioDevice audioDevice, ISampleSource source, bool supports3D) : base(audioDevice)
+        public Sound(AudioDevice audioDevice, string file, SoundFlags flags) : base(audioDevice)
         {
-            var channels = source.Channels;
-            var sampleRate = source.SampleRate;
-            var samples = source.ReadAll();
+            if (string.IsNullOrEmpty(file))
+                throw new ArgumentNullException("file");
+            if (!System.IO.File.Exists(file))
+                throw new System.IO.FileNotFoundException("file", file);
 
-            buffers = new List<AudioBuffer>();
-            if (supports3D)
+            this.File = file;
+            this.Flags = flags;
+            this.Supports3D = flags.HasFlag(SoundFlags.Support3D);
+            this.IsStreamed = flags.HasFlag(SoundFlags.Streamed);
+            this.AllowRead = flags.HasFlag(SoundFlags.AllowRead);
+
+            instances = new List<WeakReference<SoundInstance>>();
+
+            if (!IsStreamed)
             {
-                var format = OpenAL.AudioDevice.GetFormat(AudioFormat.Short16, 1);
-                short[] samplesChannel = new short[samples.Length / channels];
-                for (int i = 0; i < channels; i++)
+                using (var source = AudioDevice.Factory.CreateSampleSource(file))
                 {
-                    for (int j = 0; j < samplesChannel.Length; j++)
+                    var bufferCount = Supports3D ? source.Channels : 1;
+                    var channelCount = Supports3D ? 1 : source.Channels;
+                    var sampleRate = source.SampleRate;
+                    var samples = source.ReadAll();
+
+                    buffers = new List<AudioBuffer<short>>();
+                    short[] samplesChannel = new short[samples.Length / bufferCount];
+                    for (int i = 0; i < bufferCount; i++)
                     {
-                        samplesChannel[j] = (short)(samples[i + j * channels] * short.MaxValue);
+                        SampleConverter.To16Bit(samples, samplesChannel, i, bufferCount);
+                        var buffer = new AudioBuffer<short>(audioDevice, !AllowRead);
+                        buffer.SetData(AudioFormat.Short16, channelCount, samplesChannel, sampleRate);
+                        buffers.Add(buffer);
                     }
-
-                    var buffer = new AudioBuffer(audioDevice);
-                    buffer.SetData(format, samplesChannel, sampleRate);
-                    buffers.Add(buffer);
                 }
             }
-            else
-            {
-                short[] samplesChannel = new short[samples.Length];
-                for (int i = 0; i < samplesChannel.Length; i++)
-                {
-                    samplesChannel[i] = (short)(samples[i] * short.MaxValue);
-                }
-
-                var format = OpenAL.AudioDevice.GetFormat(AudioFormat.Short16, source.Channels);
-                var buffer = new AudioBuffer(audioDevice);
-                buffer.SetData(format, samplesChannel, sampleRate);
-                buffers.Add(buffer);
-            }
-
-            this.Supports3D = supports3D;
         }
 
-        public ISoundInstance CreateInstance(bool isPaused)
+        public ISoundInstance CreateInstance()
         {
-            return new SoundInstance(this, isPaused);
+            return new SoundInstance(this);
+        }
+
+        internal void Register(SoundInstance instance)
+        {
+            if (instance == null)
+                throw new ArgumentNullException("instance");
+            if (instance.IsDisposed)
+                throw new ArgumentException("instance is disposed.", "instance");
+
+            instances.Add(new WeakReference<SoundInstance>(instance));
+        }
+
+        internal void Update()
+        {
+            if (IsStreamed)
+            {
+                SoundInstance instance;
+                for (int i = 0; i < instances.Count; i++)
+                {
+                    if (instances[i].TryGetTarget(out instance))
+                    {
+                        if (instance.IsDisposed)
+                            instances.RemoveAt(i--);
+                        else
+                            instance.Update();
+                    }
+                    else
+                    {
+                        instances.RemoveAt(i--);
+                    }
+                }
+            }
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            foreach (var buffer in buffers)
+            foreach (var inst in instances)
             {
-                buffer.Dispose();
+                SoundInstance target;
+                if (inst.TryGetTarget(out target))
+                {
+                    target.Dispose();
+                }
+            }
+
+            if (!IsStreamed)
+            {
+                foreach (var buffer in buffers)
+                {
+                    buffer.Dispose();
+                }
             }
 
             base.Dispose(isDisposing);
