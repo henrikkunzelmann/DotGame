@@ -59,11 +59,13 @@
     <Compile Include="EngineSettings.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="GameTime.cs" />
+    <Compile Include="Geometry\VertexPositionTextureColor.cs" />
     <Compile Include="Geometry\VertexPositionTexture.cs" />
     <Compile Include="Geometry\VertexPositionColor.cs" />
     <Compile Include="Geometry\VertexPosition.cs" />
     <Compile Include="GraphicsAPI.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SpriteBatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />
