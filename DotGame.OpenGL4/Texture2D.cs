@@ -39,7 +39,10 @@ namespace DotGame.OpenGL4
             this.TextureID = GL.GenTexture();
 
             graphicsDevice.StateManager.SetTexture(this, 0);
-            GL.TexImage2D(TextureTarget.Texture2D, 0, EnumConverter.Convert(Format), this.Width, this.Height, 0, PixelFormat.Alpha, PixelType.Byte, IntPtr.Zero);
+
+
+            Tuple<OpenTK.Graphics.OpenGL4.PixelFormat, PixelType> tuple = EnumConverter.ConvertPixelDataFormat(Format);
+            GL.TexImage2D(TextureTarget.Texture2D, 0, EnumConverter.Convert(Format), this.Width, this.Height, 0, tuple.Item1, tuple.Item2, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
             OpenGL4.GraphicsDevice.CheckGLError();
         }

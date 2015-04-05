@@ -67,7 +67,7 @@ namespace DotGame.OpenGL4
         public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            return Register(new Texture2D(graphicsDevice, width,height, 1, format));
         }
 
         public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)

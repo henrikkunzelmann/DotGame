@@ -27,6 +27,9 @@ namespace DotGame.OpenGL4
             {TextureFormat.RGB32_Float, Tuple.Create(PixelFormat.Rgb, PixelType.Float)},
             {TextureFormat.RGBA16_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
             {TextureFormat.RGBA8_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
+            {TextureFormat.Depth16, Tuple.Create(PixelFormat.DepthComponent, PixelType.UnsignedInt)},
+            {TextureFormat.Depth32, Tuple.Create(PixelFormat.DepthComponent, PixelType.Float)},
+            {TextureFormat.Depth24Stencil8, Tuple.Create(PixelFormat.DepthStencil, PixelType.UnsignedInt248)},
         };
 
         private static readonly Dictionary<string, string> shaderModels = new Dictionary<string, string>() 

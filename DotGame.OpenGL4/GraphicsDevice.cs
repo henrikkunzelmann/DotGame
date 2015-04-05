@@ -260,9 +260,9 @@ namespace DotGame.OpenGL4
             return GetFBO(depth, new IRenderTarget2D[] { color });
         }
 
-        internal Fbo GetFBO(IRenderTarget2D color)
+        internal Fbo GetFBO(IRenderTarget2D depth)
         {
-            return GetFBO(null, new IRenderTarget2D[] { color });
+            return GetFBO(depth, new IRenderTarget2D[] { });
         }
 
         internal static void CheckGLError()

@@ -14,9 +14,7 @@ namespace DotGame.OpenGL4
         private RenderStateInfo currentState = new RenderStateInfo();
         private VertexBuffer currentVertexBuffer;
         private IndexBuffer currentIndexBuffer;
-
-        private Fbo currentFbo;
-
+        
         private bool stateDirty;
         private bool vertexBufferDirty;
         private bool indexBufferDirty;
@@ -104,35 +102,40 @@ namespace DotGame.OpenGL4
 
             throw new NotImplementedException();
         }
-
-        public void SetRenderTargetBackBuffer()
-        {
-            throw new NotImplementedException();
-        }
-
+  
+                
         public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
         {
-            this.currentFbo = graphicsDevice.GetFBO(depth, color);
+            SetRenderTargets(depth, new IRenderTarget2D[] { color });
         }
 
         public void SetRenderTargetColor(IRenderTarget2D color)
         {
-            this.currentFbo = graphicsDevice.GetFBO(null, color);
+            SetRenderTargets(null, new IRenderTarget2D[] { color });
         }
 
         public void SetRenderTargetDepth(IRenderTarget2D depth)
         {
-            throw new NotImplementedException();
+            SetRenderTargets(depth, new IRenderTarget2D[]{});
         }
 
         public void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets)
         {
-            throw new NotImplementedException();
+            graphicsDevice.StateManager.Fbo = graphicsDevice.GetFBO(depth, colorTargets);
+
+            if (colorTargets != null && colorTargets.Length != 0)
+                GL.Viewport(0, 0, colorTargets[0].Width, colorTargets[0].Height);
+            else if (depth != null)
+                GL.Viewport(0, 0, depth.Width, depth.Height);
         }
         
         public void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets)
         {
-            throw new NotImplementedException();
+            SetRenderTargets(null, colorTargets);
+        }
+        public void SetRenderTargetBackBuffer()
+        {
+            graphicsDevice.StateManager.Fbo = null;
         }
 
         public void Clear(Color color)
@@ -338,9 +341,8 @@ namespace DotGame.OpenGL4
                     graphicsDevice.StateManager.IsMultisampleEnabled = currentState.Rasterizer.Info.IsMultisampleEnabled;
                     graphicsDevice.StateManager.IsScissorEnabled = currentState.Rasterizer.Info.IsScissorEnabled;
                     graphicsDevice.StateManager.IsAntialiasedLineEnable = currentState.Rasterizer.Info.IsAntialiasedLineEnabled;
-                    graphicsDevice.StateManager.DepthBias = currentState.Rasterizer.Info.DepthBias;
                     graphicsDevice.StateManager.DepthBiasClamp = currentState.Rasterizer.Info.DepthBiasClamp;
-                    graphicsDevice.StateManager.SlopeScaledDepthBias = currentState.Rasterizer.Info.SlopeScaledDepthBias;
+                    graphicsDevice.StateManager.SetPolygonOffset(currentState.Rasterizer.Info.DepthBiasClamp, currentState.Rasterizer.Info.SlopeScaledDepthBias);
                 }
             }
             if (vertexBufferDirty)

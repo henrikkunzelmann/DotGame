@@ -58,13 +58,20 @@ namespace DotGame.OpenGL4
 
             if (colorAttachments != null)
             {
+                DrawBuffersEnum[] buffers = new DrawBuffersEnum[colorAttachments.Length];
+
                 for (int i = 0; i < colorAttachments.Length; i++)
                 {
                     Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(colorAttachments[i], string.Format("attachments[{0}]", i));
 
                     GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, internalTexture.TextureID, 0);
+                    buffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
                 }
+
+                GL.DrawBuffers(buffers.Length, buffers);
             }
+            else            
+                GL.DrawBuffer(DrawBufferMode.None);
 
             if (depthAttachment != null)
             {

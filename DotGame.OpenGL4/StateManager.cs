@@ -253,22 +253,15 @@ namespace DotGame.OpenGL4
         internal int DepthBias 
         {
             get { return currentDepthBias; }
-            set
-            {
-                if (value != currentDepthBias)
-                {
-                    currentDepthBias = value;
-                }
-            }
         }
 
         internal float DepthBiasClamp
         {
             get { return currentDepthBiasClamp; }
-            set
+            set 
             {
-                if (value != currentDepthBias)
-                {
+                if (currentDepthBiasClamp != value)
+                { 
                     currentDepthBiasClamp = value;
                 }
             }
@@ -276,12 +269,15 @@ namespace DotGame.OpenGL4
         internal float SlopeScaledDepthBias
         {
             get { return currentSlopeScaledDepthBias; }
-            set
+        }
+        internal void SetPolygonOffset(float depthBias, float slopeScaledDepthBias)
+        {
+            if (depthBias != currentDepthBias || slopeScaledDepthBias != currentSlopeScaledDepthBias)
             {
-                if (value != currentSlopeScaledDepthBias)
-                {
-                    currentSlopeScaledDepthBias = value;
-                }
+                currentDepthBiasClamp = depthBias;
+                currentSlopeScaledDepthBias = slopeScaledDepthBias;
+                GL.PolygonMode(MaterialFace.FrontAndBack, EnumConverter.Convert(FillMode));
+                GL.PolygonOffset(currentDepthBias, currentSlopeScaledDepthBias);
             }
         }
 
@@ -292,7 +288,7 @@ namespace DotGame.OpenGL4
             this.currentSamplers = new IGraphicsObject[graphicsDevice.TextureUnits];
         }
 
-        public void SetSampler(ISampler sampler, int unit)
+        internal void SetSampler(ISampler sampler, int unit)
         {
             if (sampler == null)
             {
@@ -317,7 +313,7 @@ namespace DotGame.OpenGL4
             }
         }
 
-        public void SetTexture(ITexture2D texture, int unit)
+        internal void SetTexture(ITexture2D texture, int unit)
         {
             if (texture == null)
             {
