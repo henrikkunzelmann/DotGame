@@ -115,6 +115,9 @@ namespace DotGame.OpenGL4
         /// <returns></returns>
         internal int GetUniformLocation(string name)
         {
+            if (!uniformLocations.ContainsKey(name))
+                throw new Exception(string.Format("Uniform {0} not found"));
+
             return uniformLocations[name];
         }
 
@@ -123,10 +126,15 @@ namespace DotGame.OpenGL4
         /// </summary>
         /// <param name="name">Name des Uniform Blocks</param>
         /// <returns></returns>
-        internal int GetUniformBindingPoint(string name)
+        internal int GetUniformBlockBindingPoint(string name)
         {
             if (!uniformBindingPoints.ContainsKey(name))
             {
+                if (!uniformBlockLocations.ContainsKey(name))
+                    throw new Exception(string.Format("Uniform block {0} not found"));
+
+                graphicsDevice.StateManager.Shader = this;
+
                 int blockIndex = uniformBlockLocations[name];
                 int bindingPoint = uniformBindingPoints.Count;
                 GL.UniformBlockBinding(ProgramID, blockIndex, bindingPoint);
@@ -147,7 +155,13 @@ namespace DotGame.OpenGL4
             if (!textureUnits.ContainsKey(name))
             {
                 int textureUnit = textureUnits.Count;
-                GL.Uniform1(uniformLocations[name], textureUnit);
+
+                if (textureUnit > graphicsDevice.TextureUnits - 1)
+                    throw new PlatformNotSupportedException("No more texture units available");
+
+                graphicsDevice.StateManager.Shader = this;
+
+                GL.Uniform1(GetUniformLocation(name), textureUnit);
 
                 textureUnits[name] = textureUnit;
             }

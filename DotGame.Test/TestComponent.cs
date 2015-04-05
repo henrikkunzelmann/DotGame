@@ -83,16 +83,13 @@ namespace DotGame.Test
                  1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
             }, Geometry.VertexPositionTexture.Description);
 
-            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-            {
-                sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
-                rasterizerState = GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
-                    {
-                        CullMode = CullMode.Back,
-                        FillMode = FillMode.Solid,
-                        IsFrontCounterClockwise = true
-                    });
-            }
+            sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
+            rasterizerState = GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
+                {
+                    CullMode = CullMode.Back,
+                    FillMode = FillMode.Solid,
+                    IsFrontCounterClockwise = true
+                });
         }
 
         public override void Update(GameTime gameTime)
@@ -115,14 +112,17 @@ namespace DotGame.Test
 
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
 
-            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-                GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);
+            GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);
 
             GraphicsDevice.RenderContext.SetShader(shader);
             GraphicsDevice.RenderContext.SetConstantBuffer(shader, constantBuffer);
             GraphicsDevice.RenderContext.SetTexture(shader, "picture", texture);
-            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+
+            if(Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
                 GraphicsDevice.RenderContext.SetSampler(shader, "pictureSampler", sampler);
+            else
+                GraphicsDevice.RenderContext.SetSampler(shader, "picture", sampler);
+
             GraphicsDevice.RenderContext.Update(constantBuffer, worldViewProj);
             GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
             GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);

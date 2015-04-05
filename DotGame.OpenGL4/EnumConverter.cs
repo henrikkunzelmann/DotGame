@@ -22,6 +22,12 @@ namespace DotGame.OpenGL4
             {TextureFormat.Depth32, PixelInternalFormat.DepthComponent32},
             {TextureFormat.Depth24Stencil8, PixelInternalFormat.Depth24Stencil8},
         };
+        private static readonly Dictionary<TextureFormat, Tuple<PixelFormat, PixelType>> dataFormats = new Dictionary<TextureFormat, Tuple<PixelFormat, PixelType>>() 
+        {
+            {TextureFormat.RGB32_Float, Tuple.Create(PixelFormat.Rgb, PixelType.Float)},
+            {TextureFormat.RGBA16_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
+            {TextureFormat.RGBA8_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
+        };
 
         private static readonly Dictionary<string, string> shaderModels = new Dictionary<string, string>() 
         {
@@ -62,6 +68,48 @@ namespace DotGame.OpenGL4
             {CullMode.Back, CullFaceMode.Back},
         };
 
+        private static readonly Dictionary<FillMode, PolygonMode> fillModes = new Dictionary<FillMode, PolygonMode>()
+        {
+            {FillMode.Solid, PolygonMode.Fill},
+            {FillMode.WireFrame, PolygonMode.Line},
+        };
+
+        private static readonly Dictionary<AddressMode, TextureWrapMode> addressModes = new Dictionary<AddressMode, TextureWrapMode>()
+        {
+            {AddressMode.Border, TextureWrapMode.ClampToBorder},
+            {AddressMode.Clamp, TextureWrapMode.ClampToEdge},
+            {AddressMode.Mirror,  TextureWrapMode.MirroredRepeat},
+            {AddressMode.Wrap, TextureWrapMode.Repeat},
+        };
+
+        /// <summary>
+        /// Min, Mag, Mip
+        /// </summary>
+        private static readonly Dictionary<Tuple<TextureFilter, TextureFilter, TextureFilter>, Tuple<TextureMinFilter, TextureMagFilter>> filters = new Dictionary<Tuple<TextureFilter, TextureFilter, TextureFilter>, Tuple<TextureMinFilter, TextureMagFilter>>()
+        {
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Point, TextureFilter.Point), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest)},
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Point, TextureFilter.Linear), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.NearestMipmapLinear, TextureMagFilter.Nearest)},
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Linear, TextureFilter.Point), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Linear)},
+            { Tuple.Create(TextureFilter.Point, TextureFilter.Linear, TextureFilter.Linear), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.NearestMipmapLinear, TextureMagFilter.Linear)},
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Point, TextureFilter.Point), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.LinearMipmapNearest, TextureMagFilter.Nearest)},
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Point, TextureFilter.Linear), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.LinearMipmapLinear, TextureMagFilter.Nearest)},
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Linear, TextureFilter.Point), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.LinearMipmapNearest, TextureMagFilter.Linear)},
+            { Tuple.Create(TextureFilter.Linear, TextureFilter.Linear, TextureFilter.Linear), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.LinearMipmapLinear, TextureMagFilter.Linear)},
+            { Tuple.Create(TextureFilter.Anisotropic, TextureFilter.Anisotropic, TextureFilter.Anisotropic), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.LinearMipmapLinear, TextureMagFilter.Linear)},
+        };
+
+        private static readonly Dictionary<Comparison, int> comparisons = new Dictionary<Comparison, int>()
+        {
+            {Comparison.Always, (int)All.Always},
+            {Comparison.Equal, (int)All.Equal},
+            {Comparison.Greater, (int)All.Greater},
+            {Comparison.GreaterEqual, (int)All.Gequal},
+            {Comparison.Less, (int)All.Less},
+            {Comparison.LessEqual, (int)All.Lequal},
+            {Comparison.Never, (int)All.Never},
+            {Comparison.NotEqual, (int)All.Notequal},
+        };
+
         internal static PixelInternalFormat Convert(TextureFormat format)
         {
             if (!formats.ContainsKey(format))
@@ -74,6 +122,22 @@ namespace DotGame.OpenGL4
             if (!formats.ContainsValue(format))
                 throw new NotImplementedException();
             return formats.First((f) => f.Value == format).Key;
+        }
+
+        internal static Tuple<PixelFormat, PixelType> ConvertPixelDataFormat(TextureFormat format)
+        {
+            if (!dataFormats.ContainsKey(format))
+                throw new NotSupportedException("format is not supported");
+            return dataFormats[format];
+        }
+
+        internal static TextureFormat Convert(PixelFormat format, PixelType type)
+        {
+            var tuple = Tuple.Create<PixelFormat, PixelType>(format, type);
+
+            if (!dataFormats.ContainsValue(tuple))
+                throw new NotImplementedException();
+            return dataFormats.First((f) => f.Value == tuple).Key;
         }
 
         internal static OpenTK.Graphics.OpenGL4.PrimitiveType Convert(PrimitiveType primitiveType)
@@ -135,6 +199,74 @@ namespace DotGame.OpenGL4
                 throw new NotImplementedException();
 
             return cullModes.First((f) => f.Value == cullMode).Key;
+        }
+
+        internal static PolygonMode Convert(FillMode fillMode)
+        {
+            if (!fillModes.ContainsKey(fillMode))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return fillModes[fillMode];
+        }
+
+        internal static FillMode Convert(PolygonMode fillMode)
+        {
+            if (!fillModes.ContainsValue(fillMode))
+                throw new NotImplementedException();
+
+            return fillModes.First((f) => f.Value == fillMode).Key;
+        }
+
+        internal static TextureWrapMode Convert(AddressMode addressMode)
+        {
+            if (!addressModes.ContainsKey(addressMode))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return addressModes[addressMode];
+        }
+
+        internal static AddressMode Convert(TextureWrapMode addressMode)
+        {
+            if (!addressModes.ContainsValue(addressMode))
+                throw new NotImplementedException();
+
+            return addressModes.First((f) => f.Value == addressMode).Key;
+        }
+
+        internal static Tuple<TextureMinFilter, TextureMagFilter> Convert(TextureFilter min, TextureFilter mag, TextureFilter mip)
+        {
+            Tuple<TextureFilter, TextureFilter, TextureFilter> tuple = new Tuple<TextureFilter, TextureFilter, TextureFilter>(min, mag, mip);
+
+            if (!filters.ContainsKey(tuple))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return filters[tuple];
+        }
+
+        internal static Tuple<TextureFilter, TextureFilter, TextureFilter> Convert(TextureMinFilter min, TextureMagFilter mag)
+        {
+            Tuple<TextureMinFilter, TextureMagFilter> tuple = new Tuple<TextureMinFilter, TextureMagFilter>(min, mag);
+
+            if (!filters.ContainsValue(tuple))
+                throw new NotImplementedException();
+
+            return filters.First((f) => f.Value == tuple).Key;
+        }
+
+        internal static int Convert(Comparison comparison)
+        {
+            if (!comparisons.ContainsKey(comparison))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return comparisons[comparison];
+        }
+
+        internal static Comparison Convert(int comparison)
+        {
+            if (!comparisons.ContainsValue(comparison))
+                throw new NotImplementedException();
+
+            return comparisons.First((f) => f.Value == comparison).Key;
         }
     }
 }

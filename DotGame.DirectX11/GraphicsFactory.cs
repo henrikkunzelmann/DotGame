@@ -28,6 +28,8 @@ namespace DotGame.DirectX11
                 throw new ArgumentNullException("file");
             if (!File.Exists(file))
                 throw new ArgumentException("File does not exist.", "file");
+
+            // TODO (Robin): Texture2D.FromFile ist deprecated. Texturen mit Inhalt über ResourceManager laden
             return new Texture2D(graphicsDevice, (SharpDX.Direct3D11.Texture2D)SharpDX.Direct3D11.Texture2D.FromFile(graphicsDevice.Device, file, new SharpDX.Direct3D11.ImageLoadInformation()
                 {
                     Width = SharpDX.Direct3D11.ImageLoadInformation.FileDefaultValue,

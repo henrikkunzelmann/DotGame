@@ -36,13 +36,21 @@ namespace DotGame.OpenGL4
         internal StateManager StateManager { get; private set; }
 
         private IWindowContainer container;
+                
+        private List<Fbo> fboPool = new List<Fbo>();
 
+        //Hardware/ Driver Information
         internal int GLSLVersionMajor { get; private set; }
         internal int GLSLVersionMinor { get; private set; }
         internal int OpenGLVersionMajor { get; private set; }
         internal int OpenGLVersionMinor { get; private set; }
         internal bool HasAnisotropicFiltering { get; private set; }
         internal bool HasS3TextureCompression { get; private set; }
+        internal int TextureUnits { get; private set; }
+
+        //Sampler Values
+        internal int MaxAnisotropicFiltering { get; private set; }
+        internal int MaxTextureLoDBias { get; private set; }
 
         internal static int MipLevels(int width, int height, int depth = 0)
         {
@@ -138,8 +146,12 @@ namespace DotGame.OpenGL4
                 if (extension == "GL_EXT_texture_filter_anisotropic")
                 {
                     HasAnisotropicFiltering = true;
+                    MaxAnisotropicFiltering  = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
                 }
             }
+            TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
+            MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
+
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
@@ -223,6 +235,34 @@ namespace DotGame.OpenGL4
             ((GraphicsFactory)Factory).DisposeUnused();
 
             Context.SwapBuffers();
+        }
+
+        //RenderTarget
+        internal Fbo GetFBO(IRenderTarget2D depth, params IRenderTarget2D[] color)
+        {
+            for (int i = 0; i < fboPool.Count; i++)
+            {
+                if (fboPool[i].ColorAttachments == color && fboPool[i].DepthAttachment == depth)
+                {
+                    return fboPool[i];
+                }
+            }
+
+            GraphicsFactory factory = Cast<GraphicsFactory>(Factory, "factory");
+
+            Fbo fbo = factory.CreateFbo(depth, color);
+            fboPool.Add(fbo);
+            return fbo;
+        }
+
+        internal Fbo GetFBO(IRenderTarget2D depth, IRenderTarget2D color)
+        {
+            return GetFBO(depth, new IRenderTarget2D[] { color });
+        }
+
+        internal Fbo GetFBO(IRenderTarget2D color)
+        {
+            return GetFBO(null, new IRenderTarget2D[] { color });
         }
 
         internal static void CheckGLError()

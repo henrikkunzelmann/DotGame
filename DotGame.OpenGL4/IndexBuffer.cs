@@ -15,7 +15,7 @@ namespace DotGame.OpenGL4
         public int IndexCount { get; private set; }
         public int SizeBytes { get; private set; }
 
-        internal int IndexBufferID { get; private set; }
+        internal int IboID { get; private set; }
  
         public IndexBuffer(GraphicsDevice graphicsDevice) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
@@ -24,7 +24,7 @@ namespace DotGame.OpenGL4
             if (graphicsDevice.IsDisposed)
                 throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
 
-            IndexBufferID = GL.GenBuffer();
+            IboID = GL.GenBuffer();
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
@@ -48,7 +48,7 @@ namespace DotGame.OpenGL4
         protected override void Dispose(bool isDisposing)
         {
             if (!GraphicsDevice.IsDisposed)
-                GL.DeleteBuffer(IndexBufferID);
+                GL.DeleteBuffer(IboID);
         }
     }
 }

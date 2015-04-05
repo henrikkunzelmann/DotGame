@@ -16,19 +16,6 @@ namespace DotGame.OpenGL4
 {
     public class GraphicsFactory : GraphicsObject, IGraphicsFactory
     {
-        public static Dictionary<TextureFormat, PixelInternalFormat> TextureFormats = new Dictionary<TextureFormat, PixelInternalFormat>() 
-        {
-            {TextureFormat.RGB32_Float, PixelInternalFormat.Rgb32f},
-            {TextureFormat.DXT1, PixelInternalFormat.CompressedRgbaS3tcDxt1Ext},
-            {TextureFormat.DXT3, PixelInternalFormat.CompressedRgbaS3tcDxt3Ext},
-            {TextureFormat.DXT5, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext},
-            {TextureFormat.RGBA16_UIntNorm, PixelInternalFormat.Rgba16},
-            {TextureFormat.RGBA8_UIntNorm, PixelInternalFormat.Rgba8},
-            {TextureFormat.Depth16, PixelInternalFormat.DepthComponent16},
-            {TextureFormat.Depth32, PixelInternalFormat.DepthComponent32},
-            {TextureFormat.Depth24Stencil8, PixelInternalFormat.Depth24Stencil8},
-        };
-
         internal readonly List<GraphicsObject> DeferredDispose; // Wird zum disposen benutzt, um MakeCurrent Aufrufe zu vermeiden. Siehe DisposeUnused und Referenzen dazu.
         internal ReadOnlyCollection<WeakReference<GraphicsObject>> Objects { get { return objects.AsReadOnly(); } }
         private readonly List<WeakReference<GraphicsObject>> objects;
@@ -104,7 +91,8 @@ namespace DotGame.OpenGL4
         public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct
         {
             AssertCurrent();
-            VertexBuffer buffer = new VertexBuffer(graphicsDevice, description);
+
+            VertexBuffer buffer = Register(new VertexBuffer(graphicsDevice, description));
             buffer.SetData<T>(data);
             return buffer;
         }
@@ -112,7 +100,8 @@ namespace DotGame.OpenGL4
         public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format) where T : struct
         {
             AssertCurrent();
-            IndexBuffer buffer = new IndexBuffer(graphicsDevice);
+
+            IndexBuffer buffer = Register(new IndexBuffer(graphicsDevice));
             buffer.SetData<T>(data, format);
             return buffer;
         }
@@ -144,6 +133,8 @@ namespace DotGame.OpenGL4
 
         public IShader CompileShader(string name, ShaderCompileInfo vertex, ShaderCompileInfo pixel)
         {
+            AssertCurrent();
+
             if (name == null)
                 throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name))
@@ -160,7 +151,7 @@ namespace DotGame.OpenGL4
             string pixelCode = File.ReadAllText(pixel.File);
             pixelCode = CheckShaderVersion(name, pixelCode, pixel);
 
-            return new Shader(graphicsDevice, vertexCode, pixelCode);
+            return Register(new Shader(graphicsDevice, vertexCode, pixelCode));
         }
 
         private string CheckShaderVersion(string shaderName, string shaderCode, ShaderCompileInfo info)
@@ -213,12 +204,17 @@ namespace DotGame.OpenGL4
 
         public IRasterizerState CreateRasterizerState(RasterizerStateInfo info)
         {
-            throw new NotImplementedException();
+            return Register(new RasterizerState(graphicsDevice, info));
         }
 
         public ISampler CreateSampler(SamplerInfo info)
         {
-            throw new NotImplementedException();
+            return Register(new Sampler(this.graphicsDevice, info));
+        }
+
+        internal Fbo CreateFbo(IRenderTarget2D depth, params IRenderTarget2D[] color)
+        {
+            return Register(Fbo.CreateWithITexture2D(graphicsDevice, depth, color));
         }
 
         internal static void CheckGLError()

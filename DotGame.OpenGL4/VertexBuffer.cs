@@ -11,8 +11,8 @@ namespace DotGame.OpenGL4
 {
     internal class VertexBuffer : GraphicsObject, IVertexBuffer
     {
-        internal int VertexBufferObjectID { get; private set; }
-        internal int VertexArrayObjectID { get; private set; }
+        internal int VaoID { get; private set; }
+        internal int VboID { get; private set; }
 
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
@@ -27,8 +27,8 @@ namespace DotGame.OpenGL4
         internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            VertexArrayObjectID = GL.GenVertexArray();
-            VertexBufferObjectID = GL.GenBuffer();
+            VboID = GL.GenVertexArray();
+            VaoID = GL.GenBuffer();
             OpenGL4.GraphicsDevice.CheckGLError();
 
             this.Description = description;
@@ -55,7 +55,7 @@ namespace DotGame.OpenGL4
                 VertexCount = size / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
             }
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VertexBufferObjectID);
+            GL.BindBuffer(BufferTarget.ArrayBuffer, VaoID);
             GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw);
             OpenGL4.GraphicsDevice.CheckGLError();
         }
@@ -67,8 +67,8 @@ namespace DotGame.OpenGL4
 
             if (!GraphicsDevice.IsDisposed)
             {
-                GL.DeleteVertexArray(VertexArrayObjectID);
-                GL.DeleteBuffer(VertexBufferObjectID);
+                GL.DeleteVertexArray(VboID);
+                GL.DeleteBuffer(VaoID);
             }
         }
     }

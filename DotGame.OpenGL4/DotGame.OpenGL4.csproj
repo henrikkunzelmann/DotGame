@@ -50,8 +50,11 @@
   <ItemGroup>
     <Compile Include="ConstantBuffer.cs" />
     <Compile Include="EnumConverter.cs" />
+    <Compile Include="Fbo.cs" />
     <Compile Include="IndexBuffer.cs" />
+    <Compile Include="RasterizerState.cs" />
     <Compile Include="RenderContext.cs" />
+    <Compile Include="Sampler.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="ShaderPart.cs" />
     <Compile Include="StateManager.cs" />
