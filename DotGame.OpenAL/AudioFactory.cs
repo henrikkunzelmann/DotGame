@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotGame.Audio;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Threading;
 
 namespace DotGame.OpenAL
 {
@@ -16,7 +17,8 @@ namespace DotGame.OpenAL
 
         internal AudioDevice AudioDeviceInternal { get; private set; }
 
-        internal ReadOnlyCollection<WeakReference<AudioObject>> Objects { get { return objects.AsReadOnly(); } }
+        internal readonly ReadOnlyCollection<WeakReference<AudioObject>> Objects;
+        internal readonly ReaderWriterLockSlim ObjectsLock;
         private readonly List<WeakReference<AudioObject>> objects;
 
         public AudioFactory(AudioDevice audioDevice)
@@ -25,6 +27,8 @@ namespace DotGame.OpenAL
             this.AudioDeviceInternal = audioDevice;
 
             objects = new List<WeakReference<AudioObject>>();
+            Objects = objects.AsReadOnly();
+            ObjectsLock = new ReaderWriterLockSlim();
         }
 
         ~AudioFactory()
@@ -58,8 +62,16 @@ namespace DotGame.OpenAL
 
         private T Register<T>(T obj) where T : AudioObject
         {
-            objects.Add(new WeakReference<AudioObject>(obj));
-            return obj;
+            ObjectsLock.EnterWriteLock();
+            try
+            {
+                objects.Add(new WeakReference<AudioObject>(obj));
+                return obj;
+            }
+            finally
+            {
+                ObjectsLock.ExitWriteLock();
+            }
         }
 
         private string GetMagic(string file)

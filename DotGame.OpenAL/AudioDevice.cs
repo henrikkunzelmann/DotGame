@@ -153,15 +153,23 @@ namespace DotGame.OpenAL
                 var factory = (AudioFactory)Factory;
                 // TODO (Joex3): AudioObject.Update?
                 AudioObject obj;
-                foreach (var reference in factory.Objects)
+                factory.ObjectsLock.EnterReadLock();
+                try
                 {
-                    if (reference.TryGetTarget(out obj))
+                    foreach (var reference in factory.Objects)
                     {
-                        if (obj is Sound)
+                        if (reference.TryGetTarget(out obj))
                         {
-                            ((Sound)obj).Update();
+                            if (obj is Sound)
+                            {
+                                ((Sound)obj).Update();
+                            }
                         }
                     }
+                }
+                finally
+                {
+                    factory.ObjectsLock.ExitReadLock();
                 }
 
                 Thread.Sleep(100);
@@ -181,6 +189,7 @@ namespace DotGame.OpenAL
             updateTaskCancelation.Cancel();
             updateTask.Wait(2000);
 
+            updateTaskCancelation.Dispose();
             Factory.Dispose();
             CheckAlcError();
             CheckALError();
