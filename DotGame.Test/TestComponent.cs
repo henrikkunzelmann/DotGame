@@ -13,6 +13,7 @@ namespace DotGame.Test
     {
         public ISoundInstance Visualize;
 
+        private IRenderTarget2D depthBuffer;
         private IRasterizerState rasterizerState;
         private IShader shader;
         private IConstantBuffer constantBuffer;
@@ -36,6 +37,8 @@ namespace DotGame.Test
                 shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
             else
                 throw new NotImplementedException();
+
+            depthBuffer = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
 
             constantBuffer = shader.CreateConstantBuffer();
             vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
@@ -110,6 +113,8 @@ namespace DotGame.Test
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();
 
+            GraphicsDevice.RenderContext.SetRenderTargetBackBuffer();
+            GraphicsDevice.RenderContext.SetRenderTargetDepth(depthBuffer);
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
 
             GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);

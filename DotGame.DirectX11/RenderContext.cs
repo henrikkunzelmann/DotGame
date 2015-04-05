@@ -23,6 +23,7 @@ namespace DotGame.DirectX11
         private bool indexBufferDirty;
 
         private RenderTargetView currentColorTarget;
+        private RenderTargetView[] currentColorTargets;
         private DepthStencilView currentDepthTarget;
 
         private IRasterizerState currentRasterizer;
@@ -136,24 +137,30 @@ namespace DotGame.DirectX11
             }
         }
 
-        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
+        public void SetRenderTargetBackBuffer()
         {
-            if (color == null)
-                throw new ArgumentNullException("color");
-            var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
+            SetRenderTargetColor(graphicsDevice.BackBuffer);
+        }
+
+        public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
+        {
             if (depth == null)
                 throw new ArgumentNullException("depth");
             var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
+            if (color == null)
+                throw new ArgumentNullException("color");
+            var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
 
-            if (dxColor.RenderView == null)
-                throw new ArgumentException("Texture is not a color render target.", "color");
             if (dxDepth.DepthView == null)
                 throw new ArgumentException("Texture is not a depth render target.", "depth");
+            if (dxColor.RenderView == null)
+                throw new ArgumentException("Texture is not a color render target.", "color");
 
             if (currentColorTarget == dxColor.RenderView && currentDepthTarget == dxDepth.DepthView)
                 return;
 
             currentColorTarget = dxColor.RenderView;
+            currentColorTargets = null;
             currentDepthTarget = dxDepth.DepthView;
 
             context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
@@ -162,7 +169,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTargetColor(IRenderTarget2D color)
         {
-            if (color == null)
+            if (color == null) // TODO (henrik1235) color = null Rendering erlauben
                 throw new ArgumentNullException("color");
             var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
 
@@ -173,6 +180,7 @@ namespace DotGame.DirectX11
                 return;
 
             currentColorTarget = dxColor.RenderView;
+            currentColorTargets = null;
 
             context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
             context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
@@ -180,7 +188,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTargetDepth(IRenderTarget2D depth)
         {
-            if (depth == null)
+            if (depth == null) // TODO (henrik1235) depth = null Rendering erlauben
                 throw new ArgumentNullException("depth");
             var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
 
@@ -192,7 +200,39 @@ namespace DotGame.DirectX11
 
             currentDepthTarget = dxDepth.DepthView;
 
-            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
+            if (currentColorTarget != null)
+                context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
+            else if (currentColorTargets != null)
+                context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
+            else
+                context.OutputMerger.SetTargets(currentDepthTarget);
+        }
+
+        public void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets)
+        {
+            SetRenderTargetDepth(depth);
+            SetRenderTargetsColor(colorTargets);
+        }
+
+        public void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets)
+        {
+            if (colorTargets == null)
+                throw new ArgumentNullException("colorTargets");
+            if (colorTargets.Length == 0)
+                throw new ArgumentException("ColorTargets is empty.", "colorTargets");
+
+            RenderTargetView[] targets = new RenderTargetView[colorTargets.Length];
+            for (int i = 0; i < targets.Length; i++)
+            {
+                Texture2D target = graphicsDevice.Cast<Texture2D>(colorTargets[i], "colorTargets[" + i + "]");
+                if (target.RenderView == null)
+                    throw new ArgumentException("Texture at index " + i + " is not a color target", "colorTargets");
+                targets[i] = target.RenderView;
+            }
+
+            currentColorTarget = null;
+            currentColorTargets = targets;
+            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
         }
 
         public void SetShader(IShader shader)

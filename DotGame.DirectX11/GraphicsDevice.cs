@@ -18,8 +18,7 @@ namespace DotGame.DirectX11
         internal Device Device { get; private set; }
         private SwapChain swapChain;
 
-        private Texture2D backBuffer;
-        private Texture2D depthBuffer;
+        internal Texture2D BackBuffer { get; private set; }
 
         public bool IsDisposed { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
@@ -65,9 +64,8 @@ namespace DotGame.DirectX11
 
         private void InitBackbuffer()
         {
-            backBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
-            depthBuffer = (Texture2D)Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth16, false);
-            RenderContext.SetRenderTarget(backBuffer, depthBuffer);
+            BackBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
+            RenderContext.SetRenderTargetBackBuffer();
         }
 
         public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
@@ -110,8 +108,7 @@ namespace DotGame.DirectX11
             if (IsDisposed)
                 return;
 
-            backBuffer.Dispose();
-            depthBuffer.Dispose();
+            BackBuffer.Dispose();
             Factory.Dispose();
 
             GraphicsObject[] created = CreatedObjects.ToArray();

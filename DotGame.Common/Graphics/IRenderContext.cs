@@ -36,9 +36,14 @@ namespace DotGame.Graphics
         /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
         void Clear(ClearOptions clearOptions, Color color, float depth, int stencil);
 
-        void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth);
+        void SetRenderTargetBackBuffer();
+
+        void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color);
         void SetRenderTargetColor(IRenderTarget2D color);
         void SetRenderTargetDepth(IRenderTarget2D depth);
+
+        void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets);
+        void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets);
 
         /// <summary>
         /// Setzt den Shader in der Pipeline.

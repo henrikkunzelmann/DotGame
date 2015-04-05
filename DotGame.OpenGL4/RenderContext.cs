@@ -104,9 +104,13 @@ namespace DotGame.OpenGL4
 
             throw new NotImplementedException();
         }
-        
 
-        public void SetRenderTarget(IRenderTarget2D color, IRenderTarget2D depth)
+        public void SetRenderTargetBackBuffer()
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
         {
             this.currentFbo = graphicsDevice.GetFBO(depth, color);
         }
@@ -117,6 +121,16 @@ namespace DotGame.OpenGL4
         }
 
         public void SetRenderTargetDepth(IRenderTarget2D depth)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets)
+        {
+            throw new NotImplementedException();
+        }
+        
+        public void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets)
         {
             throw new NotImplementedException();
         }
