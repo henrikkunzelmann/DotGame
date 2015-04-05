@@ -119,9 +119,33 @@ namespace DotGame
                     return false;
         }
 
+        public override int GetHashCode()
+        {
+            unchecked
+            {
+                int hash = 17;
+                hash = hash * 23 + X.GetHashCode();
+                hash = hash * 23 + Y.GetHashCode();
+                hash = hash * 23 + Width.GetHashCode();
+                hash = hash * 23 + Height.GetHashCode();
+                return hash;
+            }
+        }
+
         public override string ToString()
         {
-            return string.Format("[X: {0}, Y: {1}, Width: {2}, Height: {3}]", X, Y, Width, Height);
+            var builder = new StringBuilder();
+            builder.Append("[X: ");
+            builder.Append(X);
+            builder.Append(", Y: ");
+            builder.Append(Y);
+            builder.Append(", Width: ");
+            builder.Append(Width);
+            builder.Append(", Height: ");
+            builder.Append(Height);
+            builder.Append("]");
+
+            return builder.ToString();
         }
     }
 }

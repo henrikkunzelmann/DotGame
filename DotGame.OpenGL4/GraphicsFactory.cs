@@ -46,8 +46,8 @@ namespace DotGame.OpenGL4
             AssertCurrent();
 
             Bitmap bitmap = new Bitmap(file);
-            BitmapData bmpData = bitmap.LockBits(new Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            Texture2D texture = new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, TextureFormat.RGBA16_UIntNorm, bmpData.Scan0);
+            BitmapData bmpData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            Texture2D texture = Register(new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, TextureFormat.RGBA16_UIntNorm, bmpData.Scan0));
             bitmap.UnlockBits(bmpData);
 
             return texture;
@@ -268,6 +268,7 @@ namespace DotGame.OpenGL4
         protected override void Dispose(bool isDisposing)
         {
             DisposeUnused();
+            // TODO (Joex3): Alle restlichen Objekte disposen.
         }
     }
 }

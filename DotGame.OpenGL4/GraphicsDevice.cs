@@ -242,10 +242,9 @@ namespace DotGame.OpenGL4
 
         private void Dispose(bool isDisposing)
         {
+            Factory.Dispose();
             Context.Dispose();
             IsDisposed = true;
-            // Wird hinter IsDisposed = true; aufgerufen, damit die GraphicsObject Dispose Implementationen bescheid wissen, dass nicht mehr auf das GraphicsDevice zugegriffen werden kann.
-            Factory.Dispose();
         }
     }
 }
