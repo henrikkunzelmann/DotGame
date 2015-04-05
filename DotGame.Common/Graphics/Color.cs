@@ -952,10 +952,10 @@ namespace DotGame.Graphics
         /// <returns></returns>
         public uint ToArgb()
         {
-            uint argb = (uint)((int)(A * 255) & 0xFF);
-            argb |= (uint)((int)(R * 255) & 0xFF) << 8;
-            argb |= (uint)((int)(G * 255) & 0xFF) << 16;
-            argb |= (uint)((int)(B * 255) & 0xFF) << 24;
+            uint argb = (uint)((int)(A * 255) & 0xFF) << 24;
+            argb |= (uint)((int)(R * 255) & 0xFF) << 16;
+            argb |= (uint)((int)(G * 255) & 0xFF) << 8;
+            argb |= (uint)((int)(B * 255) & 0xFF);
             return argb;
         }
 
@@ -965,10 +965,10 @@ namespace DotGame.Graphics
         /// <returns></returns>
         public uint ToRgba()
         {
-            uint rgba = (uint)((int)(R * 255) & 0xFF);
-            rgba |= (uint)((int)(G * 255) & 0xFF) << 8;
-            rgba |= (uint)((int)(B * 255) & 0xFF) << 16;
-            rgba |= (uint)((int)(A * 255) & 0xFF) << 24;
+            uint rgba = (uint)((int)(R * 255) & 0xFF) << 24;
+            rgba |= (uint)((int)(G * 255) & 0xFF) << 16;
+            rgba |= (uint)((int)(B * 255) & 0xFF) << 8;
+            rgba |= (uint)((int)(A * 255) & 0xFF);
             return rgba;
         }
 
