@@ -39,18 +39,18 @@ namespace DotGame.OpenAL
 
         private readonly object locker = new object();
 
-        public SoundInstance(Sound sound) : base(sound == null ? null : (AudioDevice)sound.AudioDevice)
+        public SoundInstance(AudioDevice audioDevice, Sound sound)  : base(audioDevice)
         {
             if (sound == null)
                 throw new ArgumentNullException("sound");
             if (sound.IsDisposed)
-                throw new ObjectDisposedException(sound.GetType().FullName);
+                throw new ArgumentException("Sound is disposed.", "sound");
 
             this.Sound = sound;
 
             IDs = new List<int>();
             if (sound.IsStreamed)
-                source = AudioDevice.Factory.CreateSampleSource(sound.File);
+                source = SampleSourceFactory.FromFile(sound.File);
             int bufferCount;
             if (sound.IsStreamed)
                 bufferCount = sound.Supports3D ? source.Channels : 1;
@@ -92,7 +92,7 @@ namespace DotGame.OpenAL
                 AssertNotDisposed();
 
                 if (slot < 0 && slot >= AudioDevice.MaxRoutes)
-                    throw new ArgumentOutOfRangeException("slot", "slot must be between 0 and MaxRoutes.");
+                    throw new ArgumentOutOfRangeException("slot", "Slot must be between 0 and MaxRoutes.");
 
                 for (int i = 0; i < IDs.Count; i++)
                 {

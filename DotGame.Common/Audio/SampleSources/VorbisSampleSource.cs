@@ -6,9 +6,9 @@ using System.Threading.Tasks;
 using DotGame.Audio;
 using NVorbis;
 
-namespace DotGame.OpenAL
+namespace DotGame.Audio.SampleSources
 {
-    public class VorbisSampleSource : AudioObject, ISampleSource
+    public class VorbisSampleSource : SampleSourceBase, ISampleSource
     {
         public long TotalSamples { get; private set; }
         public long Position { get { AssertNotDisposed(); return reader.DecodedPosition * Channels; } set { AssertNotDisposed(); reader.DecodedPosition = value / Channels; } }
@@ -19,7 +19,7 @@ namespace DotGame.OpenAL
 
         private VorbisReader reader;
 
-        public VorbisSampleSource(AudioDevice audioDevice, string file) : base(audioDevice)
+        public VorbisSampleSource(string file)
         {
             reader = new VorbisReader(file);
             

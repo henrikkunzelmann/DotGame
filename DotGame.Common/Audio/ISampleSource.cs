@@ -9,8 +9,10 @@ namespace DotGame.Audio
     /// <summary>
     /// Stellt eine Quelle an Sampledaten dar.
     /// </summary>
-    public interface ISampleSource : IAudioObject
+    public interface ISampleSource : IDisposable
     {
+        bool IsDisposed { get; }
+
         /// <summary>
         /// Ruft die Anzahl an Samples ab.
         /// </summary>

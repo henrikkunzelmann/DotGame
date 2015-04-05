@@ -50,12 +50,13 @@ namespace DotGame.OpenAL
         {
         }
 
-        public AudioDevice(string device)
+        public AudioDevice(string deviceName)
         {
-            if (device != null && !AvailableDevices.Contains(device))
-                throw new InvalidOperationException(string.Format("AudioDevice \"{0}\" does not exist.", device));
+            // TODO (Joex3): Den deviceName parameter eventuell als Suche benutzen, um trotzdem ein Device zu finden, wenn der Name nicht 100% übereinstimmt.
+            if (deviceName != null && !AvailableDevices.Contains(deviceName))
+                throw new InvalidOperationException(string.Format("AudioDevice \"{0}\" does not exist.", deviceName));
 
-            Context = new OpenTK.Audio.AudioContext(device, 0, 15, true, true, AudioContext.MaxAuxiliarySends.UseDriverDefault);
+            Context = new OpenTK.Audio.AudioContext(deviceName, 0, 15, true, true, AudioContext.MaxAuxiliarySends.UseDriverDefault);
             CheckAlcError();
             Efx = new EffectsExtension();
             CheckAlcError();

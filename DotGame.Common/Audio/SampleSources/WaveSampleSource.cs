@@ -6,9 +6,9 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotGame.OpenAL
+namespace DotGame.Audio.SampleSources
 {
-    public class WaveSampleSource : AudioObject, ISampleSource
+    public class WaveSampleSource : SampleSourceBase, ISampleSource
     {
         public long TotalSamples { get; private set; }
         public long Position { get { AssertNotDisposed(); return position; } set { AssertNotDisposed(); reader.BaseStream.Position = startOffset + bytesPerSample * value; position = value; } }
@@ -22,7 +22,7 @@ namespace DotGame.OpenAL
         private BinaryReader reader;
         private int bytesPerSample;
 
-        public WaveSampleSource(AudioDevice audioDevice, string file) : base(audioDevice)
+        public WaveSampleSource(string file)
         {
             this.reader = new BinaryReader(File.OpenRead(file));
             int chunkID = reader.ReadInt32();
@@ -65,7 +65,7 @@ namespace DotGame.OpenAL
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count < 1."));
             if (channels > 2)
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count > 2."));
-            
+
             this.Channels = channels;
             // TODO (Joex3): Herausfinden, warum dataSize bei veränderter SampleRate gleich bleibt.
             this.TotalSamples = dataSize / (bitDepth / 8);
@@ -89,12 +89,13 @@ namespace DotGame.OpenAL
             AssertNotDisposed();
 
             if (count < 0)
-                throw new ArgumentOutOfRangeException("count", "count must be >= 0.");
+                throw new ArgumentOutOfRangeException("count", "Count must be >= 0.");
             if (offset < 0)
                 throw new ArgumentOutOfRangeException("offset");
             if (offset + count > buffer.Length)
-                throw new ArgumentOutOfRangeException("count", "offset + count must be <= buffer.Length.");
+                throw new ArgumentOutOfRangeException("count", "Offset + count must be <= buffer.Length.");
 
+            count = Math.Min(count, (int)(TotalSamples - Position));
 
             switch (NativeFormat)
             {

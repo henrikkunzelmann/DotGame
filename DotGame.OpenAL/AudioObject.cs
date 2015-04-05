@@ -21,7 +21,7 @@ namespace DotGame.OpenAL
             if (audioDevice == null)
                 throw new ArgumentNullException("audioDevice");
             if (audioDevice.IsDisposed)
-                throw new ArgumentException("audioDevice is disposed.", "audioDevice");
+                throw new ArgumentException("AudioDevice is disposed.", "audioDevice");
 
             this.AudioDevice = audioDevice;
             this.AudioDeviceInternal = audioDevice;

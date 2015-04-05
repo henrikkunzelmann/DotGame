@@ -34,31 +34,26 @@ namespace DotGame.OpenAL
 
         public ISound CreateSound(string file, SoundFlags flags)
         {
+            AssertNotDisposed();
             return Register(new Sound(AudioDeviceInternal, file, flags));
-        }
-
-        public ISampleSource CreateSampleSource(string file)
-        {
-            if (string.IsNullOrEmpty(file))
-                throw new ArgumentNullException("file");
-
-            var magic = GetMagic(file);
-            if (magic == ".wav")
-                return Register(new WaveSampleSource(AudioDeviceInternal, file));
-            else if (magic == ".ogg")
-                return Register(new VorbisSampleSource(AudioDeviceInternal, file));
-
-            throw new NotSupportedException(magic);
         }
 
         public IMixerChannel CreateMixerChannel(string name)
         {
+            AssertNotDisposed();
             return Register(new MixerChannel(AudioDeviceInternal, name));
         }
 
         public IEffectReverb CreateReverb()
         {
+            AssertNotDisposed();
             return Register(new EffectReverb(AudioDeviceInternal));
+        }
+
+        public IAudioCapture CreateAudioCapture(string deviceName, int sampleRate, AudioFormat bitDepth, int channels, int bufferSize)
+        {
+            AssertNotDisposed();
+            return Register(new AudioCapture(AudioDeviceInternal, deviceName, sampleRate, bitDepth, channels, bufferSize));
         }
 
         private T Register<T>(T obj) where T : AudioObject

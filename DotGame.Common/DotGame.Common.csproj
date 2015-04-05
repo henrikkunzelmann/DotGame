@@ -31,6 +31,9 @@
     <WarningLevel>4</WarningLevel>
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="NVorbis">
+      <HintPath>..\packages\NVorbis.0.8.4.0\lib\NVorbis.dll</HintPath>
+    </Reference>
     <Reference Include="System" />
     <Reference Include="System.Core" />
     <Reference Include="System.Drawing" />
@@ -43,6 +46,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Audio\AudioFormat.cs" />
+    <Compile Include="Audio\IAudioCapture.cs" />
     <Compile Include="Audio\IAudioListener.cs" />
     <Compile Include="Audio\IEffect.cs" />
     <Compile Include="Audio\IEffectReverb.cs" />
@@ -54,7 +58,11 @@
     <Compile Include="Audio\ISound.cs" />
     <Compile Include="Audio\ISoundInstance.cs" />
     <Compile Include="Audio\SampleConverter.cs" />
+    <Compile Include="Audio\SampleSources\SampleSourceBase.cs" />
+    <Compile Include="Audio\SampleSourceFactory.cs" />
+    <Compile Include="Audio\SampleSources\VorbisSampleSource.cs" />
     <Compile Include="Audio\SoundFlags.cs" />
+    <Compile Include="Audio\SampleSources\WaveSampleSource.cs" />
     <Compile Include="Graphics\AddressMode.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
@@ -130,6 +138,7 @@
       <Generator>TextTemplatingFileGenerator</Generator>
       <LastGenOutput>Vector.cs</LastGenOutput>
     </None>
+    <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
     <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />

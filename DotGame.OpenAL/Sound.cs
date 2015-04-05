@@ -38,7 +38,7 @@ namespace DotGame.OpenAL
 
             if (!IsStreamed)
             {
-                using (var source = AudioDevice.Factory.CreateSampleSource(file))
+                using (var source = SampleSourceFactory.FromFile(file))
                 {
                     var bufferCount = Supports3D ? source.Channels : 1;
                     var channelCount = Supports3D ? 1 : source.Channels;
@@ -60,7 +60,7 @@ namespace DotGame.OpenAL
 
         public ISoundInstance CreateInstance()
         {
-            return new SoundInstance(this);
+            return new SoundInstance(AudioDeviceInternal, this);
         }
 
         internal void Register(SoundInstance instance)
