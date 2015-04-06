@@ -1,0 +1,26 @@
+﻿DotGame RoadMap
+    GraphicsAPI
+        ITexture2D: Von T[] Data laden lassen (mit generate mip maps option) (henrik1235) 
+        IBlendState (henrik1235)
+        IRenderState
+        OpenGL: Dispose-Liste in GraphicsDevice verschieben
+        Error-Checking und Code-Cleanup - 
+
+    Engine
+        ICamera
+        SceneGraph
+        Assets
+            Mesh
+            Material
+            Texture
+            Shader
+            MeshObject 
+        Pipeline
+            IPass
+            ForwardPass
+    
+    Math
+        Vector: Swizzle Support
+        Bounding* Klassen 
+        Ray
+        Plane

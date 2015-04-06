@@ -19,6 +19,7 @@ namespace DotGame.DirectX11
         private SwapChain swapChain;
 
         internal Texture2D BackBuffer { get; private set; }
+        internal IRenderTarget2D DepthStencilBuffer { get; private set; }
 
         public bool IsDisposed { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
@@ -65,6 +66,7 @@ namespace DotGame.DirectX11
         private void InitBackbuffer()
         {
             BackBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
+            DepthStencilBuffer = Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
             RenderContext.SetRenderTargetBackBuffer();
         }
 

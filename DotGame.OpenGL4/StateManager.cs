@@ -21,6 +21,9 @@ namespace DotGame.OpenGL4
         private IShader currentShader;
         private Fbo currentFbo;
 
+        private int currentWidth;
+        private int currentHeight;
+
         //Rasterizer
         private bool currentIsFrontCounterClockwise = false;
         private CullMode currentCullMode;
@@ -65,10 +68,6 @@ namespace DotGame.OpenGL4
             get { return currentIndexBuffer; } 
             set
             {
-                if (value == null)
-                {
-                    GL.BindVertexArray(0);
-                }
                 if (value != currentIndexBuffer)
                 {
                     if (value == null)
@@ -253,6 +252,13 @@ namespace DotGame.OpenGL4
         internal int DepthBias 
         {
             get { return currentDepthBias; }
+            set
+            {
+                if (currentDepthBias != value)
+                {
+                    currentDepthBias = value;
+                }
+            }
         }
 
         internal float DepthBiasClamp
@@ -278,6 +284,23 @@ namespace DotGame.OpenGL4
                 currentSlopeScaledDepthBias = slopeScaledDepthBias;
                 GL.PolygonMode(MaterialFace.FrontAndBack, EnumConverter.Convert(FillMode));
                 GL.PolygonOffset(currentDepthBias, currentSlopeScaledDepthBias);
+            }
+        }
+
+        internal Fbo Fbo
+        {
+            get { return currentFbo; }
+            set
+            {
+                if (currentFbo != value)
+                {
+                    if (value == null)
+                        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
+                    else
+                        GL.BindFramebuffer(FramebufferTarget.Framebuffer, value.FboID);
+
+                    currentFbo = value;
+                }
             }
         }
 
@@ -341,20 +364,14 @@ namespace DotGame.OpenGL4
             }
         }
 
-        internal Fbo Fbo
+        internal void SetViewport(int width, int height)
         {
-            get { return currentFbo; }
-            set
+            if (currentWidth != width && currentHeight != height)
             {
-                if (currentFbo != value)
-                {
-                    if (value == null)
-                        GL.BindFramebuffer(FramebufferTarget.Framebuffer, 0);
-                    else
-                        GL.BindFramebuffer(FramebufferTarget.Framebuffer, value.FboID);
+                currentWidth = width;
+                currentHeight = height;
 
-                    currentFbo = value;
-                }
+                GL.Viewport(0, 0, currentWidth, currentHeight);
             }
         }
     }

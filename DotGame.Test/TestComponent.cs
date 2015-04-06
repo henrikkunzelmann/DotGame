@@ -14,10 +14,12 @@ namespace DotGame.Test
         public ISoundInstance Visualize;
 
         private IRenderTarget2D depthBuffer;
+        private IRenderTarget2D colorTarget;
         private IRasterizerState rasterizerState;
         private IShader shader;
         private IConstantBuffer constantBuffer;
         private IVertexBuffer vertexBuffer;
+        private IVertexBuffer quad;
         private ITexture2D texture;
         private ISampler sampler;
 
@@ -39,8 +41,10 @@ namespace DotGame.Test
                 throw new NotImplementedException();
 
             depthBuffer = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
+            colorTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.RGBA32_Float, false);
 
             constantBuffer = shader.CreateConstantBuffer();
+
             vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
                 // 3D coordinates              UV Texture coordinates
                 -1.0f, -1.0f, -1.0f,    0.0f, 1.0f, // Front
@@ -86,6 +90,19 @@ namespace DotGame.Test
                  1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
             }, Geometry.VertexPositionTexture.Description);
 
+
+            quad = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
+                // 3D coordinates              UV Texture coordinates                 
+                 1.0f,  1.0f, -1.0f,    1.0f, 0.0f, // Front
+                -1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
+                 -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
+                 
+                 1.0f, -1.0f, -1.0f,    1.0f, 1.0f,
+                 1.0f,  1.0f, -1.0f,    1.0f, 0.0f,
+                -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
+            }, Geometry.VertexPositionTexture.Description);
+
+
             sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
             rasterizerState = GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
                 {
@@ -113,9 +130,8 @@ namespace DotGame.Test
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();
 
-            GraphicsDevice.RenderContext.SetRenderTargetBackBuffer();
-            GraphicsDevice.RenderContext.SetRenderTargetDepth(depthBuffer);
-            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.SkyBlue, 1f, 0);
+            GraphicsDevice.RenderContext.SetRenderTarget(depthBuffer, colorTarget);
+            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.CornflowerBlue, 1f, 0);
 
             GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);
 
@@ -132,6 +148,13 @@ namespace DotGame.Test
             GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
             GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);
 
+            GraphicsDevice.RenderContext.Draw();
+            
+            GraphicsDevice.RenderContext.SetRenderTargetBackBuffer();
+            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.Beige, 1f, 0);
+            GraphicsDevice.RenderContext.SetVertexBuffer(quad);
+            GraphicsDevice.RenderContext.Update(constantBuffer, Matrix.Identity);
+            GraphicsDevice.RenderContext.SetTexture(shader, "picture", colorTarget);
             GraphicsDevice.RenderContext.Draw();
         }
 

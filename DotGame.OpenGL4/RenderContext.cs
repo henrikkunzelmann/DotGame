@@ -14,10 +14,12 @@ namespace DotGame.OpenGL4
         private RenderStateInfo currentState = new RenderStateInfo();
         private VertexBuffer currentVertexBuffer;
         private IndexBuffer currentIndexBuffer;
-        
-        private bool stateDirty;
-        private bool vertexBufferDirty;
-        private bool indexBufferDirty;
+
+        private int[] currentRenderTargets;
+        private int currentDepthRenderTarget = -1;
+        private int currentWidth;
+        private int currentHeight;
+        private ClearBufferMask currentClearBufferMask = ClearBufferMask.None;
 
         private Color clearColor;
         private float clearDepth;
@@ -111,31 +113,54 @@ namespace DotGame.OpenGL4
 
         public void SetRenderTargetColor(IRenderTarget2D color)
         {
-            SetRenderTargets(null, new IRenderTarget2D[] { color });
+            SetRenderTargetsColor(color);
         }
 
         public void SetRenderTargetDepth(IRenderTarget2D depth)
         {
-            SetRenderTargets(depth, new IRenderTarget2D[]{});
+            if (depth != null)
+            {
+                Texture2D texture = graphicsDevice.Cast<Texture2D>(depth, "depth");
+                currentDepthRenderTarget = texture.TextureID;
+
+                if (texture.Width > currentWidth)
+                    currentWidth = texture.Width;
+                if (texture.Height > currentHeight)
+                    currentHeight = texture.Height;
+            }
+            else
+                currentDepthRenderTarget = -1;
         }
 
         public void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets)
         {
-            graphicsDevice.StateManager.Fbo = graphicsDevice.GetFBO(depth, colorTargets);
-
-            if (colorTargets != null && colorTargets.Length != 0)
-                GL.Viewport(0, 0, colorTargets[0].Width, colorTargets[0].Height);
-            else if (depth != null)
-                GL.Viewport(0, 0, depth.Width, depth.Height);
+            SetRenderTargetsColor(colorTargets);
+            SetRenderTargetDepth(depth);
         }
         
         public void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets)
         {
-            SetRenderTargets(null, colorTargets);
+            if (colorTargets != null && colorTargets.Length > 0)
+            {
+                currentRenderTargets = new int[colorTargets.Length];
+                for (int i = 0; i < colorTargets.Length; i++)
+                {
+                    Texture2D texture = graphicsDevice.Cast<Texture2D>(colorTargets[i], string.Format("color[{0}]", i));
+                    currentRenderTargets[i] = texture.TextureID;
+
+                    if (texture.Width > currentWidth)
+                        currentWidth = texture.Width;
+                    if (texture.Height > currentHeight)
+                        currentHeight = texture.Height;
+                }
+            }
+            else
+                currentRenderTargets = null;
         }
         public void SetRenderTargetBackBuffer()
         {
-            graphicsDevice.StateManager.Fbo = null;
+            currentDepthRenderTarget = -1;
+            currentRenderTargets = null;
         }
 
         public void Clear(Color color)
@@ -145,27 +170,23 @@ namespace DotGame.OpenGL4
 
         public void Clear(ClearOptions options, Color color, float depth, int stencil)
         {
-            ClearBufferMask mask = ClearBufferMask.None;
-
             if (options.HasFlag(ClearOptions.Color))
             {
                 SetClearColor(ref color);
-                mask |= ClearBufferMask.ColorBufferBit;
+                currentClearBufferMask |= ClearBufferMask.ColorBufferBit;
             }
 
             if (options.HasFlag(ClearOptions.Depth))
             {
                 SetClearDepth(ref depth);
-                mask |= ClearBufferMask.DepthBufferBit;
+                currentClearBufferMask |= ClearBufferMask.DepthBufferBit;
             }
 
             if (options.HasFlag(ClearOptions.Stencil))
             {
                 SetClearStencil(ref stencil);
-                mask |= ClearBufferMask.StencilBufferBit;
+                currentClearBufferMask |= ClearBufferMask.StencilBufferBit;
             }
-
-            GL.Clear(mask);
         }
 
         private void SetClearColor(ref Color color)
@@ -202,7 +223,6 @@ namespace DotGame.OpenGL4
             graphicsDevice.Cast<IShader>(shader, "shader"); // Shader überprüfen
 
             currentState.Shader = shader;
-            stateDirty = true;
         }
 
         public void SetPrimitiveType(PrimitiveType type)
@@ -210,7 +230,6 @@ namespace DotGame.OpenGL4
             EnumConverter.Convert(type); // Type überprüfen (ob supported ist)
 
             currentState.PrimitiveType = type;
-            stateDirty = true;
         }
 
         public void SetRasterizer(IRasterizerState rasterizerState)
@@ -222,7 +241,6 @@ namespace DotGame.OpenGL4
 
             if (!rasterizerState.Info.Equals(rasterizerState))
             {
-                stateDirty = true;
                 currentState.Rasterizer = rasterizerState;
             }
         }
@@ -231,12 +249,11 @@ namespace DotGame.OpenGL4
         {
             if (state == null)
                 throw new ArgumentNullException("state");
-            //graphicsDevice.Cast<RenderState>(state, "state"); // State überprüfen
 
             if (!state.Info.Equals(currentState))
             {
-                stateDirty = true;
                 currentState = state.Info;
+                ApplyState();
             }
         }
 
@@ -250,7 +267,6 @@ namespace DotGame.OpenGL4
             if (currentVertexBuffer != vertexBuffer)
             {
                 currentVertexBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer");
-                vertexBufferDirty = true;
             }
         }
 
@@ -264,7 +280,6 @@ namespace DotGame.OpenGL4
             if (currentIndexBuffer != indexBuffer)
             {
                 currentIndexBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "indexBuffer");
-                indexBufferDirty = true;
             }
         }
 
@@ -325,61 +340,62 @@ namespace DotGame.OpenGL4
             GL.BindSampler(internalShader.GetTextureUnit(name), internalSampler.SamplerID);
         }
 
+        private void ApplyRenderTarget()
+        {
+            graphicsDevice.StateManager.Fbo = graphicsDevice.GetFBO(currentDepthRenderTarget, currentRenderTargets);
+
+            graphicsDevice.StateManager.SetViewport(currentWidth, currentHeight);
+
+            GL.Clear(currentClearBufferMask);
+        }
+
         private void ApplyState()
         {
             var shader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
-            if (stateDirty)
+
+            graphicsDevice.StateManager.Shader = shader;
+
+            if (currentState.Rasterizer != null)
             {
-                graphicsDevice.StateManager.Shader = shader;
-                                
-                if (currentState.Rasterizer != null)
-                {
-                    graphicsDevice.StateManager.FillMode = currentState.Rasterizer.Info.FillMode;
-                    graphicsDevice.StateManager.CullMode = currentState.Rasterizer.Info.CullMode;
-                    graphicsDevice.StateManager.IsDepthClipEnabled = currentState.Rasterizer.Info.IsDepthClipEnabled;
-                    graphicsDevice.StateManager.IsFrontCounterClockwise = currentState.Rasterizer.Info.IsFrontCounterClockwise;
-                    graphicsDevice.StateManager.IsMultisampleEnabled = currentState.Rasterizer.Info.IsMultisampleEnabled;
-                    graphicsDevice.StateManager.IsScissorEnabled = currentState.Rasterizer.Info.IsScissorEnabled;
-                    graphicsDevice.StateManager.IsAntialiasedLineEnable = currentState.Rasterizer.Info.IsAntialiasedLineEnabled;
-                    graphicsDevice.StateManager.DepthBiasClamp = currentState.Rasterizer.Info.DepthBiasClamp;
-                    graphicsDevice.StateManager.SetPolygonOffset(currentState.Rasterizer.Info.DepthBiasClamp, currentState.Rasterizer.Info.SlopeScaledDepthBias);
-                }
+                graphicsDevice.StateManager.FillMode = currentState.Rasterizer.Info.FillMode;
+                graphicsDevice.StateManager.CullMode = currentState.Rasterizer.Info.CullMode;
+                graphicsDevice.StateManager.IsDepthClipEnabled = currentState.Rasterizer.Info.IsDepthClipEnabled;
+                graphicsDevice.StateManager.IsFrontCounterClockwise = currentState.Rasterizer.Info.IsFrontCounterClockwise;
+                graphicsDevice.StateManager.IsMultisampleEnabled = currentState.Rasterizer.Info.IsMultisampleEnabled;
+                graphicsDevice.StateManager.IsScissorEnabled = currentState.Rasterizer.Info.IsScissorEnabled;
+                graphicsDevice.StateManager.IsAntialiasedLineEnable = currentState.Rasterizer.Info.IsAntialiasedLineEnabled;
+                graphicsDevice.StateManager.DepthBiasClamp = currentState.Rasterizer.Info.DepthBiasClamp;
+                graphicsDevice.StateManager.SetPolygonOffset(currentState.Rasterizer.Info.DepthBiasClamp, currentState.Rasterizer.Info.SlopeScaledDepthBias);
             }
-            if (vertexBufferDirty)
+
+            graphicsDevice.StateManager.VertexBuffer = currentVertexBuffer;
+
+            if (currentState.Shader == null)
+                throw new Exception("No shader set!");
+
+            // Das VertexArrayObject speichert die Attribute calls eines bestimmten Shaders
+            // Falls ein anderer Shader gesetzt ist oder diese Attribute gesetzt sind, müssen diese VertexAttributePointer gesetzt werden
+            Shader internalShader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
+            if (currentVertexBuffer.Shader != currentState.Shader)
             {
-                graphicsDevice.StateManager.VertexBuffer = currentVertexBuffer;
+                GL.BindBuffer(BufferTarget.ArrayBuffer, currentVertexBuffer.VaoID);
 
-                if (currentState.Shader == null)
-                    throw new Exception("No shader set!");
-
-                // Das VertexArrayObject speichert die Attribute calls eines bestimmten Shaders
-                // Falls ein anderer Shader gesetzt ist oder diese Attribute gesetzt sind, müssen diese VertexAttributePointer gesetzt werden
-                Shader internalShader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
-                if (currentVertexBuffer.Shader != currentState.Shader)
+                int offset = 0;
+                VertexElement[] elements = currentVertexBuffer.Description.GetElements();
+                for (int i = 0; i < currentVertexBuffer.Description.ElementCount; i++)
                 {
-                    GL.BindBuffer(BufferTarget.ArrayBuffer, currentVertexBuffer.VaoID);
+                    GL.EnableVertexAttribArray(i);
+                    GL.BindAttribLocation(internalShader.ProgramID, i, EnumConverter.Convert(elements[i].Usage));
 
-                    int offset = 0;
-                    VertexElement[] elements = currentVertexBuffer.Description.GetElements();
-                    for (int i = 0; i < currentVertexBuffer.Description.ElementCount; i++)
-                    {
-                        GL.EnableVertexAttribArray(i);
-                        GL.BindAttribLocation(internalShader.ProgramID, i, EnumConverter.Convert(elements[i].Usage));
-
-                        GL.VertexAttribPointer(i, graphicsDevice.GetComponentsOf(elements[i].Type), VertexAttribPointerType.Float, false, graphicsDevice.GetSizeOf(currentVertexBuffer.Description), offset);
-                        offset += graphicsDevice.GetSizeOf(elements[i].Type);
-                    }
-                    currentVertexBuffer.Shader = internalShader;
+                    GL.VertexAttribPointer(i, graphicsDevice.GetComponentsOf(elements[i].Type), VertexAttribPointerType.Float, false, graphicsDevice.GetSizeOf(currentVertexBuffer.Description), offset);
+                    offset += graphicsDevice.GetSizeOf(elements[i].Type);
                 }
+                currentVertexBuffer.Shader = internalShader;
             }
-            if (indexBufferDirty)
-                graphicsDevice.StateManager.IndexBuffer = currentIndexBuffer;
-            
+
+            graphicsDevice.StateManager.IndexBuffer = currentIndexBuffer;
+
             OpenGL4.GraphicsDevice.CheckGLError();
-
-            stateDirty = false;
-            vertexBufferDirty = false;
-            indexBufferDirty = false;
         }
 
         public void Draw()
@@ -387,6 +403,7 @@ namespace DotGame.OpenGL4
             if (currentVertexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without a vertexbuffer set.");
 
+            ApplyRenderTarget();
             ApplyState();
             GL.DrawArrays(EnumConverter.Convert(currentState.PrimitiveType), 0, currentVertexBuffer.VertexCount);
         }

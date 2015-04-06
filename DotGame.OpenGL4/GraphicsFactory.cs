@@ -212,9 +212,9 @@ namespace DotGame.OpenGL4
             return Register(new Sampler(this.graphicsDevice, info));
         }
 
-        internal Fbo CreateFbo(IRenderTarget2D depth, params IRenderTarget2D[] color)
+        internal Fbo CreateFbo(int depth, params int[] color)
         {
-            return Register(Fbo.CreateWithITexture2D(graphicsDevice, depth, color));
+            return Register(new Fbo(graphicsDevice, depth, color));
         }
 
         internal static void CheckGLError()

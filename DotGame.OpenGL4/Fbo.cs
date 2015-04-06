@@ -11,72 +11,56 @@ namespace DotGame.OpenGL4
     internal class Fbo : GraphicsObject
     {
         internal int FboID { get; private set; }
-        internal IGraphicsObject[] ColorAttachments { get; private set; }
-        internal IGraphicsObject DepthAttachment { get; private set; }
+        internal int[] ColorAttachmentIDs { get; private set; }
+        internal int DepthAttachmentID { get; private set; }
 
-        private Fbo(GraphicsDevice graphicsDevice)
+        internal Fbo(GraphicsDevice graphicsDevice, int depth, params int[] color)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             FboID = GL.GenFramebuffer();
+            Attach(depth, color);
+            CheckStatus();
         }
 
-        /// <summary>
-        /// Creates a FrameBufferObject with ITexture2D attachments. Should only be called by IGraphicsFactory
-        /// </summary>
-        /// <param name="graphicsDevice">GraphicsDevice</param>
-        /// <param name="color">Textures to attach to color attachment slots</param>
-        /// <returns></returns>
-        internal static Fbo CreateWithITexture2D(GraphicsDevice graphicsDevice, params ITexture2D[] color)
+        internal Fbo(GraphicsDevice graphicsDevice, params int[] color)
+            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            Fbo fbo = new Fbo(graphicsDevice);
-            fbo.Attach(null, color);
-            fbo.CheckStatus();
-            return fbo;
+            FboID = GL.GenFramebuffer();
+            Attach(-1, color);
+            CheckStatus();
+            OpenGL4.GraphicsDevice.CheckGLError();
         }
 
-        /// <summary>
-        /// Creates a FrameBufferObject with ITexture2D attachments. Should only be called by IGraphicsFactory
-        /// </summary>
-        /// <param name="graphicsDevice">GraphicsDevice</param>
-        /// <param name="depth">Texture to attach to the depth attachment slots</param>
-        /// <param name="color">Textures to attach to color attachment slots</param>
-        /// <returns></returns>
-        internal static Fbo CreateWithITexture2D(GraphicsDevice graphicsDevice, ITexture2D depth, params ITexture2D[] color)
+        private void Attach(int depthAttachment, params int[] colorAttachments)
         {
-            Fbo fbo = new Fbo(graphicsDevice);
-            fbo.Attach(depth, color);
-            fbo.CheckStatus();
-            return fbo;
-        }
-
-        private void Attach(ITexture2D depthAttachment, params ITexture2D[] colorAttachments)
-        {
-            if (depthAttachment == null && (colorAttachments == null || colorAttachments.Length == 0))
+            if (depthAttachment == -1 && (colorAttachments == null || colorAttachments.Length == 0))
                 throw new Exception("Can't create a framebuffer object without attachments.");
             
             graphicsDevice.StateManager.Fbo = this;
+            ColorAttachmentIDs = colorAttachments;
+            DepthAttachmentID = depthAttachment;
 
             if (colorAttachments != null)
             {
-                DrawBuffersEnum[] buffers = new DrawBuffersEnum[colorAttachments.Length];
+                DrawBuffersEnum[] buffers = new DrawBuffersEnum[colorAttachments.Length];                
 
                 for (int i = 0; i < colorAttachments.Length; i++)
                 {
-                    Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(colorAttachments[i], string.Format("attachments[{0}]", i));
-
-                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, internalTexture.TextureID, 0);
+                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, colorAttachments[i], 0);
                     buffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
                 }
 
-                GL.DrawBuffers(buffers.Length, buffers);
+                if (colorAttachments.Length == 0)
+                    GL.DrawBuffer(DrawBufferMode.None);
+                else
+                    GL.DrawBuffers(buffers.Length, buffers);
             }
             else            
                 GL.DrawBuffer(DrawBufferMode.None);
 
-            if (depthAttachment != null)
+            if (depthAttachment != -1)
             {
-                Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(depthAttachment, "attachment");
-                GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, internalTexture.TextureID, 0);
+                GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, depthAttachment, 0);
             }
         }
 

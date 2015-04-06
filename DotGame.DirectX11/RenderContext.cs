@@ -22,7 +22,6 @@ namespace DotGame.DirectX11
         private bool vertexBufferDirty;
         private bool indexBufferDirty;
 
-        private RenderTargetView currentColorTarget;
         private RenderTargetView[] currentColorTargets;
         private DepthStencilView currentDepthTarget;
 
@@ -113,9 +112,12 @@ namespace DotGame.DirectX11
 
         public void Clear(Color color)
         {
-            if (currentColorTarget == null)
+            if (currentColorTargets == null)
                 throw new InvalidOperationException("No render target set for color.");
-            context.ClearRenderTargetView(currentColorTarget, new SharpDX.Color4(color.R, color.G, color.B, color.A));
+
+            var clearColor = new SharpDX.Color4(color.R, color.G, color.B, color.A);
+            for (int i = 0; i < currentColorTargets.Length; i++)
+                context.ClearRenderTargetView(currentColorTargets[i], clearColor);
         }
 
         public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
@@ -139,7 +141,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTargetBackBuffer()
         {
-            SetRenderTargetColor(graphicsDevice.BackBuffer);
+            SetRenderTarget(graphicsDevice.DepthStencilBuffer, graphicsDevice.BackBuffer);
         }
 
         public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
@@ -156,14 +158,13 @@ namespace DotGame.DirectX11
             if (dxColor.RenderView == null)
                 throw new ArgumentException("Texture is not a color render target.", "color");
 
-            if (currentColorTarget == dxColor.RenderView && currentDepthTarget == dxDepth.DepthView)
+            if (currentColorTargets != null && currentColorTargets.Length == 1 && dxColor.RenderView == currentColorTargets[0] && currentDepthTarget == dxDepth.DepthView)
                 return;
 
-            currentColorTarget = dxColor.RenderView;
-            currentColorTargets = null;
+            currentColorTargets = new RenderTargetView[] { dxColor.RenderView };
             currentDepthTarget = dxDepth.DepthView;
 
-            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
+            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
             context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
         }
 
@@ -176,13 +177,12 @@ namespace DotGame.DirectX11
             if (dxColor.RenderView == null)
                 throw new ArgumentException("Texture is not a color render target.", "color");
 
-            if (dxColor.RenderView == currentColorTarget)
+            if (currentColorTargets != null && currentColorTargets.Length == 1 && dxColor.RenderView == currentColorTargets[0])
                 return;
 
-            currentColorTarget = dxColor.RenderView;
-            currentColorTargets = null;
+            currentColorTargets = new RenderTargetView[] { dxColor.RenderView };
 
-            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
+            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
             context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
         }
 
@@ -200,9 +200,7 @@ namespace DotGame.DirectX11
 
             currentDepthTarget = dxDepth.DepthView;
 
-            if (currentColorTarget != null)
-                context.OutputMerger.SetTargets(currentDepthTarget, currentColorTarget);
-            else if (currentColorTargets != null)
+            if (currentColorTargets != null)
                 context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
             else
                 context.OutputMerger.SetTargets(currentDepthTarget);
@@ -230,7 +228,6 @@ namespace DotGame.DirectX11
                 targets[i] = target.RenderView;
             }
 
-            currentColorTarget = null;
             currentColorTargets = targets;
             context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
         }

@@ -69,7 +69,6 @@ namespace DotGame.OpenGL4
             if (context.IsDisposed)
                 throw new ArgumentException("context is disposed.", "context");
 
-
             this.DefaultWindow = window;
             this.container = container;
             this.Context = context;
@@ -238,11 +237,14 @@ namespace DotGame.OpenGL4
         }
 
         //RenderTarget
-        internal Fbo GetFBO(IRenderTarget2D depth, params IRenderTarget2D[] color)
+        internal Fbo GetFBO(int depth, params int[] color)
         {
+            if(depth == -1 && (color == null || color.Length == 0))
+                return null;
+
             for (int i = 0; i < fboPool.Count; i++)
             {
-                if (fboPool[i].ColorAttachments == color && fboPool[i].DepthAttachment == depth)
+                if (fboPool[i].DepthAttachmentID == depth && (fboPool[i].ColorAttachmentIDs == color || fboPool[i].ColorAttachmentIDs.Equals(color) || fboPool[i].ColorAttachmentIDs.SequenceEqual(color) || ((color == null || color.Length == 0) && (fboPool[i].ColorAttachmentIDs == null || fboPool[i].ColorAttachmentIDs.Length == 0))))
                 {
                     return fboPool[i];
                 }
@@ -255,14 +257,14 @@ namespace DotGame.OpenGL4
             return fbo;
         }
 
-        internal Fbo GetFBO(IRenderTarget2D depth, IRenderTarget2D color)
+        internal Fbo GetFBO(int depth, int color)
         {
-            return GetFBO(depth, new IRenderTarget2D[] { color });
+            return GetFBO(depth, new int[] { color });
         }
 
-        internal Fbo GetFBO(IRenderTarget2D depth)
+        internal Fbo GetFBO(int depth)
         {
-            return GetFBO(depth, new IRenderTarget2D[] { });
+            return GetFBO(depth, new int[] { });
         }
 
         internal static void CheckGLError()

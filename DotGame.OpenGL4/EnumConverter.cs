@@ -13,6 +13,7 @@ namespace DotGame.OpenGL4
         private static readonly Dictionary<TextureFormat, PixelInternalFormat> formats = new Dictionary<TextureFormat, PixelInternalFormat>() 
         {
             {TextureFormat.RGB32_Float, PixelInternalFormat.Rgb32f},
+            {TextureFormat.RGBA32_Float, PixelInternalFormat.Rgba32f},
             {TextureFormat.DXT1, PixelInternalFormat.CompressedRgbaS3tcDxt1Ext},
             {TextureFormat.DXT3, PixelInternalFormat.CompressedRgbaS3tcDxt3Ext},
             {TextureFormat.DXT5, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext},
@@ -25,6 +26,7 @@ namespace DotGame.OpenGL4
         private static readonly Dictionary<TextureFormat, Tuple<PixelFormat, PixelType>> dataFormats = new Dictionary<TextureFormat, Tuple<PixelFormat, PixelType>>() 
         {
             {TextureFormat.RGB32_Float, Tuple.Create(PixelFormat.Rgb, PixelType.Float)},
+            {TextureFormat.RGBA32_Float, Tuple.Create(PixelFormat.Rgba, PixelType.Float)},
             {TextureFormat.RGBA16_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
             {TextureFormat.RGBA8_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
             {TextureFormat.Depth16, Tuple.Create(PixelFormat.DepthComponent, PixelType.UnsignedInt)},

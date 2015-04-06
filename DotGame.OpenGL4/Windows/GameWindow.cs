@@ -37,7 +37,7 @@ namespace DotGame.OpenGL4.Windows
 
         public IGraphicsDevice CreateDevice()
         {
-            //Run();
+            this.Visible = true;
             GraphicsContext context = (GraphicsContext)this.Context;
             return new GraphicsDevice(this, this, context);
         }
