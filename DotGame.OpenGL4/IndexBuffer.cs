@@ -28,7 +28,7 @@ namespace DotGame.OpenGL4
             OpenGL4.GraphicsDevice.CheckGLError();
         }
 
-        public void SetData<T>(T[] data, IndexFormat format) where T : struct
+        internal void SetData<T>(T[] data, IndexFormat format) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException("data");

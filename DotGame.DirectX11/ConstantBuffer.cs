@@ -21,10 +21,10 @@ namespace DotGame.DirectX11
             : base(graphicsDevice, new StackTrace(1))
         {
             if (size < 0)
-                throw new ArgumentException("Size is smaller then 0.", "size");
+                throw new ArgumentException("Size must be bigger or equal to 0.", "size");
             this.Size = size;
 
-            Handle = new Buffer(graphicsDevice.Device, size, ResourceUsage.Default, BindFlags.ConstantBuffer, CpuAccessFlags.None, ResourceOptionFlags.None, 0);
+            Handle = new Buffer(graphicsDevice.Device, size, ResourceUsage.Dynamic, BindFlags.ConstantBuffer, CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
         }
 
         protected override void Dispose(bool disposing)

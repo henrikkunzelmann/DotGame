@@ -34,12 +34,12 @@ namespace DotGame.OpenGL4
             this.Description = description;
         }
 
-        public void SetData<T>(T[] data) where T : struct
+        internal void SetData<T>(T[] data) where T : struct
         {
             if(data == null) 
                 throw new ArgumentNullException("data");
             if(data.Length == 0) 
-                throw new ArgumentException("data must not be empty.");
+                throw new ArgumentException("Data must not be empty.", "data");
 
             int sizePerVertex = GraphicsDevice.GetSizeOf(Description);
             int size = 0;

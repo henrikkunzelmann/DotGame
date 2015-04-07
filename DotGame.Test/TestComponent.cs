@@ -156,6 +156,8 @@ namespace DotGame.Test
             GraphicsDevice.RenderContext.Update(constantBuffer, Matrix.Identity);
             GraphicsDevice.RenderContext.SetTexture(shader, "picture", colorTarget);
             GraphicsDevice.RenderContext.Draw();
+
+            GraphicsDevice.RenderContext.SetTextureNull(shader, "picture");
         }
 
         public override void Unload()

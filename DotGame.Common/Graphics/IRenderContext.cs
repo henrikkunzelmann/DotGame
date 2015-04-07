@@ -34,7 +34,7 @@ namespace DotGame.Graphics
         /// <param name="color">Die Farbe für Farbchannel benutzt wird.</param>
         /// <param name="depth">Der Wert für den Tiefenchannel (standardmäßig 1).</param>
         /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
-        void Clear(ClearOptions clearOptions, Color color, float depth, int stencil);
+        void Clear(ClearOptions clearOptions, Color color, float depth, byte stencil);
 
         void SetRenderTargetBackBuffer();
 
@@ -94,6 +94,7 @@ namespace DotGame.Graphics
         /// <param name="buffer"></param>
         void SetConstantBuffer(IShader shader, string name, IConstantBuffer buffer);
 
+        void SetTextureNull(IShader shader, string name);
         void SetTexture(IShader shader, string name, ITexture2D texture);
         void SetTexture(IShader shader, string name, ITexture2DArray texture);
         void SetTexture(IShader shader, string name, ITexture3D texture);

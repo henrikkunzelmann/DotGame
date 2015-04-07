@@ -168,7 +168,7 @@ namespace DotGame.OpenGL4
             Clear(ClearOptions.ColorDepth, color, 1.0f, 0);
         }
 
-        public void Clear(ClearOptions options, Color color, float depth, int stencil)
+        public void Clear(ClearOptions options, Color color, float depth, byte stencil)
         {
             if (options.HasFlag(ClearOptions.Color))
             {
@@ -207,7 +207,7 @@ namespace DotGame.OpenGL4
             }
         }
 
-        private void SetClearStencil(ref int stencil)
+        private void SetClearStencil(ref byte stencil)
         {
             if (stencil != clearStencil)
             {
@@ -310,6 +310,14 @@ namespace DotGame.OpenGL4
 
             Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
             GL.BindTexture(target, internalTexture.TextureID);
+        }
+
+        public void SetTextureNull(IShader shader, string name)
+        {
+            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
+
+            GL.ActiveTexture(TextureUnit.Texture0 + internalShader.GetTextureUnit(name));
+            GL.BindTexture(TextureTarget.Texture2D, 0);
         }
 
         public void SetTexture(IShader shader, string name, ITexture2D texture)

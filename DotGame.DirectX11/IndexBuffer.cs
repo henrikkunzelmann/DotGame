@@ -30,7 +30,7 @@ namespace DotGame.DirectX11
             this.graphicsDevice = graphicsDevice;
         }
 
-        public void SetData<T>(T[] data, IndexFormat format) where T : struct
+        internal void SetData<T>(T[] data, IndexFormat format) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException("data");

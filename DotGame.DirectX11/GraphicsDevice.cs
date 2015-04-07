@@ -72,6 +72,11 @@ namespace DotGame.DirectX11
 
         public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
         {
+            if (obj == null)
+                throw new ArgumentNullException(parameterName);
+            if (obj.IsDisposed)
+                throw new ObjectDisposedException(parameterName);
+
             T ret = obj as T;
             if (ret == null)
                 throw new ArgumentException("GraphicsObject is not part of this api.", parameterName);

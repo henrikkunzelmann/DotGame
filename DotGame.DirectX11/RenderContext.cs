@@ -48,11 +48,15 @@ namespace DotGame.DirectX11
 
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
         {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-
             var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
-            context.UpdateSubresource(ref data, dxBuffer.Handle);
+
+            if (SharpDX.Utilities.SizeOf<T>() != buffer.Size)
+                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
+
+            //context.UpdateSubresource(ref data, dxBuffer.Handle); TODO (henrik1235) Rausfinden ob es einen Performance-Unterschied zwischen UpdateSubresource und Map/Unmap gibt
+            SharpDX.DataBox box = context.MapSubresource(dxBuffer.Handle, 0, MapMode.WriteDiscard, MapFlags.None);
+            SharpDX.Utilities.Write(box.DataPointer, ref data);
+            context.UnmapSubresource(dxBuffer.Handle, 0);
         }
 
         public void Update<T>(ITexture2D texture, T[] data) where T : struct
@@ -62,8 +66,6 @@ namespace DotGame.DirectX11
 
         public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
         {
-            if (texture == null)
-                throw new ArgumentNullException("texture");
             if (mipLevel < 0 || mipLevel >= texture.MipLevels)
                 throw new ArgumentOutOfRangeException("mipLevel");
 
@@ -78,21 +80,17 @@ namespace DotGame.DirectX11
 
         public void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct
         {
-            if (textureArray == null)
-                throw new ArgumentNullException("texture");
+            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "texture");
             if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
                 throw new ArgumentOutOfRangeException("arrayIndex");
             if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
                 throw new ArgumentOutOfRangeException("mipLevel");
 
-            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "texture");
             context.UpdateSubresource<T>(data, dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels), textureArray.Width * graphicsDevice.GetSizeOf(textureArray.Format), textureArray.Width * textureArray.Height * graphicsDevice.GetSizeOf(textureArray.Format));
         }
 
         public void GenerateMips(ITexture2D texture)
         {
-            if (texture == null)
-                throw new ArgumentNullException("texture");
             var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
             if (!dxTexture.Handle.Description.OptionFlags.HasFlag(SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps))
                 throw new ArgumentException("Texture does not have the GenerateMipMaps flag.", "texture");
@@ -101,8 +99,6 @@ namespace DotGame.DirectX11
 
         public void GenerateMips(ITexture2DArray textureArray)
         {
-            if (textureArray == null)
-                throw new ArgumentNullException("textureArray");
             var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "textureArray");
             if (!dxTexture.Handle.Description.OptionFlags.HasFlag(SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps))
                 throw new ArgumentException("TextureArray does not have the GenerateMipMaps flag.", "textureArray");
@@ -120,10 +116,13 @@ namespace DotGame.DirectX11
                 context.ClearRenderTargetView(currentColorTargets[i], clearColor);
         }
 
-        public void Clear(ClearOptions clearOptions, Color color, float depth, int stencil)
+        public void Clear(ClearOptions clearOptions, Color color, float depth, byte stencil)
         {
             if (clearOptions.HasFlag(ClearOptions.Color))
                 Clear(color);
+
+            if (depth < 0 || depth > 1)
+                throw new ArgumentOutOfRangeException("Depth must be between 0 and 1", "depth");
 
             DepthStencilClearFlags clearFlags = 0;
             if (clearOptions.HasFlag(ClearOptions.Depth))
@@ -135,7 +134,7 @@ namespace DotGame.DirectX11
             {
                 if (currentDepthTarget == null)
                     throw new InvalidOperationException("No render target set for depth.");
-                context.ClearDepthStencilView(currentDepthTarget, clearFlags, depth, (byte)stencil);
+                context.ClearDepthStencilView(currentDepthTarget, clearFlags, depth, stencil);
             }
         }
 
@@ -146,11 +145,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
         {
-            if (depth == null)
-                throw new ArgumentNullException("depth");
             var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
-            if (color == null)
-                throw new ArgumentNullException("color");
             var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
 
             if (dxDepth.DepthView == null)
@@ -170,8 +165,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTargetColor(IRenderTarget2D color)
         {
-            if (color == null) // TODO (henrik1235) color = null Rendering erlauben
-                throw new ArgumentNullException("color");
+            // TODO (henrik1235) color = null Rendering erlauben
             var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
 
             if (dxColor.RenderView == null)
@@ -188,8 +182,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTargetDepth(IRenderTarget2D depth)
         {
-            if (depth == null) // TODO (henrik1235) depth = null Rendering erlauben
-                throw new ArgumentNullException("depth");
+            // TODO (henrik1235) depth = null Rendering erlauben
             var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
 
             if (dxDepth.DepthView == null)
@@ -252,9 +245,6 @@ namespace DotGame.DirectX11
 
         public void SetRasterizer(IRasterizerState rasterizerState)
         {
-            if (rasterizerState == null)
-                throw new ArgumentNullException("rasterizerState");
-
             graphicsDevice.Cast<RasterizerState>(rasterizerState, "rasterizerState"); // State überprüfen
 
             currentState.Rasterizer = rasterizerState;
@@ -263,8 +253,6 @@ namespace DotGame.DirectX11
 
         public void SetState(IRenderState state)
         {
-            if (state == null)
-                throw new ArgumentNullException("state");
             graphicsDevice.Cast<RenderState>(state, "state"); // State überprüfen
 
             if (!state.Info.Equals(currentState))
@@ -276,28 +264,20 @@ namespace DotGame.DirectX11
 
         public void SetVertexBuffer(IVertexBuffer vertexBuffer)
         {
-            if (vertexBuffer == null)
-                throw new ArgumentNullException("vertexBuffer");
-            if (vertexBuffer.IsDisposed)
-                throw new ArgumentException("VertexBuffer is disposed.", "vertexBuffer");
-
-            if (currentVertexBuffer != vertexBuffer)
+            var dxVertexBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer"); ;
+            if (currentVertexBuffer != dxVertexBuffer)
             {
-                currentVertexBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer");
+                currentVertexBuffer = dxVertexBuffer;
                 vertexBufferDirty = true;
             }
         }
 
         public void SetIndexBuffer(IIndexBuffer indexBuffer)
         {
-            if (indexBuffer == null)
-                throw new ArgumentNullException("indexBuffer");
-            if (indexBuffer.IsDisposed)
-                throw new ArgumentException("IndexBuffer is disposed.", "indexBuffer");
-
-            if (currentIndexBuffer != indexBuffer)
+            var dxIndexBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "indexBuffer"); 
+            if (currentIndexBuffer != dxIndexBuffer)
             {
-                currentIndexBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "indexBuffer");
+                currentIndexBuffer = dxIndexBuffer;
                 indexBufferDirty = true;
             }
         }
@@ -309,13 +289,9 @@ namespace DotGame.DirectX11
 
         public void SetConstantBuffer(IShader shader, string name, IConstantBuffer buffer)
         {
-            if (shader == null)
-                throw new ArgumentNullException("shader");
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
+            var dxShader = graphicsDevice.Cast<Shader>(shader, "shader");
             if (shader != currentState.Shader)
                 throw new ArgumentException("Shader does not match current set shader.", "shader");
-            var dxShader = graphicsDevice.Cast<Shader>(shader, "shader");
             var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
 
             int slot;
@@ -334,45 +310,43 @@ namespace DotGame.DirectX11
             }
         }
 
+        public void SetTextureNull(IShader shader, string name)
+        {
+            graphicsDevice.Cast<Shader>(shader, "shader");
+            if (name == null)
+                throw new ArgumentNullException("name");
+            SetTexture(shader, name, (ShaderResourceView)null);
+        }
+
         public void SetTexture(IShader shader, string name, ITexture2D texture)
         {
+            graphicsDevice.Cast<Shader>(shader, "shader");
             if (shader == null)
                 throw new ArgumentNullException("shader");
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (texture == null)
-                throw new ArgumentNullException("texture");
             SetTexture(shader, name, graphicsDevice.Cast<Texture2D>(texture, "texture").ResourceView);
         }
         public void SetTexture(IShader shader, string name, ITexture2DArray texture)
         {
-            if (shader == null)
-                throw new ArgumentNullException("shader");
+            graphicsDevice.Cast<Shader>(shader, "shader");
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (texture == null)
-                throw new ArgumentNullException("texture");
             SetTexture(shader, name, graphicsDevice.Cast<Texture2D>(texture, "texture").ResourceView);
         }
         public void SetTexture(IShader shader, string name, ITexture3D texture)
         {
-            if (shader == null)
-                throw new ArgumentNullException("shader");
+            graphicsDevice.Cast<Shader>(shader, "shader");
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (texture == null)
-                throw new ArgumentNullException("texture");
             throw new NotImplementedException();
             //SetTexture(shader, name, graphicsDevice.Cast<Texture3D>(texture, "texture").ResourceView);
         }
         public void SetTexture(IShader shader, string name, ITexture3DArray texture)
         {
-            if (shader == null)
-                throw new ArgumentNullException("shader");
+            graphicsDevice.Cast<Shader>(shader, "shader");
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (texture == null)
-                throw new ArgumentNullException("texture");
             throw new NotImplementedException();
             //SetTexture(shader, name, graphicsDevice.Cast<Texture3D>(texture, "texture").ResourceView);
         }
@@ -401,12 +375,9 @@ namespace DotGame.DirectX11
 
         public void SetSampler(IShader shader, string name, ISampler sampler)
         {
-            if (shader == null)
-                throw new ArgumentNullException("shader");
+            graphicsDevice.Cast<Shader>(shader, "shader");
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (sampler == null)
-                throw new ArgumentNullException("sampler");
             if (shader != currentState.Shader)
                 throw new ArgumentException("Shader does not match current set shader.", "shader");
 
@@ -484,7 +455,7 @@ namespace DotGame.DirectX11
             if (currentVertexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without a vertexbuffer set.");
             if (currentIndexBuffer == null)
-                throw new InvalidOperationException("Tried to draw without indexbuffer set.");
+                throw new InvalidOperationException("Tried to draw without an indexbuffer set.");
 
             ApplyState();
             context.DrawIndexed(currentIndexBuffer.IndexCount, 0, 0);

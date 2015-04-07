@@ -30,7 +30,7 @@ namespace DotGame.DirectX11
             this.Description = description;
         }
 
-        public void SetData<T>(T[] data) where T : struct
+        internal void SetData<T>(T[] data) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException("data");
