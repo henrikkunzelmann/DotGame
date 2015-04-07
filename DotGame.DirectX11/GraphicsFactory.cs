@@ -154,17 +154,26 @@ namespace DotGame.DirectX11
                 throw new ArgumentException("Version of info is null.", parameterName);
         }
 
-        public IShader CreateShader(string name, byte[] vertex, byte[] pixel)
+        public IShader CreateShader(string name, byte[] binaryCode)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name is empty or whitespace.", "name");
-            if (vertex == null)
-                throw new ArgumentNullException("vertex");
-            if (pixel == null)
-                throw new ArgumentNullException("pixel");
-            return new Shader(graphicsDevice, name, new ShaderBytecode(vertex), new ShaderBytecode(pixel));
+            if (binaryCode == null)
+                throw new ArgumentNullException("binaryCode");
+
+            using(MemoryStream stream = new MemoryStream(binaryCode))
+            using(BinaryReader reader = new BinaryReader(stream))
+            {
+                if (reader.ReadString() != "DIRECTX11")
+                    throw new ArgumentException("Invalid header of binary code.", "binaryCode");
+                int vertexSize = reader.ReadInt32();
+                byte[] vertex = reader.ReadBytes(vertexSize);
+                int pixelSize = reader.ReadInt32();
+                byte[] pixel = reader.ReadBytes(pixelSize);
+                return new Shader(graphicsDevice, name, new ShaderBytecode(vertex), new ShaderBytecode(pixel));
+            }
         }
 
         public IRenderState CreateRenderState(RenderStateInfo info)

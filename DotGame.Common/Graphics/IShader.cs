@@ -17,6 +17,12 @@ namespace DotGame.Graphics
         string Name { get; }
 
         /// <summary>
+        /// Der binäre Code des Shaders. Dieser hängt stark von der Konfiguration ab, z.B. GPU-Hersteller oder Treiber-Version. Er ist daher nicht zum offline Kompilieren von Shadern geeignet.
+        /// </summary>
+        /// <exception cref="System.NotSupportedException">Wenn das IGraphicsDevice keine binäre Shader unterstützt: GraphicsCapabilities.SupportsBinaryShaders == false.</exception>
+        byte[] BinaryCode { get; }
+
+        /// <summary>
         /// Erstellt einen passenden ConstantBuffer für alle globale Variablen.
         /// </summary>
         /// <returns></returns>

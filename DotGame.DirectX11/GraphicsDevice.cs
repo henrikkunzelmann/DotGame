@@ -65,6 +65,11 @@ namespace DotGame.DirectX11
             this.Factory = new GraphicsFactory(this);
             this.RenderContext = new RenderContext(this, device.ImmediateContext);
 
+            this.Capabilities = new GraphicsCapabilities()
+            {
+                SupportsBinaryShaders = true
+            };
+
             InitBackbuffer();
         }
 

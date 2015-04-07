@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Diagnostics;
+using System.IO;
 using SharpDX;
 using SharpDX.D3DCompiler;
 using SharpDX.DXGI;
@@ -18,11 +19,17 @@ namespace DotGame.DirectX11
     {
         public string Name { get; private set; }
 
-        public ShaderBytecode VertexCode { get; private set; }
-        public ShaderBytecode PixelCode { get; private set; }
+        internal ShaderBytecode VertexCode { get; private set; }
+        internal ShaderBytecode PixelCode { get; private set; }
 
-        public VertexShader VertexShaderHandle { get; private set; }
-        public PixelShader PixelShaderHandle { get; private set; }
+        private byte[] binaryCode;
+        public byte[] BinaryCode
+        {
+            get { return (byte[])binaryCode.Clone(); }
+        }
+
+        internal VertexShader VertexShaderHandle { get; private set; }
+        internal PixelShader PixelShaderHandle { get; private set; }
 
         private Dictionary<string, int> resourcesVertex = new Dictionary<string, int>();
         private Dictionary<string, int> resourcesPixel = new Dictionary<string, int>();
@@ -44,7 +51,7 @@ namespace DotGame.DirectX11
             this.VertexCode = vertex;
             this.PixelCode = pixel;
 
-            using (ShaderReflection reflection = new ShaderReflection(VertexCode.Data))
+            using (ShaderReflection reflection = new ShaderReflection(VertexCode))
             {
                 for (int i = 0; i < reflection.Description.BoundResources; i++)
                 {
@@ -56,7 +63,7 @@ namespace DotGame.DirectX11
                 }
             }
 
-            using (ShaderReflection reflection = new ShaderReflection(PixelCode.Data))
+            using (ShaderReflection reflection = new ShaderReflection(PixelCode))
             {
                 for (int i = 0; i < reflection.Description.BoundResources; i++)
                 {
@@ -68,8 +75,19 @@ namespace DotGame.DirectX11
                 }
             }
 
-            VertexShaderHandle = new VertexShader(graphicsDevice.Device, VertexCode.Data);
-            PixelShaderHandle = new PixelShader(graphicsDevice.Device, PixelCode.Data);
+            VertexShaderHandle = new VertexShader(graphicsDevice.Device, VertexCode);
+            PixelShaderHandle = new PixelShader(graphicsDevice.Device, PixelCode);
+
+            using (MemoryStream stream = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                writer.Write("DIRECTX11");
+                writer.Write(VertexCode.Data.Length);
+                writer.Write(VertexCode.Data);
+                writer.Write(PixelCode.Data.Length);
+                writer.Write(PixelCode.Data);
+                binaryCode = stream.GetBuffer();
+            }
         }
 
         protected override void Dispose(bool isDisposing)

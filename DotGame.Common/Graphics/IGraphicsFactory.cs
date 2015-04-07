@@ -31,7 +31,7 @@ namespace DotGame.Graphics
         IConstantBuffer CreateConstantBuffer(int size);
 
         IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo);
-        IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode);
+        IShader CreateShader(string name, byte[] code);
 
         IRenderState CreateRenderState(RenderStateInfo info);
         ISampler CreateSampler(SamplerInfo info);

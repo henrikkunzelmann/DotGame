@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using DotGame.Graphics;
 using OpenTK.Graphics.OpenGL4;
 
@@ -12,6 +13,17 @@ namespace DotGame.OpenGL4
     {
         public string Name { get; private set; }
         public ShaderType Type { get; private set; }
+
+        private byte[] binaryCode;
+        public byte[] BinaryCode
+        {
+            get
+            {
+                if (!graphicsDevice.Capabilities.SupportsBinaryShaders)
+                    throw new NotSupportedException("Binary shaders are not supported.");
+                return (byte[])binaryCode.Clone();
+            }
+        }
 
         internal ShaderPart VertexShader { get; private set; }
         internal ShaderPart FragmentShader { get; private set; }
@@ -39,6 +51,7 @@ namespace DotGame.OpenGL4
             //Link program
             GL.LinkProgram(ProgramID);
             int linkStatus;
+            GL.ProgramParameter(ProgramID, ProgramParameterName.ProgramBinaryRetrievableHint, 1);
             GL.GetProgram(ProgramID, GetProgramParameterName.LinkStatus, out linkStatus);
             if (linkStatus == 0)
             {
@@ -56,12 +69,59 @@ namespace DotGame.OpenGL4
             }
             OpenGL4.GraphicsDevice.CheckGLError();
 
+            int binaryLength;
+            GL.GetProgram(ProgramID, (GetProgramParameterName)0x8741, out binaryLength); // GL_PROGRAM_BINARY_LENGTH
+
+            BinaryFormat format;
+            int length;
+            byte[] array = new byte[binaryLength];
+            GL.GetProgramBinary(ProgramID, binaryLength, out length, out format, array);
+
+            using (MemoryStream stream = new MemoryStream())
+            using (BinaryWriter writer = new BinaryWriter(stream))
+            {
+                writer.Write("OPENGL4");
+                writer.Write((int)format);
+                writer.Write(array.Length);
+                writer.Write(array);
+                binaryCode = stream.GetBuffer();
+            }
+
 
             FindUniforms();
             FindUniformBlocks();
 
             // TODO (Robin) Custom Exception
             // TODO (Robin) Im Fall einer Exception Shader freigeben
+        }
+
+        internal Shader(GraphicsDevice graphicsDevice, byte[] binaryCode)
+            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        {
+            this.binaryCode = binaryCode;
+
+            ProgramID = GL.CreateProgram();
+
+            using (MemoryStream stream = new MemoryStream(binaryCode))
+            using (BinaryReader reader = new BinaryReader(stream))
+            {
+                if (reader.ReadString() != "OPENGL4")
+                    throw new ArgumentException("Invalid header of binary code.", "binaryCode");
+                int format = reader.ReadInt32();
+                int codeSize = reader.ReadInt32();
+                byte[] code = reader.ReadBytes(codeSize);
+
+                GL.ProgramBinary(ProgramID, (BinaryFormat)format, code, code.Length);
+
+                int linkStatus;
+                GL.GetProgram(ProgramID, GetProgramParameterName.LinkStatus, out linkStatus);
+                if (linkStatus == 0)
+                    throw new Exception(GL.GetProgramInfoLog(ProgramID));
+                OpenGL4.GraphicsDevice.CheckGLError();
+            }
+
+            FindUniforms();
+            FindUniformBlocks();
         }
 
         private void FindUniforms()

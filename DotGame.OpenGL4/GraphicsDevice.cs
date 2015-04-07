@@ -19,7 +19,12 @@ namespace DotGame.OpenGL4
         public bool IsDisposed { get; private set; }
 
         public DeviceCreationFlags CreationFlags { get; private set; }
-        public GraphicsCapabilities Capabilities { get; private set; }
+
+        private GraphicsCapabilities capabilities;
+        public GraphicsCapabilities Capabilities
+        {
+            get { return capabilities; }
+        }
         public IGraphicsFactory Factory { get; private set; }
         public IRenderContext RenderContext { get; private set; }
 
@@ -92,6 +97,8 @@ namespace DotGame.OpenGL4
 
             Context.LoadAll();
 
+            capabilities = new GraphicsCapabilities();
+
             CheckVersion();
 
             Factory = new GraphicsFactory(this);
@@ -119,7 +126,7 @@ namespace DotGame.OpenGL4
             OpenGLVersionMajor = GL.GetInteger(GetPName.MajorVersion);
             OpenGLVersionMinor = GL.GetInteger(GetPName.MinorVersion);
 
-            Log.Debug(string.Format("OpenGL Version: {0}.{1}",OpenGLVersionMajor,OpenGLVersionMinor));
+            Log.Debug("OpenGL Version: {0}.{1}", OpenGLVersionMajor, OpenGLVersionMinor);
 
             //GLSL Version string auslesen
             string glslVersionString = GL.GetString(StringName.ShadingLanguageVersion);
@@ -137,7 +144,7 @@ namespace DotGame.OpenGL4
             GLSLVersionMajor = glslVersionMajor;
             GLSLVersionMinor = glslVersionMinor;
 
-            Log.Debug(string.Format("GLSL Version: {0}.{1}",GLSLVersionMajor,GLSLVersionMinor));
+            Log.Debug("GLSL Version: {0}.{1}", GLSLVersionMajor, GLSLVersionMinor);
 
             //Extensions überprüfen
             int extensionCount = GL.GetInteger(GetPName.NumExtensions);
@@ -149,13 +156,13 @@ namespace DotGame.OpenGL4
                     HasS3TextureCompression = true;
                 }
 
-                if (extension == "GL_EXT_texture_filter_anisotropic")
+                else if (extension == "GL_EXT_texture_filter_anisotropic")
                 {
                     HasAnisotropicFiltering = true;
                     MaxAnisotropicFiltering  = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
                 }
 
-                if (extension == "GL_ARB_debug_output")
+                else if (extension == "GL_ARB_debug_output")
                 {
                     SupportsDebugOutput = true;
 
@@ -167,6 +174,10 @@ namespace DotGame.OpenGL4
 
                         GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
                     }
+                }
+                else if (extension == "GL_ARB_get_program_binary")
+                {
+                    capabilities.SupportsBinaryShaders = true;
                 }
             }
             TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);

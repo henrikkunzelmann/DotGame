@@ -192,15 +192,17 @@ namespace DotGame.OpenGL4
             return code;
         }
 
-        public IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode)
+        public IShader CreateShader(string name, byte[] code)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (vertexCode == null)
-                throw new ArgumentNullException("vertexCode");
-            if (pixelCode == null)
-                throw new ArgumentNullException("pixelCode");
-            throw new NotSupportedException("Creating shader from byte code is not supported.");
+            if (code == null)
+                throw new ArgumentNullException("code");
+
+            if (!graphicsDevice.Capabilities.SupportsBinaryShaders)
+                throw new NotSupportedException("Creating shaders by byte code is not supported.");
+
+            return new Shader(graphicsDevice, code);
         }
 
         public IRenderState CreateRenderState(RenderStateInfo info)

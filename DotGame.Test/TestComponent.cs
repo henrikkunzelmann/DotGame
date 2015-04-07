@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.IO;
 using DotGame.Graphics;
 using DotGame.Utils;
 using DotGame.Audio;
@@ -31,14 +32,26 @@ namespace DotGame.Test
 
         public override void Init()
         {
+            Log.Debug("TestComponent.Init()");
             texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg", true);
 
-            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
-            else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
-                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
+            string shaderBinaryFile = "testShader_" + Engine.Settings.GraphicsAPI + ".bin";
+            if (File.Exists(shaderBinaryFile) && GraphicsDevice.Capabilities.SupportsBinaryShaders)
+            {
+                shader = GraphicsDevice.Factory.CreateShader("testShader", File.ReadAllBytes(shaderBinaryFile));
+                Log.Debug("Shader loaded by binary code!");
+            }
             else
-                throw new NotImplementedException();
+            {
+                if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+                    shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
+                else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
+                    shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
+                else
+                    throw new NotImplementedException();
+                if (GraphicsDevice.Capabilities.SupportsBinaryShaders)
+                    File.WriteAllBytes(shaderBinaryFile, shader.BinaryCode);
+            }
 
             depthBuffer = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
             colorTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.RGBA32_Float, false);
@@ -110,6 +123,8 @@ namespace DotGame.Test
                     FillMode = FillMode.Solid,
                     IsFrontCounterClockwise = true
                 });
+
+            Log.FlushBuffer();
         }
 
         public override void Update(GameTime gameTime)
