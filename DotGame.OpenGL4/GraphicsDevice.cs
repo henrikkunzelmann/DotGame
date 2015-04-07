@@ -126,6 +126,7 @@ namespace DotGame.OpenGL4
             OpenGLVersionMajor = GL.GetInteger(GetPName.MajorVersion);
             OpenGLVersionMinor = GL.GetInteger(GetPName.MinorVersion);
 
+            Log.Debug("Renderer: {0}", GL.GetString(StringName.Renderer));
             Log.Debug("OpenGL Version: {0}.{1}", OpenGLVersionMajor, OpenGLVersionMinor);
 
             //GLSL Version string auslesen

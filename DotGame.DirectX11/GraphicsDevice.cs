@@ -78,6 +78,7 @@ namespace DotGame.DirectX11
             BackBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
             DepthStencilBuffer = Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
             RenderContext.SetRenderTargetBackBuffer();
+            RenderContext.SetViewport(new Viewport(0, 0, DefaultWindow.Width, DefaultWindow.Height, 0, 1));
         }
 
         public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject

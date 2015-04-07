@@ -140,27 +140,7 @@ namespace DotGame.DirectX11
 
         public void SetRenderTargetBackBuffer()
         {
-            SetRenderTarget(graphicsDevice.DepthStencilBuffer, graphicsDevice.BackBuffer);
-        }
-
-        public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
-        {
-            var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
-            var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
-
-            if (dxDepth.DepthView == null)
-                throw new ArgumentException("Texture is not a depth render target.", "depth");
-            if (dxColor.RenderView == null)
-                throw new ArgumentException("Texture is not a color render target.", "color");
-
-            if (currentColorTargets != null && currentColorTargets.Length == 1 && dxColor.RenderView == currentColorTargets[0] && currentDepthTarget == dxDepth.DepthView)
-                return;
-
-            currentColorTargets = new RenderTargetView[] { dxColor.RenderView };
-            currentDepthTarget = dxDepth.DepthView;
-
-            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
-            context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
+            SetRenderTargets(graphicsDevice.DepthStencilBuffer, graphicsDevice.BackBuffer);
         }
 
         public void SetRenderTargetColor(IRenderTarget2D color)
@@ -177,7 +157,6 @@ namespace DotGame.DirectX11
             currentColorTargets = new RenderTargetView[] { dxColor.RenderView };
 
             context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
-            context.Rasterizer.SetViewport(new SharpDX.ViewportF(0, 0, dxColor.Width, dxColor.Height, 0.0f, 1.0f));
         }
 
         public void SetRenderTargetDepth(IRenderTarget2D depth)
@@ -223,6 +202,11 @@ namespace DotGame.DirectX11
 
             currentColorTargets = targets;
             context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
+        }
+
+        public void SetViewport(Viewport viewport)
+        {
+            context.Rasterizer.SetViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth, viewport.MaxDepth);
         }
 
         public void SetShader(IShader shader)

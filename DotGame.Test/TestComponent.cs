@@ -145,7 +145,7 @@ namespace DotGame.Test
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();
 
-            GraphicsDevice.RenderContext.SetRenderTarget(depthBuffer, colorTarget);
+            GraphicsDevice.RenderContext.SetRenderTargets(depthBuffer, colorTarget);
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.CornflowerBlue, 1f, 0);
 
             GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);

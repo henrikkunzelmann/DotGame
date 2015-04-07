@@ -38,12 +38,13 @@ namespace DotGame.Graphics
 
         void SetRenderTargetBackBuffer();
 
-        void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color);
         void SetRenderTargetColor(IRenderTarget2D color);
         void SetRenderTargetDepth(IRenderTarget2D depth);
 
         void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets);
         void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets);
+
+        void SetViewport(Viewport viewport);
 
         /// <summary>
         /// Setzt den Shader in der Pipeline.

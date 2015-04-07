@@ -110,11 +110,6 @@ namespace DotGame.OpenGL4
         }
   
                 
-        public void SetRenderTarget(IRenderTarget2D depth, IRenderTarget2D color)
-        {
-            SetRenderTargets(depth, new IRenderTarget2D[] { color });
-        }
-
         public void SetRenderTargetColor(IRenderTarget2D color)
         {
             SetRenderTargetsColor(color);
@@ -222,6 +217,11 @@ namespace DotGame.OpenGL4
                 clearStencil = stencil;
                 GL.ClearStencil(stencil);
             }
+        }
+
+        public void SetViewport(Viewport viewport)
+        {
+            throw new NotImplementedException();
         }
 
         public void SetShader(IShader shader)
