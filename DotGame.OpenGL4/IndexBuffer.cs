@@ -35,6 +35,8 @@ namespace DotGame.OpenGL4
             if (data.Length == 0)
                 throw new ArgumentException("Data must not be empty.", "data");
 
+            EnumConverter.Convert(format);
+
             // TODO (henrik1235) Format und SizeBytes supporten
             this.Format = format;
             this.IndexCount = data.Length;

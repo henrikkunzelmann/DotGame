@@ -35,11 +35,11 @@ namespace DotGame.OpenGL4.Windows
         public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title) { }
 
 
-        public IGraphicsDevice CreateDevice()
+        public IGraphicsDevice CreateDevice(DeviceCreationFlags flags)
         {
             this.Visible = true;
             GraphicsContext context = (GraphicsContext)this.Context;
-            return new GraphicsDevice(this, this, context);
+            return new GraphicsDevice(this, this, context, flags);
         }
     }
 }

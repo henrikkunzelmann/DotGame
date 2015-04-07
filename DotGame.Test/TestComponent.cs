@@ -131,7 +131,7 @@ namespace DotGame.Test
             worldViewProj.Transpose();
 
             GraphicsDevice.RenderContext.SetRenderTarget(depthBuffer, colorTarget);
-            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.CornflowerBlue, 1f, 0);
+            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.CornflowerBlue, 1f, 0);
 
             GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);
 
@@ -151,7 +151,7 @@ namespace DotGame.Test
             GraphicsDevice.RenderContext.Draw();
             
             GraphicsDevice.RenderContext.SetRenderTargetBackBuffer();
-            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepthStencil, Color.Beige, 1f, 0);
+            GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.Beige, 1f, 0);
             GraphicsDevice.RenderContext.SetVertexBuffer(quad);
             GraphicsDevice.RenderContext.Update(constantBuffer, Matrix.Identity);
             GraphicsDevice.RenderContext.SetTexture(shader, "picture", colorTarget);

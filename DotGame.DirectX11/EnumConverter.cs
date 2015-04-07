@@ -120,6 +120,14 @@ namespace DotGame.DirectX11
             { DotGame.Graphics.FillMode.Solid, SharpDX.Direct3D11.FillMode.Solid },
         };
 
+        public static SharpDX.Direct3D11.DeviceCreationFlags Convert(DotGame.Graphics.DeviceCreationFlags flags)
+        {
+            SharpDX.Direct3D11.DeviceCreationFlags f = 0;
+            if (flags.HasFlag(DotGame.Graphics.DeviceCreationFlags.Debug))
+                f |= SharpDX.Direct3D11.DeviceCreationFlags.Debug;
+            return f;
+        }
+
         public static Format Convert(TextureFormat format)
         {
             Format f;

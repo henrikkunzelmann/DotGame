@@ -12,10 +12,7 @@ namespace DotGame.OpenGL4
     {
         internal int SamplerID { get; private set; }
 
-        public SamplerInfo Info
-        {
-            get; set; 
-        }
+        public SamplerInfo Info { get; set; }
 
         internal Sampler(GraphicsDevice graphicsDevice, SamplerInfo info)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))

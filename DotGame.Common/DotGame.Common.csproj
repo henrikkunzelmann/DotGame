@@ -63,6 +63,7 @@
     <Compile Include="Audio\SampleSources\VorbisSampleSource.cs" />
     <Compile Include="Audio\SoundFlags.cs" />
     <Compile Include="Audio\SampleSources\WaveSampleSource.cs" />
+    <Compile Include="Graphics\DeviceCreationFlags.cs" />
     <Compile Include="Graphics\AddressMode.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
@@ -103,6 +104,7 @@
     <Compile Include="Graphics\VertexElement.cs" />
     <Compile Include="Graphics\VertexElementType.cs" />
     <Compile Include="Graphics\VertexElementUsage.cs" />
+    <Compile Include="Graphics\GraphicsCapabilities.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs">
       <DependentUpon>Vector.tt</DependentUpon>

@@ -194,12 +194,18 @@ namespace DotGame.OpenGL4
 
         public IShader CreateShader(string name, byte[] vertexCode, byte[] pixelCode)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+            if (vertexCode == null)
+                throw new ArgumentNullException("vertexCode");
+            if (pixelCode == null)
+                throw new ArgumentNullException("pixelCode");
             throw new NotSupportedException("Creating shader from byte code is not supported.");
         }
 
         public IRenderState CreateRenderState(RenderStateInfo info)
         {
-            throw new NotImplementedException();
+            return new RenderState(graphicsDevice, info);
         }
 
         public IRasterizerState CreateRasterizerState(RasterizerStateInfo info)
@@ -209,7 +215,7 @@ namespace DotGame.OpenGL4
 
         public ISampler CreateSampler(SamplerInfo info)
         {
-            return Register(new Sampler(this.graphicsDevice, info));
+            return Register(new Sampler(graphicsDevice, info));
         }
 
         internal Fbo CreateFbo(int depth, params int[] color)

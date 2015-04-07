@@ -24,7 +24,7 @@ namespace DotGame.OpenGL4
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (graphicsDevice.IsDisposed)
-                throw new ArgumentException("graphicsDevice is disposed.", "graphicsDevice");
+                throw new ObjectDisposedException("graphicsDevice");
             if (creationStack == null)
                 throw new ArgumentNullException("creationStack");
 

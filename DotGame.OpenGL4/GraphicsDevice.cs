@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using DotGame.Graphics;
@@ -16,6 +17,9 @@ namespace DotGame.OpenGL4
     public sealed class GraphicsDevice : IGraphicsDevice
     {
         public bool IsDisposed { get; private set; }
+
+        public DeviceCreationFlags CreationFlags { get; private set; }
+        public GraphicsCapabilities Capabilities { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
         public IRenderContext RenderContext { get; private set; }
 
@@ -47,10 +51,13 @@ namespace DotGame.OpenGL4
         internal bool HasAnisotropicFiltering { get; private set; }
         internal bool HasS3TextureCompression { get; private set; }
         internal int TextureUnits { get; private set; }
+        internal bool SupportsDebugOutput { get; private set; }
 
         //Sampler Values
         internal int MaxAnisotropicFiltering { get; private set; }
         internal int MaxTextureLoDBias { get; private set; }
+
+        private DebugProc onDebugMessage;
 
         internal static int MipLevels(int width, int height, int depth = 0)
         {
@@ -58,7 +65,7 @@ namespace DotGame.OpenGL4
             return (int)Math.Ceiling(Math.Log(max, 2));
         }
 
-        public GraphicsDevice(IGameWindow window, IWindowContainer container, GraphicsContext context)
+        public GraphicsDevice(IGameWindow window, IWindowContainer container, GraphicsContext context, DeviceCreationFlags creationFlags)
         {
             if (window == null)
                 throw new ArgumentNullException("window");
@@ -72,6 +79,7 @@ namespace DotGame.OpenGL4
             this.DefaultWindow = window;
             this.container = container;
             this.Context = context;
+            this.CreationFlags = creationFlags;
             
             Log.Debug("Got context: [ColorFormat: {0}, Depth: {1}, Stencil: {2}, FSAA Samples: {3}, AccumulatorFormat: {4}, Buffers: {5}, Stereo: {6}]",
                 Context.GraphicsMode.ColorFormat,
@@ -95,7 +103,6 @@ namespace DotGame.OpenGL4
         ~GraphicsDevice()
         {
             Dispose(false);
-            GC.SuppressFinalize(this);
         }
 
         public void MakeCurrent()
@@ -147,11 +154,43 @@ namespace DotGame.OpenGL4
                     HasAnisotropicFiltering = true;
                     MaxAnisotropicFiltering  = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
                 }
+
+                if (extension == "GL_ARB_debug_output")
+                {
+                    SupportsDebugOutput = true;
+
+                    if (CreationFlags.HasFlag(DeviceCreationFlags.Debug))
+                    {
+                        onDebugMessage = new DebugProc(OnDebugMessage);
+                        GL.Enable(EnableCap.DebugOutput);
+                        GL.DebugMessageCallback(onDebugMessage, IntPtr.Zero);
+
+                        GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
+                    }
+                }
             }
             TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
             MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
 
             OpenGL4.GraphicsDevice.CheckGLError();
+        }
+
+        private void OnDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr user)
+        {
+            string sourceString = source.ToString();
+            if (sourceString.StartsWith("DebugSource"))
+                sourceString = sourceString.Remove(0, "DebugSource".Length);
+
+            string typeString = type.ToString();
+            if (typeString.StartsWith("DebugType"))
+                typeString = typeString.Remove(0, "DebugType".Length);
+
+            string severityString = severity.ToString();
+            if (severityString.StartsWith("DebugSeverity"))
+                severityString = severityString.Remove(0, "DebugSeverity".Length);
+
+            Log.Debug("(OpenGL) ({0}) ({1}) ({2}) {3}", severityString, sourceString, typeString, Marshal.PtrToStringAnsi(message, length));
+            Log.FlushBuffer();
         }
 
         public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
@@ -276,7 +315,7 @@ namespace DotGame.OpenGL4
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
             {
-                throw new InvalidOperationException(error.ToString());
+                throw new InvalidOperationException("OpenGL threw an error: " + error.ToString());
             }
         }
 
@@ -288,9 +327,12 @@ namespace DotGame.OpenGL4
 
         private void Dispose(bool isDisposing)
         {
-            Factory.Dispose();
-            Context.Dispose();
-            IsDisposed = true;
+            if (Factory != null)
+                Factory.Dispose();
+            if (Context != null)
+                Context.Dispose();
+            IsDisposed = true; 
+            GC.SuppressFinalize(this);
         }
     }
 }

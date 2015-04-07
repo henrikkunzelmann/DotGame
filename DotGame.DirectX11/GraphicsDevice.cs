@@ -10,6 +10,7 @@ using System.Windows.Forms;
 using SharpDX.Windows;
 using SharpDX.DXGI;
 using DotGame.Utils;
+using DeviceCreationFlags = DotGame.Graphics.DeviceCreationFlags;
 
 namespace DotGame.DirectX11
 {
@@ -22,6 +23,9 @@ namespace DotGame.DirectX11
         internal IRenderTarget2D DepthStencilBuffer { get; private set; }
 
         public bool IsDisposed { get; private set; }
+
+        public DeviceCreationFlags CreationFlags { get; private set; }
+        public GraphicsCapabilities Capabilities { get; private set; }
         public IGraphicsFactory Factory { get; private set; }
         public IRenderContext RenderContext { get; private set; }
 
@@ -38,7 +42,7 @@ namespace DotGame.DirectX11
 
         private Dictionary<VertexDescription, InputLayout> inputLayoutPool = new Dictionary<VertexDescription, InputLayout>();
 
-        internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain)
+        internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain, DeviceCreationFlags creationFlags)
         {
             if (window == null)
                 throw new ArgumentNullException("window");
@@ -54,6 +58,7 @@ namespace DotGame.DirectX11
             this.DefaultWindow = window;
             this.Device = device;
             this.swapChain = swapChain;
+            this.CreationFlags = CreationFlags;
 
             this.CreatedObjects = new List<GraphicsObject>();
 

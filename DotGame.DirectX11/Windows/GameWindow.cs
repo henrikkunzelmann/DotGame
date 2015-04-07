@@ -31,7 +31,7 @@ namespace DotGame.DirectX11.Windows
             Height = height;
         }
 
-        public IGraphicsDevice CreateDevice()
+        public IGraphicsDevice CreateDevice(DotGame.Graphics.DeviceCreationFlags flags)
         {
             if (graphicsDevice != null)
                 return graphicsDevice;
@@ -49,12 +49,12 @@ namespace DotGame.DirectX11.Windows
             };
 
             Device device;
-            Device.CreateWithSwapChain(DriverType.Hardware, DeviceCreationFlags.Debug, swapChainDescription, out device, out swapChain);
+            Device.CreateWithSwapChain(DriverType.Hardware, EnumConverter.Convert(flags), swapChainDescription, out device, out swapChain);
 
             Factory factory = swapChain.GetParent<Factory>();
             factory.MakeWindowAssociation(Handle, WindowAssociationFlags.IgnoreAll);
 
-            graphicsDevice = new GraphicsDevice(this, device, swapChain);
+            graphicsDevice = new GraphicsDevice(this, device, swapChain, flags);
 
             this.Show();
             return graphicsDevice;

@@ -28,6 +28,6 @@ namespace DotGame.Graphics
         /// Erstellt ein GraphicsDevice für diese GameWindow.
         /// </summary>
         /// <returns></returns>
-        IGraphicsDevice CreateDevice();
+        IGraphicsDevice CreateDevice(DeviceCreationFlags flags);
     }
 }

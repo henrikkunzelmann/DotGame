@@ -20,8 +20,6 @@ namespace DotGame.OpenGL4
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Width must be positive.");
             if (height <= 0)
@@ -29,7 +27,7 @@ namespace DotGame.OpenGL4
             if (mipLevels < 0)
                 throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
             if (format == TextureFormat.Unknown)
-                throw new ArgumentException("format is TextureFormat.Unkown.", "format");
+                throw new ArgumentException("Format must be not TextureFormat.Unkown.", "format");
             
             this.Width = width;
             this.Height = height;
@@ -50,8 +48,6 @@ namespace DotGame.OpenGL4
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format, IntPtr data)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
             if (width <= 0)
                 throw new ArgumentOutOfRangeException("width", "Width must be positive.");
             if (height <= 0)
@@ -59,7 +55,7 @@ namespace DotGame.OpenGL4
             if (mipLevels < 0)
                 throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
             if (format == TextureFormat.Unknown)
-                throw new ArgumentException("format is TextureFormat.Unkown.", "format");
+                throw new ArgumentException("Format must be not TextureFormat.Unkown.", "format");
 
             this.Width = width;
             this.Height = height;
@@ -81,9 +77,6 @@ namespace DotGame.OpenGL4
 
         protected override void Dispose(bool isDisposing)
         {
-            if (IsDisposed)
-                return;
-
             if (!GraphicsDevice.IsDisposed)
                 GL.DeleteTexture(TextureID);
         }

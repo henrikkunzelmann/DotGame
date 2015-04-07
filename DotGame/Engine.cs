@@ -115,7 +115,7 @@ namespace DotGame
 
         private void Init()
         {
-            this.GraphicsDevice = window.CreateDevice();
+            this.GraphicsDevice = window.CreateDevice(DeviceCreationFlags.Debug);
             GraphicsDevice.MakeCurrent();
             Log.Debug("Got GraphicsDevice: " + GraphicsDevice.GetType().FullName);
             Log.Debug("Got window: [width: {0}, height: {1}]", GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height);

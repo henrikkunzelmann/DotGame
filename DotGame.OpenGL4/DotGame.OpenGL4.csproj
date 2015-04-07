@@ -21,6 +21,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <AllowUnsafeBlocks>false</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <DebugType>pdbonly</DebugType>
@@ -54,6 +55,7 @@
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="RasterizerState.cs" />
     <Compile Include="RenderContext.cs" />
+    <Compile Include="RenderState.cs" />
     <Compile Include="Sampler.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="ShaderPart.cs" />

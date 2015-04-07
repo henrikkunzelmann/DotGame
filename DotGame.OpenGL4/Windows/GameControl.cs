@@ -16,7 +16,6 @@ namespace DotGame.OpenGL4.Windows
 {
     public class GameControl : DotGame.Graphics.IGameWindow, IWindowContainer
     {
-        private IGraphicsDevice graphicsDevice;
         private Control control;
 
         public int Width
@@ -49,16 +48,12 @@ namespace DotGame.OpenGL4.Windows
             this.control = control;
         }
 
-        public IGraphicsDevice CreateDevice()
+        public IGraphicsDevice CreateDevice(DeviceCreationFlags flags)
         {
-            if (graphicsDevice != null)
-                return graphicsDevice;
-
             WindowInfo = Utilities.CreateWindowsWindowInfo(control.Handle);
             GraphicsContext context = new GraphicsContext(GraphicsMode.Default, WindowInfo);
             context.LoadAll();
-            graphicsDevice = new GraphicsDevice(this, this, context);
-            return graphicsDevice;
+            return new GraphicsDevice(this, this, context, flags);
         }
     }
 }

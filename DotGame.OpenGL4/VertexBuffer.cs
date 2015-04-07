@@ -62,9 +62,6 @@ namespace DotGame.OpenGL4
 
         protected override void Dispose(bool isDisposing)
         {
-            if (IsDisposed)
-                return;
-
             if (!GraphicsDevice.IsDisposed)
             {
                 GL.DeleteVertexArray(VboID);
