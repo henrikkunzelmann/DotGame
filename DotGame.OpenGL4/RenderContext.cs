@@ -108,34 +108,18 @@ namespace DotGame.OpenGL4
 
             throw new NotImplementedException();
         }
-  
-                
-        public void SetRenderTargetColor(IRenderTarget2D color)
-        {
-            SetRenderTargetsColor(color);
-        }
 
-        public void SetRenderTargetDepth(IRenderTarget2D depth)
-        {
-            if (depth != null)
-            {
-                Texture2D texture = graphicsDevice.Cast<Texture2D>(depth, "depth");
-                currentDepthRenderTarget = texture.TextureID;
-                currentDepthFormat = texture.Format;
 
-                if (texture.Width > currentWidth)
-                    currentWidth = texture.Width;
-                if (texture.Height > currentHeight)
-                    currentHeight = texture.Height;
-            }
-            else
-                currentDepthRenderTarget = -1;
+        public void SetRenderTargetsBackBuffer()
+        {
+            currentDepthRenderTarget = -1;
+            currentRenderTargets = null;
         }
 
         public void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets)
         {
             SetRenderTargetsColor(colorTargets);
-            SetRenderTargetDepth(depth);
+            SetRenderTargetsDepth(depth);
         }
         
         public void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets)
@@ -157,10 +141,22 @@ namespace DotGame.OpenGL4
             else
                 currentRenderTargets = null;
         }
-        public void SetRenderTargetBackBuffer()
+
+        public void SetRenderTargetsDepth(IRenderTarget2D depth)
         {
-            currentDepthRenderTarget = -1;
-            currentRenderTargets = null;
+            if (depth != null)
+            {
+                Texture2D texture = graphicsDevice.Cast<Texture2D>(depth, "depth");
+                currentDepthRenderTarget = texture.TextureID;
+                currentDepthFormat = texture.Format;
+
+                if (texture.Width > currentWidth)
+                    currentWidth = texture.Width;
+                if (texture.Height > currentHeight)
+                    currentHeight = texture.Height;
+            }
+            else
+                currentDepthRenderTarget = -1;
         }
 
         public void Clear(Color color)
@@ -224,6 +220,11 @@ namespace DotGame.OpenGL4
             throw new NotImplementedException();
         }
 
+        public void SetScissor(Rectangle rectangle)
+        {
+            throw new NotImplementedException();
+        }
+
         public void SetShader(IShader shader)
         {
             graphicsDevice.Cast<Shader>(shader, "shader"); // Shader überprüfen
@@ -252,10 +253,7 @@ namespace DotGame.OpenGL4
         {
             var internalState = graphicsDevice.Cast<RenderState>(state, "state");
             if (!internalState.Info.Equals(currentState))
-            {
                 currentState = internalState.Info;
-                ApplyState();
-            }
         }
 
         public void SetVertexBuffer(IVertexBuffer vertexBuffer)

@@ -22,7 +22,8 @@ namespace DotGame.DirectX11
         private bool vertexBufferDirty;
         private bool indexBufferDirty;
 
-        private RenderTargetView[] currentColorTargets;
+        private bool renderTargetsDirty = true;
+        private RenderTargetView[] currentColorTargets = new RenderTargetView[0];
         private DepthStencilView currentDepthTarget;
 
         private IRasterizerState currentRasterizer;
@@ -138,59 +139,28 @@ namespace DotGame.DirectX11
             }
         }
 
-        public void SetRenderTargetBackBuffer()
+        public void SetRenderTargetsBackBuffer()
         {
             SetRenderTargets(graphicsDevice.DepthStencilBuffer, graphicsDevice.BackBuffer);
         }
 
-        public void SetRenderTargetColor(IRenderTarget2D color)
-        {
-            // TODO (henrik1235) color = null Rendering erlauben
-            var dxColor = graphicsDevice.Cast<Texture2D>(color, "color");
-
-            if (dxColor.RenderView == null)
-                throw new ArgumentException("Texture is not a color render target.", "color");
-
-            if (currentColorTargets != null && currentColorTargets.Length == 1 && dxColor.RenderView == currentColorTargets[0])
-                return;
-
-            currentColorTargets = new RenderTargetView[] { dxColor.RenderView };
-
-            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
-        }
-
-        public void SetRenderTargetDepth(IRenderTarget2D depth)
-        {
-            // TODO (henrik1235) depth = null Rendering erlauben
-            var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
-
-            if (dxDepth.DepthView == null)
-                throw new ArgumentException("Texture is not a depth render target.", "depth");
-
-            if (dxDepth.DepthView == currentDepthTarget)
-                return;
-
-            currentDepthTarget = dxDepth.DepthView;
-
-            if (currentColorTargets != null)
-                context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
-            else
-                context.OutputMerger.SetTargets(currentDepthTarget);
-        }
-
         public void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets)
         {
-            SetRenderTargetDepth(depth);
+            SetRenderTargetsDepth(depth);
             SetRenderTargetsColor(colorTargets);
         }
 
         public void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets)
         {
-            if (colorTargets == null)
-                throw new ArgumentNullException("colorTargets");
-            if (colorTargets.Length == 0)
-                throw new ArgumentException("ColorTargets is empty.", "colorTargets");
-
+            if (colorTargets == null || colorTargets.Length == 0)
+            {
+                if (currentColorTargets.Length != 0)
+                {
+                    currentColorTargets = new RenderTargetView[0];
+                    renderTargetsDirty = true;
+                }
+                return;
+            }
             RenderTargetView[] targets = new RenderTargetView[colorTargets.Length];
             for (int i = 0; i < targets.Length; i++)
             {
@@ -200,13 +170,54 @@ namespace DotGame.DirectX11
                 targets[i] = target.RenderView;
             }
 
+            if (currentColorTargets != null && targets.SequenceEqual(currentColorTargets))
+                return;
+
             currentColorTargets = targets;
-            context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
+            renderTargetsDirty = true;
         }
+
+        public void SetRenderTargetsDepth(IRenderTarget2D depth)
+        {
+            if (depth == null)
+            {
+                if (currentDepthTarget != null)
+                {
+                    currentDepthTarget = null;
+                    renderTargetsDirty = true;
+                }
+                return;
+            }
+            var dxDepth = graphicsDevice.Cast<Texture2D>(depth, "depth");
+
+            if (dxDepth.DepthView == null)
+                throw new ArgumentException("Texture is not a depth render target.", "depth");
+
+            if (dxDepth.DepthView == currentDepthTarget)
+                return;
+
+            currentDepthTarget = dxDepth.DepthView;
+            renderTargetsDirty = true;
+        }
+
+        private void ApplyRenderTargets()
+        {
+            if (renderTargetsDirty)
+            {
+                context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
+                renderTargetsDirty = false;
+            }
+        }
+
 
         public void SetViewport(Viewport viewport)
         {
             context.Rasterizer.SetViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth, viewport.MaxDepth);
+        }
+
+        public void SetScissor(Rectangle rectangle)
+        {
+            context.Rasterizer.SetScissorRectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Right, (int)rectangle.Bottom);
         }
 
         public void SetShader(IShader shader)
@@ -352,6 +363,9 @@ namespace DotGame.DirectX11
         {
             if (cache.Views[slot] != view)
             {
+                // um Ressourcen Hazards zu vermeiden (Read und Write gleichzeitig) werden die RTs schon beim Setzten von Texturen neu gesetzt
+                ApplyRenderTargets();
+
                 stage.SetShaderResource(slot, view);
                 cache.Views[slot] = view;
             }
@@ -386,6 +400,8 @@ namespace DotGame.DirectX11
 
         private void ApplyState()
         {
+            ApplyRenderTargets();
+
             var shader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
             if (stateDirty)
             {

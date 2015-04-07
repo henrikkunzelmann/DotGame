@@ -42,6 +42,7 @@ namespace DotGame.DirectX11
 
         private Dictionary<VertexDescription, InputLayout> inputLayoutPool = new Dictionary<VertexDescription, InputLayout>();
 
+
         internal GraphicsDevice(IGameWindow window, Device device, SwapChain swapChain, DeviceCreationFlags creationFlags)
         {
             if (window == null)
@@ -49,11 +50,12 @@ namespace DotGame.DirectX11
             if (device == null)
                 throw new ArgumentNullException("device");
             if (device.IsDisposed)
-                throw new ArgumentException("Device is disposed.", "device");
+                throw new ObjectDisposedException("device");
             if (swapChain == null)
                 throw new ArgumentNullException("swapChain");
             if (swapChain.IsDisposed)
-                throw new ArgumentException("SwapChain is disposed.", "swapChain");
+                throw new ObjectDisposedException("swapChain");
+
 
             this.DefaultWindow = window;
             this.Device = device;
@@ -62,6 +64,7 @@ namespace DotGame.DirectX11
 
             this.CreatedObjects = new List<GraphicsObject>();
 
+            this.Device.DebugName = string.Format("{0}@{1:X}", GetType().FullName, ((object)this).GetHashCode());
             this.Factory = new GraphicsFactory(this);
             this.RenderContext = new RenderContext(this, device.ImmediateContext);
 
@@ -77,7 +80,7 @@ namespace DotGame.DirectX11
         {
             BackBuffer = new Texture2D(this, swapChain.GetBackBuffer<SharpDX.Direct3D11.Texture2D>(0));
             DepthStencilBuffer = Factory.CreateRenderTarget2D(DefaultWindow.Width, DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
-            RenderContext.SetRenderTargetBackBuffer();
+            RenderContext.SetRenderTargetsBackBuffer();
             RenderContext.SetViewport(new Viewport(0, 0, DefaultWindow.Width, DefaultWindow.Height, 0, 1));
         }
 

@@ -33,8 +33,7 @@ namespace DotGame.Audio
 
             for (int i = 0; i < samples.Length / channels; i++)
             {
-                if (Math.Abs(samples[channel + i * channels]) > 1)
-                    DotGame.Utils.Log.Debug(samples[channel + i * channels].ToString());
+                
                 newSamples[i] = (short)(samples[channel + i * channels] * short.MaxValue);
             }
         }

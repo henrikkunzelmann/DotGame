@@ -14,8 +14,8 @@ namespace DotGame.Test
     {
         public ISoundInstance Visualize;
 
-        private IRenderTarget2D depthBuffer;
         private IRenderTarget2D colorTarget;
+        private IRenderTarget2D depthTarget;
         private IRasterizerState rasterizerState;
         private IShader shader;
         private IConstantBuffer constantBuffer;
@@ -23,6 +23,7 @@ namespace DotGame.Test
         private IVertexBuffer quad;
         private ITexture2D texture;
         private ISampler sampler;
+        private IRenderState state;
 
         public TestComponent(Engine engine)
             : base(engine)
@@ -53,8 +54,8 @@ namespace DotGame.Test
                     File.WriteAllBytes(shaderBinaryFile, shader.BinaryCode);
             }
 
-            depthBuffer = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth24Stencil8, false);
             colorTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.RGBA32_Float, false);
+            depthTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth32, false);
 
             constantBuffer = shader.CreateConstantBuffer();
 
@@ -121,8 +122,15 @@ namespace DotGame.Test
                 {
                     CullMode = CullMode.Back,
                     FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = true
+                    IsFrontCounterClockwise = true,
                 });
+
+            state = GraphicsDevice.Factory.CreateRenderState(new RenderStateInfo()
+            {
+                PrimitiveType = PrimitiveType.TriangleList,
+                Rasterizer = rasterizerState,
+                Shader = shader
+            });
 
             Log.FlushBuffer();
         }
@@ -145,12 +153,11 @@ namespace DotGame.Test
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();
 
-            GraphicsDevice.RenderContext.SetRenderTargets(depthBuffer, colorTarget);
+            GraphicsDevice.RenderContext.SetRenderTargetsBackBuffer();
+            GraphicsDevice.RenderContext.SetRenderTargetsColor(colorTarget); 
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.CornflowerBlue, 1f, 0);
 
-            GraphicsDevice.RenderContext.SetRasterizer(rasterizerState);
-
-            GraphicsDevice.RenderContext.SetShader(shader);
+            GraphicsDevice.RenderContext.SetState(state);
             GraphicsDevice.RenderContext.SetConstantBuffer(shader, constantBuffer);
             GraphicsDevice.RenderContext.SetTexture(shader, "picture", texture);
 
@@ -160,13 +167,13 @@ namespace DotGame.Test
                 GraphicsDevice.RenderContext.SetSampler(shader, "picture", sampler);
 
             GraphicsDevice.RenderContext.Update(constantBuffer, worldViewProj);
-            GraphicsDevice.RenderContext.SetPrimitiveType(PrimitiveType.TriangleList);
             GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);
 
             GraphicsDevice.RenderContext.Draw();
             
-            GraphicsDevice.RenderContext.SetRenderTargetBackBuffer();
+            GraphicsDevice.RenderContext.SetRenderTargetsBackBuffer();
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.Beige, 1f, 0);
+            GraphicsDevice.RenderContext.SetState(state);
             GraphicsDevice.RenderContext.SetVertexBuffer(quad);
             GraphicsDevice.RenderContext.Update(constantBuffer, Matrix.Identity);
             GraphicsDevice.RenderContext.SetTexture(shader, "picture", colorTarget);
@@ -194,6 +201,15 @@ namespace DotGame.Test
 
             if (sampler != null)
                 sampler.Dispose();
+
+            if (state != null)
+                state.Dispose();
+
+            if (colorTarget != null)
+                colorTarget.Dispose();
+
+            if (depthTarget != null)
+                depthTarget.Dispose();
         }
     }
 }

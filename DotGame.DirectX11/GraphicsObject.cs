@@ -56,6 +56,8 @@ namespace DotGame.DirectX11
 
             if (OnDisposed != null)
                 OnDisposed(this, EventArgs.Empty);
+
+            DotGame.Utils.Log.Debug("(Dispose) {0} disposed", GetType().FullName);
         }
 
         protected abstract void Dispose(bool isDisposing);

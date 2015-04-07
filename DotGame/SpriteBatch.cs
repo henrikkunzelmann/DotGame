@@ -94,7 +94,7 @@ namespace DotGame
             GraphicsDevice.RenderContext.SetVertexBuffer(vertexBuffer);
             GraphicsDevice.RenderContext.SetIndexBuffer(indexBuffer);
 
-            GraphicsDevice.RenderContext.SetShader(shader);
+            //TODO (henrik1235) IRenderState benutzen
             //TODO: (tice) shader variable setzen: MVP
 
             // Draw Batches

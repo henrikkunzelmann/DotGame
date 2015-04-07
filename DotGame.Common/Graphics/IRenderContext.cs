@@ -36,33 +36,14 @@ namespace DotGame.Graphics
         /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
         void Clear(ClearOptions clearOptions, Color color, float depth, byte stencil);
 
-        void SetRenderTargetBackBuffer();
-
-        void SetRenderTargetColor(IRenderTarget2D color);
-        void SetRenderTargetDepth(IRenderTarget2D depth);
-
+        void SetRenderTargetsBackBuffer();
         void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets);
+        void SetRenderTargetsDepth(IRenderTarget2D depth);
         void SetRenderTargetsColor(params IRenderTarget2D[] colorTargets);
 
         void SetViewport(Viewport viewport);
 
-        /// <summary>
-        /// Setzt den Shader in der Pipeline.
-        /// </summary>
-        /// <param name="shader"></param>
-        void SetShader(IShader shader);
-
-        /// <summary>
-        /// Setzt den PrimitiveType in der Pipeline.
-        /// </summary>
-        /// <param name="type"></param>
-        void SetPrimitiveType(PrimitiveType type);
-
-        /// <summary>
-        /// Setzt den Raterizer in der Pipeline.
-        /// </summary>
-        /// <param name="rasterizerState"></param>
-        void SetRasterizer(IRasterizerState rasterizerState);
+        void SetScissor(Rectangle rectangle);
 
         /// <summary>
         /// Setzt die Pipeline auf den neuen Zustand.
