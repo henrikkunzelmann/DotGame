@@ -29,7 +29,7 @@ namespace DotGame.OpenGL4
         {
             VboID = GL.GenVertexArray();
             VaoID = GL.GenBuffer();
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
 
             this.Description = description;
         }
@@ -57,7 +57,7 @@ namespace DotGame.OpenGL4
 
             GL.BindBuffer(BufferTarget.ArrayBuffer, VaoID);
             GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw);
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

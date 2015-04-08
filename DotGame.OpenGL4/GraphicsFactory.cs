@@ -212,7 +212,7 @@ namespace DotGame.OpenGL4
 
         public IRasterizerState CreateRasterizerState(RasterizerStateInfo info)
         {
-            return Register(new RasterizerState(graphicsDevice, info));
+            return new RasterizerState(graphicsDevice, info);
         }
 
         public ISampler CreateSampler(SamplerInfo info)
@@ -222,12 +222,12 @@ namespace DotGame.OpenGL4
 
         public IDepthStencilState CreateDepthStencilState(DepthStencilStateInfo info)
         {
-            throw new NotImplementedException();
+            return new DepthStencilState(graphicsDevice, info);
         }
 
         public IBlendState CreateBlendState(BlendStateInfo info)
         {
-            throw new NotImplementedException();
+            return new BlendState(graphicsDevice, info);
         }
 
         internal Fbo CreateFbo(int depth, params int[] color)

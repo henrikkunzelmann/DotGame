@@ -36,13 +36,13 @@ namespace DotGame.OpenGL4
 
             this.TextureID = GL.GenTexture();
 
-            graphicsDevice.StateManager.SetTexture(this, 0);
+            graphicsDevice.BindManager.SetTexture(this, 0);
 
 
             Tuple<OpenTK.Graphics.OpenGL4.PixelFormat, PixelType> tuple = EnumConverter.ConvertPixelDataFormat(Format);
             GL.TexImage2D(TextureTarget.Texture2D, 0, EnumConverter.Convert(Format), this.Width, this.Height, 0, tuple.Item1, tuple.Item2, IntPtr.Zero);
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         public Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, TextureFormat format, IntPtr data)
@@ -64,7 +64,7 @@ namespace DotGame.OpenGL4
 
             this.TextureID = GL.GenTexture();
 
-            graphicsDevice.StateManager.SetTexture(this, 0);
+            graphicsDevice.BindManager.SetTexture(this, 0);
 
             // TODO (Robin): Texturen mit Inhalt über ResourceManager laden
             //Tuple<OpenTK.Graphics.OpenGL4.PixelFormat, PixelType> tuple = EnumConverter.ConvertPixelDataFormat(Format);
@@ -72,7 +72,7 @@ namespace DotGame.OpenGL4
             GL.TexImage2D(TextureTarget.Texture2D, 0, EnumConverter.Convert(Format), Width, Height, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data);
 
             GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

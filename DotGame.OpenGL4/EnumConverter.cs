@@ -87,9 +87,7 @@ namespace DotGame.OpenGL4
             {AddressMode.Wrap, TextureWrapMode.Repeat},
         };
 
-        /// <summary>
         /// Min, Mag, Mip
-        /// </summary>
         private static readonly Dictionary<Tuple<TextureFilter, TextureFilter, TextureFilter>, Tuple<TextureMinFilter, TextureMagFilter>> filters = new Dictionary<Tuple<TextureFilter, TextureFilter, TextureFilter>, Tuple<TextureMinFilter, TextureMagFilter>>()
         {
             { Tuple.Create(TextureFilter.Point, TextureFilter.Point, TextureFilter.Point), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.NearestMipmapNearest, TextureMagFilter.Nearest)},
@@ -103,16 +101,56 @@ namespace DotGame.OpenGL4
             { Tuple.Create(TextureFilter.Anisotropic, TextureFilter.Anisotropic, TextureFilter.Anisotropic), Tuple.Create<TextureMinFilter, TextureMagFilter>(TextureMinFilter.LinearMipmapLinear, TextureMagFilter.Linear)},
         };
 
-        private static readonly Dictionary<Comparison, int> comparisons = new Dictionary<Comparison, int>()
+        private static readonly Dictionary<DotGame.Graphics.Comparison, DepthFunction> comparisons = new Dictionary<DotGame.Graphics.Comparison, DepthFunction>() 
         {
-            {Comparison.Always, (int)All.Always},
-            {Comparison.Equal, (int)All.Equal},
-            {Comparison.Greater, (int)All.Greater},
-            {Comparison.GreaterEqual, (int)All.Gequal},
-            {Comparison.Less, (int)All.Less},
-            {Comparison.LessEqual, (int)All.Lequal},
-            {Comparison.Never, (int)All.Never},
-            {Comparison.NotEqual, (int)All.Notequal},
+            {Comparison.Always, DepthFunction.Always},
+            {Comparison.Equal, DepthFunction.Equal},
+            {Comparison.Greater, DepthFunction.Greater},
+            {Comparison.GreaterEqual, DepthFunction.Gequal},
+            {Comparison.Less, DepthFunction.Less},
+            {Comparison.LessEqual, DepthFunction.Lequal},
+            {Comparison.Never, DepthFunction.Never},
+            {Comparison.NotEqual, DepthFunction.Notequal},
+        };
+
+        private static readonly Dictionary<Blend, OpenTK.Graphics.OpenGL4.BlendingFactorSrc> blends = new Dictionary<Blend, BlendingFactorSrc>() 
+        {
+            {Blend.Zero, BlendingFactorSrc.Zero},
+            {Blend.One, BlendingFactorSrc.One},
+            {Blend.SrcColor, BlendingFactorSrc.SrcColor},
+            {Blend.InvSrcColor, BlendingFactorSrc.OneMinusSrcColor},
+            {Blend.SrcAlpha, BlendingFactorSrc.SrcAlpha},
+            {Blend.InvSrcAlpha, BlendingFactorSrc.OneMinusSrcAlpha},
+            {Blend.DestAlpha, BlendingFactorSrc.DstAlpha},
+            {Blend.InvDestAlpha, BlendingFactorSrc.OneMinusDstAlpha},
+            {Blend.DestColor, BlendingFactorSrc.DstColor},
+            {Blend.InvDestColor, BlendingFactorSrc.OneMinusDstColor},
+            {Blend.SrcAlphaSat, BlendingFactorSrc.SrcAlphaSaturate},
+            {Blend.BlendFactor, BlendingFactorSrc.ConstantColor},
+            {Blend.InvBlendFactor, BlendingFactorSrc.OneMinusConstantColor},
+            {Blend.Src1Color, BlendingFactorSrc.Src1Color},
+            {Blend.InvSrc1Color, BlendingFactorSrc.OneMinusSrc1Color},
+            {Blend.Src1Alpha, BlendingFactorSrc.Src1Alpha},
+            {Blend.InvSrc1Alpha, BlendingFactorSrc.OneMinusSrc1Alpha},
+        };
+        private static readonly Dictionary<BlendOp, OpenTK.Graphics.OpenGL4.BlendEquationMode> blendOps = new Dictionary<BlendOp, BlendEquationMode>() 
+        {
+            {BlendOp.Add, BlendEquationMode.FuncAdd},
+            {BlendOp.Subtract, BlendEquationMode.FuncSubtract},
+            {BlendOp.RevSubtract, BlendEquationMode.FuncReverseSubtract},
+            {BlendOp.Min, BlendEquationMode.Min},
+            {BlendOp.Max, BlendEquationMode.Max},
+        };
+        private static readonly Dictionary<StencilOperation, StencilOp> stencilOperations = new Dictionary<StencilOperation, StencilOp>() 
+        {
+            {StencilOperation.Decr, StencilOp.Decr},
+            {StencilOperation.DecrSat, StencilOp.DecrWrap},
+            {StencilOperation.Incr, StencilOp.Incr},
+            {StencilOperation.IncrSat, StencilOp.IncrWrap},
+            {StencilOperation.Invert, StencilOp.Invert},
+            {StencilOperation.Keep, StencilOp.Keep},
+            {StencilOperation.Replace, StencilOp.Replace},
+            {StencilOperation.Zero, StencilOp.Zero},
         };
 
         internal static PixelInternalFormat Convert(TextureFormat format)
@@ -258,7 +296,7 @@ namespace DotGame.OpenGL4
             return filters.First((f) => f.Value == tuple).Key;
         }
 
-        internal static int Convert(Comparison comparison)
+        internal static DepthFunction Convert(Comparison comparison)
         {
             if (!comparisons.ContainsKey(comparison))
                 throw new NotSupportedException("indexFormat is not supported");
@@ -266,12 +304,60 @@ namespace DotGame.OpenGL4
             return comparisons[comparison];
         }
 
-        internal static Comparison Convert(int comparison)
+        internal static Comparison Convert(DepthFunction comparison)
         {
             if (!comparisons.ContainsValue(comparison))
                 throw new NotImplementedException();
 
             return comparisons.First((f) => f.Value == comparison).Key;
+        }
+
+        internal static BlendingFactorSrc Convert(Blend blend)
+        {
+            if (!blends.ContainsKey(blend))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return blends[blend];
+        }
+
+        internal static Blend Convert(BlendingFactorSrc blend)
+        {
+            if (!blends.ContainsValue(blend))
+                throw new NotImplementedException();
+
+            return blends.First((f) => f.Value == blend).Key;
+        }
+
+        internal static BlendEquationMode Convert(BlendOp blendOp)
+        {
+            if (!blendOps.ContainsKey(blendOp))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return blendOps[blendOp];
+        }
+
+        internal static BlendOp Convert(BlendEquationMode blendOp)
+        {
+            if (!blendOps.ContainsValue(blendOp))
+                throw new NotImplementedException();
+
+            return blendOps.First((f) => f.Value == blendOp).Key;
+        }
+
+        internal static StencilOp Convert(StencilOperation stencilOperation)
+        {
+            if (!stencilOperations.ContainsKey(stencilOperation))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return stencilOperations[stencilOperation];
+        }
+
+        internal static StencilOperation Convert(StencilOp stencilOperation)
+        {
+            if (!stencilOperations.ContainsValue(stencilOperation))
+                throw new NotImplementedException();
+
+            return stencilOperations.First((f) => f.Value == stencilOperation).Key;
         }
     }
 }

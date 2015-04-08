@@ -65,6 +65,12 @@ namespace DotGame.Null
             get { throw new NotImplementedException(); }
         }
 
+
+        public GraphicsCapabilities Capabilities
+        {
+            get { throw new NotImplementedException(); }
+        }
+
         public void Dispose()
         {
             // wir haben nichts wirklich zu disposen

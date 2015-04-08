@@ -11,7 +11,7 @@ namespace DotGame.OpenGL4
     {
         internal int ID { get; private set; }
 
-        internal ShaderPart(string shaderSource, ShaderType shaderType)
+        internal ShaderPart(GraphicsDevice graphicsDevice, string shaderSource, ShaderType shaderType)
         {
             //Comile and attach Vertex shader
             ID = GL.CreateShader(shaderType);
@@ -23,7 +23,7 @@ namespace DotGame.OpenGL4
             {
                 throw new Exception(GL.GetShaderInfoLog(ID));
             }
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         public void Dispose()

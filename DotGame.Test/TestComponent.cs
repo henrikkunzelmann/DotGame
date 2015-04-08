@@ -119,6 +119,7 @@ namespace DotGame.Test
 
 
             sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
+
             rasterizerState = GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
                 {
                     CullMode = CullMode.None,
@@ -126,13 +127,13 @@ namespace DotGame.Test
                     IsFrontCounterClockwise = true,
                 });
 
-            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-            {
                 depthStencil = GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
                 {
-                    IsDepthEnabled = false
+                    IsDepthEnabled = true,
+                    DepthComparsion = Comparison.LessEqual,
+                    DepthWriteMask = DepthWriteMask.All
                 });
-            }
+            
 
             state = GraphicsDevice.Factory.CreateRenderState(new RenderStateInfo()
             {
@@ -163,8 +164,9 @@ namespace DotGame.Test
                 * Matrix.CreateRotationZ(time * .7f) * view * proj;
             worldViewProj.Transpose();
 
-            GraphicsDevice.RenderContext.SetRenderTargetsBackBuffer();
-            GraphicsDevice.RenderContext.SetRenderTargetsColor(colorTarget); 
+            //GraphicsDevice.RenderContext.SetRenderTargetsBackBuffer();
+            GraphicsDevice.RenderContext.SetRenderTargetsColor(colorTarget);
+            GraphicsDevice.RenderContext.SetRenderTargetsDepth(depthTarget); 
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.CornflowerBlue, 1f, 0);
 
             GraphicsDevice.RenderContext.SetState(state);

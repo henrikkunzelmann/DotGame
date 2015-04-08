@@ -21,7 +21,7 @@ namespace DotGame.OpenGL4
             this.Size = size;
 
             UniformBufferObjectID = GL.GenBuffer();
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

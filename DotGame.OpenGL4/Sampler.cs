@@ -19,7 +19,7 @@ namespace DotGame.OpenGL4
         {
             Info = info;
 
-            if ((Info.MagFilter == TextureFilter.Anisotropic || Info.MinFilter == TextureFilter.Anisotropic) && (!graphicsDevice.HasAnisotropicFiltering || Info.MaximumAnisotropy > graphicsDevice.MaxAnisotropicFiltering))
+            if ((Info.MagFilter == TextureFilter.Anisotropic || Info.MinFilter == TextureFilter.Anisotropic) && (!graphicsDevice.SupportsAnisotropicFiltering || Info.MaximumAnisotropy > graphicsDevice.MaxAnisotropicFiltering))
                 throw new PlatformNotSupportedException("Anisotropic filtering is not supported at that level or at all.");
 
             if (Info.MaximumAnisotropy == 0)
@@ -30,13 +30,13 @@ namespace DotGame.OpenGL4
 
 
             SamplerID = GL.GenSampler();
-            graphicsDevice.StateManager.SetSampler(this, 0);
+            graphicsDevice.BindManager.SetSampler(this, 0);
 
             //AddressMode
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureWrapS, (float)EnumConverter.Convert(Info.AddressU));
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureWrapT, (float)EnumConverter.Convert(Info.AddressV));
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureWrapR, (float)EnumConverter.Convert(Info.AddressW));
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
 
             //Filtering
             Tuple<TextureMinFilter, TextureMagFilter> filter = EnumConverter.Convert(Info.MinFilter, Info.MagFilter, Info.MipFilter);
@@ -63,7 +63,7 @@ namespace DotGame.OpenGL4
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureMaxLod, Info.MaximumLod);
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureLodBias, Info.MipLodBias);
 
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

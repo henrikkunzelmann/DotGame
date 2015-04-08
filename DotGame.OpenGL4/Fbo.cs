@@ -28,7 +28,7 @@ namespace DotGame.OpenGL4
             FboID = GL.GenFramebuffer();
             Attach(-1, color);
             CheckStatus();
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         private void Attach(int depthAttachment, params int[] colorAttachments)
@@ -36,7 +36,7 @@ namespace DotGame.OpenGL4
             if (depthAttachment == -1 && (colorAttachments == null || colorAttachments.Length == 0))
                 throw new Exception("Can't create a framebuffer object without attachments.");
             
-            graphicsDevice.StateManager.Fbo = this;
+            graphicsDevice.BindManager.Fbo = this;
             ColorAttachmentIDs = colorAttachments;
             DepthAttachmentID = depthAttachment;
 
@@ -66,7 +66,7 @@ namespace DotGame.OpenGL4
 
         internal void CheckStatus()
         {
-            graphicsDevice.StateManager.Fbo = this;
+            graphicsDevice.BindManager.Fbo = this;
             FramebufferErrorCode error = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
             if (error != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(error.ToString());

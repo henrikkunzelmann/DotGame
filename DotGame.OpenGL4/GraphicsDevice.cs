@@ -42,10 +42,10 @@ namespace DotGame.OpenGL4
         internal GraphicsContext Context { get; private set; }
         internal bool IsCurrent { get { return Context.IsCurrent; } }
 
-        internal StateManager StateManager { get; private set; }
+        internal BindManager BindManager { get; private set; }
 
         private IWindowContainer container;
-                
+
         private List<Fbo> fboPool = new List<Fbo>();
 
         //Hardware/ Driver Information
@@ -53,10 +53,10 @@ namespace DotGame.OpenGL4
         internal int GLSLVersionMinor { get; private set; }
         internal int OpenGLVersionMajor { get; private set; }
         internal int OpenGLVersionMinor { get; private set; }
-        internal bool HasAnisotropicFiltering { get; private set; }
-        internal bool HasS3TextureCompression { get; private set; }
-        internal int TextureUnits { get; private set; }
+        internal bool SupportsAnisotropicFiltering { get; private set; }
+        internal bool SupportsS3TextureCompression { get; private set; }
         internal bool SupportsDebugOutput { get; private set; }
+        internal int TextureUnits { get; private set; }
 
         //Sampler Values
         internal int MaxAnisotropicFiltering { get; private set; }
@@ -102,7 +102,7 @@ namespace DotGame.OpenGL4
             CheckVersion();
 
             Factory = new GraphicsFactory(this);
-            StateManager = new OpenGL4.StateManager(this);
+            BindManager = new OpenGL4.BindManager(this);
             this.RenderContext = new RenderContext(this);
 
             Context.MakeCurrent(null);
@@ -126,7 +126,6 @@ namespace DotGame.OpenGL4
             OpenGLVersionMajor = GL.GetInteger(GetPName.MajorVersion);
             OpenGLVersionMinor = GL.GetInteger(GetPName.MinorVersion);
 
-            Log.Debug("Renderer: {0}", GL.GetString(StringName.Renderer));
             Log.Debug("OpenGL Version: {0}.{1}", OpenGLVersionMajor, OpenGLVersionMinor);
 
             //GLSL Version string auslesen
@@ -154,12 +153,12 @@ namespace DotGame.OpenGL4
                 string extension = GL.GetString(StringNameIndexed.Extensions, i);
                 if (extension == "GL_EXT_texture_compression_s3tc")
                 {
-                    HasS3TextureCompression = true;
+                    SupportsS3TextureCompression = true;
                 }
 
                 else if (extension == "GL_EXT_texture_filter_anisotropic")
                 {
-                    HasAnisotropicFiltering = true;
+                    SupportsAnisotropicFiltering = true;
                     MaxAnisotropicFiltering  = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
                 }
 
@@ -184,7 +183,7 @@ namespace DotGame.OpenGL4
             TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
             MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
 
-            OpenGL4.GraphicsDevice.CheckGLError();
+            CheckGLError();
         }
 
         private void OnDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr user)
@@ -322,8 +321,11 @@ namespace DotGame.OpenGL4
             return GetFBO(depth, new int[] { });
         }
 
-        internal static void CheckGLError()
+        internal void CheckGLError()
         {
+            if (!CreationFlags.HasFlag(DeviceCreationFlags.Debug))
+                return;
+
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
             {

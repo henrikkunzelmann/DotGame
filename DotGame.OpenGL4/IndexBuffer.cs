@@ -25,7 +25,7 @@ namespace DotGame.OpenGL4
                 throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
 
             IboID = GL.GenBuffer();
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         internal void SetData<T>(T[] data, IndexFormat format) where T : struct
@@ -42,9 +42,9 @@ namespace DotGame.OpenGL4
             this.IndexCount = data.Length;
             this.SizeBytes = Marshal.SizeOf(data[0]) * data.Length;
 
-            graphicsDevice.StateManager.IndexBuffer = this;
+            graphicsDevice.BindManager.IndexBuffer = this;
             GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(this.SizeBytes), data, BufferUsageHint.StaticDraw);
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

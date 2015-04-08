@@ -41,11 +41,11 @@ namespace DotGame.OpenGL4
             ProgramID = GL.CreateProgram();
 
             //Comile and attach Vertex shader
-            VertexShader = new ShaderPart(vertexShaderCode, ShaderType.VertexShader);
+            VertexShader = new ShaderPart(graphicsDevice, vertexShaderCode, ShaderType.VertexShader);
             GL.AttachShader(ProgramID, VertexShader.ID);
 
             //Comile and attach Fragment shader
-            FragmentShader = new ShaderPart(fragmentShaderCode, ShaderType.FragmentShader);
+            FragmentShader = new ShaderPart(graphicsDevice, fragmentShaderCode, ShaderType.FragmentShader);
             GL.AttachShader(ProgramID, FragmentShader.ID);
 
             //Link program
@@ -57,7 +57,7 @@ namespace DotGame.OpenGL4
             {
                 throw new Exception(GL.GetProgramInfoLog(ProgramID));
             }
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
 
             //Validate program
             GL.ValidateProgram(ProgramID);
@@ -67,7 +67,7 @@ namespace DotGame.OpenGL4
             {
                 throw new Exception(GL.GetProgramInfoLog(ProgramID));
             }
-            OpenGL4.GraphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError();
 
             int binaryLength;
             GL.GetProgram(ProgramID, (GetProgramParameterName)0x8741, out binaryLength); // GL_PROGRAM_BINARY_LENGTH
@@ -117,7 +117,7 @@ namespace DotGame.OpenGL4
                 GL.GetProgram(ProgramID, GetProgramParameterName.LinkStatus, out linkStatus);
                 if (linkStatus == 0)
                     throw new Exception(GL.GetProgramInfoLog(ProgramID));
-                OpenGL4.GraphicsDevice.CheckGLError();
+                graphicsDevice.CheckGLError();
             }
 
             FindUniforms();
@@ -193,7 +193,7 @@ namespace DotGame.OpenGL4
                 if (!uniformBlockLocations.ContainsKey(name))
                     throw new Exception(string.Format("Uniform block {0} not found"));
 
-                graphicsDevice.StateManager.Shader = this;
+                graphicsDevice.BindManager.Shader = this;
 
                 int blockIndex = uniformBlockLocations[name];
                 int bindingPoint = uniformBindingPoints.Count;
@@ -219,7 +219,7 @@ namespace DotGame.OpenGL4
                 if (textureUnit > graphicsDevice.TextureUnits - 1)
                     throw new PlatformNotSupportedException("No more texture units available");
 
-                graphicsDevice.StateManager.Shader = this;
+                graphicsDevice.BindManager.Shader = this;
 
                 GL.Uniform1(GetUniformLocation(name), textureUnit);
 
