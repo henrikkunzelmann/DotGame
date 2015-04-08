@@ -25,5 +25,10 @@ namespace DotGame.Graphics
         /// Gibt die Größe des IndexBuffers in Bytes an.
         /// </summary>
         int SizeBytes { get; }
+
+        /// <summary>
+        /// Gibt an wie der IndexBuffer benutzt wird.
+        /// </summary>
+        BufferUsage Usage { get; }
     }
 }

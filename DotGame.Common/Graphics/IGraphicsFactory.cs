@@ -21,14 +21,17 @@ namespace DotGame.Graphics
         IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize);
         IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize);
 
-        IVertexBuffer CreateVertexBuffer<T>(T[] vertices, VertexDescription description) where T : struct;
-        IIndexBuffer CreateIndexBuffer<T>(T[] indices, IndexFormat format) where T : struct;
-        IIndexBuffer CreateIndexBuffer(int[] indices);
-        IIndexBuffer CreateIndexBuffer(uint[] indices);
-        IIndexBuffer CreateIndexBuffer(short[] indices);
-        IIndexBuffer CreateIndexBuffer(ushort[] indices);
+        IVertexBuffer CreateVertexBuffer(int vertexCount, VertexDescription description, BufferUsage usage);
+        IVertexBuffer CreateVertexBuffer<T>(T[] vertices, VertexDescription description, BufferUsage usage) where T : struct;
+        IIndexBuffer CreateIndexBuffer(int indexCount, IndexFormat format, BufferUsage usage);
+        IIndexBuffer CreateIndexBuffer<T>(T[] indices, IndexFormat format, BufferUsage usage) where T : struct;
+        IIndexBuffer CreateIndexBuffer(int[] indices, BufferUsage usage);
+        IIndexBuffer CreateIndexBuffer(uint[] indices, BufferUsage usage);
+        IIndexBuffer CreateIndexBuffer(short[] indices, BufferUsage usage);
+        IIndexBuffer CreateIndexBuffer(ushort[] indices, BufferUsage usage);
 
-        IConstantBuffer CreateConstantBuffer(int size);
+        IConstantBuffer CreateConstantBuffer(int sizeBytes, BufferUsage usage);
+        IConstantBuffer CreateConstantBuffer<T>(T data, BufferUsage usage) where T : struct; 
 
         IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo);
         IShader CreateShader(string name, byte[] code);

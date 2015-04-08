@@ -66,6 +66,7 @@
     <Compile Include="Graphics\Blend.cs" />
     <Compile Include="Graphics\BlendOp.cs" />
     <Compile Include="Graphics\BlendStateInfo.cs" />
+    <Compile Include="Graphics\BufferUsage.cs" />
     <Compile Include="Graphics\ColorWriteMaskFlags.cs" />
     <Compile Include="Graphics\DepthStencilStateInfo.cs" />
     <Compile Include="Graphics\DepthWriteMask.cs" />

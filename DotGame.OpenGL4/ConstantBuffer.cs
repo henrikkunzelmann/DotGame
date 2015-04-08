@@ -14,11 +14,13 @@ namespace DotGame.OpenGL4
         internal int UniformBufferObjectID { get; private set; }
 
         public int Size { get; internal set; }
+        public BufferUsage Usage { get; private set; }
 
-        internal ConstantBuffer(GraphicsDevice graphicsDevice, int size)
+        internal ConstantBuffer(GraphicsDevice graphicsDevice, int size, BufferUsage usage)
             : base(graphicsDevice, new System.Diagnostics.StackTrace())
         {
             this.Size = size;
+            this.Usage = usage;
 
             UniformBufferObjectID = GL.GenBuffer();
             graphicsDevice.CheckGLError();

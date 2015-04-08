@@ -26,13 +26,13 @@ namespace DotGame.Graphics
         /// Erstellt einen passenden ConstantBuffer für alle globale Variablen.
         /// </summary>
         /// <returns></returns>
-        IConstantBuffer CreateConstantBuffer();
+        IConstantBuffer CreateConstantBuffer(BufferUsage usage);
 
         /// <summary>
         /// Erstellt für die Variable name im Shader einen passenden Constant-Buffer.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        IConstantBuffer CreateConstantBuffer(string name);
+        IConstantBuffer CreateConstantBuffer(string name, BufferUsage usage);
     }
 }

@@ -58,7 +58,7 @@ namespace DotGame.Test
             colorTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.RGBA32_Float, false);
             depthTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth32, false);
 
-            constantBuffer = shader.CreateConstantBuffer();
+            constantBuffer = shader.CreateConstantBuffer(BufferUsage.Dynamic);
 
             vertexBuffer = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
                 // 3D coordinates              UV Texture coordinates
@@ -103,7 +103,7 @@ namespace DotGame.Test
                  1.0f, -1.0f, -1.0f,    1.0f, 0.0f,
                  1.0f,  1.0f, -1.0f,    0.0f, 0.0f,
                  1.0f,  1.0f,  1.0f,    0.0f, 1.0f,
-            }, Geometry.VertexPositionTexture.Description);
+            }, Geometry.VertexPositionTexture.Description, BufferUsage.Static);
 
 
             quad = GraphicsDevice.Factory.CreateVertexBuffer(new float[] {
@@ -115,7 +115,7 @@ namespace DotGame.Test
                  1.0f, -1.0f, -1.0f,    1.0f, 1.0f,
                  1.0f,  1.0f, -1.0f,    1.0f, 0.0f,
                 -1.0f, -1.0f, -1.0f,    0.0f, 1.0f,
-            }, Geometry.VertexPositionTexture.Description);
+            }, Geometry.VertexPositionTexture.Description, BufferUsage.Static);
 
 
             sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
@@ -127,13 +127,13 @@ namespace DotGame.Test
                     IsFrontCounterClockwise = true,
                 });
 
-                depthStencil = GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
-                {
-                    IsDepthEnabled = true,
-                    DepthComparsion = Comparison.LessEqual,
-                    DepthWriteMask = DepthWriteMask.All
-                });
-            
+            depthStencil = GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
+            {
+                IsDepthEnabled = true,
+                DepthComparsion = Comparison.LessEqual,
+                DepthWriteMask = DepthWriteMask.All
+            });
+
 
             state = GraphicsDevice.Factory.CreateRenderState(new RenderStateInfo()
             {

@@ -88,43 +88,60 @@ namespace DotGame.DirectX11
             throw new NotImplementedException();
         }
 
-        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description) where T : struct
+        public IVertexBuffer CreateVertexBuffer(int vertexCount, VertexDescription description, BufferUsage usage) 
         {
-            VertexBuffer buffer = new VertexBuffer(graphicsDevice, description);
+            return new VertexBuffer(graphicsDevice, vertexCount, description, usage);
+        }
+
+        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description, BufferUsage usage) where T : struct
+        {
+            VertexBuffer buffer = new VertexBuffer(graphicsDevice, description, usage);
             buffer.SetData(data);
             return buffer;
         }
 
-        public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format) where T : struct
+        public IIndexBuffer CreateIndexBuffer(int indexCount, IndexFormat format, BufferUsage usage)
         {
-            IndexBuffer buffer = new IndexBuffer(graphicsDevice);
-            buffer.SetData(data, format);
+            return new IndexBuffer(graphicsDevice, indexCount, format, usage);
+        }
+
+        public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format, BufferUsage usage) where T : struct
+        {
+            IndexBuffer buffer = new IndexBuffer(graphicsDevice, format, usage);
+            buffer.SetData(data);
             return buffer;
         }
 
-        public IIndexBuffer CreateIndexBuffer(int[] data)
+        public IIndexBuffer CreateIndexBuffer(int[] data, BufferUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.Int32);
+            return CreateIndexBuffer(data, IndexFormat.Int32, usage);
         }
 
-        public IIndexBuffer CreateIndexBuffer(uint[] data)
+        public IIndexBuffer CreateIndexBuffer(uint[] data, BufferUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.UInt32);
+            return CreateIndexBuffer(data, IndexFormat.UInt32, usage);
         }
 
-        public IIndexBuffer CreateIndexBuffer(short[] data)
+        public IIndexBuffer CreateIndexBuffer(short[] data, BufferUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.Short16);
+            return CreateIndexBuffer(data, IndexFormat.Short16, usage);
         }
 
-        public IIndexBuffer CreateIndexBuffer(ushort[] data)
+        public IIndexBuffer CreateIndexBuffer(ushort[] data, BufferUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.UShort16);
+            return CreateIndexBuffer(data, IndexFormat.UShort16, usage);
         }
 
-        public IConstantBuffer CreateConstantBuffer(int size)
+        public IConstantBuffer CreateConstantBuffer(int size, BufferUsage usage)
         {
-            return new ConstantBuffer(graphicsDevice, size);
+            return new ConstantBuffer(graphicsDevice, size, usage);
+        }
+
+        public IConstantBuffer CreateConstantBuffer<T>(T data, BufferUsage usage) where T : struct
+        {
+            var buffer = new ConstantBuffer(graphicsDevice, usage);
+            buffer.SetData(data);
+            return buffer;
         }
 
         public IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo)

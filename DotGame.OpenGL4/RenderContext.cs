@@ -41,6 +41,16 @@ namespace DotGame.OpenGL4
 
         }
 
+        public void Update<T>(IVertexBuffer buffer, T[] data) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update<T>(IIndexBuffer buffer, T[] data) where T : struct
+        {
+            throw new NotImplementedException();
+        }
+
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
         {
             var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
@@ -431,15 +441,25 @@ namespace DotGame.OpenGL4
 
         public void Draw()
         {
+            Draw(currentVertexBuffer.VertexCount, 0);
+        }
+
+        public void Draw(int vertexCount, int firstVertexLocation)
+        {
             if (currentVertexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without a vertexbuffer set.");
 
             ApplyRenderTarget();
             ApplyState();
-            GL.DrawArrays(EnumConverter.Convert(currentState.PrimitiveType), 0, currentVertexBuffer.VertexCount);
+            GL.DrawArrays(EnumConverter.Convert(currentState.PrimitiveType), 0, vertexCount); // TODO (henrik1235) firstVertexLocation einbauen
         }
 
         public void DrawIndexed()
+        {
+            DrawIndexed(currentIndexBuffer.IndexCount, 0, 0);
+        }
+
+        public void DrawIndexed(int indexCount, int firstIndexLocation, int firstVertexLocation)
         {
             if (currentVertexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without a vertexbuffer set.");
@@ -447,7 +467,9 @@ namespace DotGame.OpenGL4
                 throw new InvalidOperationException("Tried to draw without an indexbuffer set.");
 
             ApplyState();
-            GL.DrawElements((BeginMode)EnumConverter.Convert(currentState.PrimitiveType), currentIndexBuffer.IndexCount, EnumConverter.Convert(currentIndexBuffer.Format), 0);
+            // TODO (henrik1235) firstIndexLocation und firstVertexLocation einbauen
+            // -> glDrawElementsBaseVertex 
+            GL.DrawElements((BeginMode)EnumConverter.Convert(currentState.PrimitiveType), indexCount, EnumConverter.Convert(currentIndexBuffer.Format), 0);
         }
 
         protected override void Dispose(bool isDisposing)

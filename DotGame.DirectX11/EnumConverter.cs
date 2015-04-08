@@ -168,6 +168,12 @@ namespace DotGame.DirectX11
              { DotGame.Graphics.Blend.Zero,           SharpDX.Direct3D11.BlendOption.Zero         },
         };
 
+        private static Dictionary<BufferUsage, ResourceUsage> bufferUsages = new Dictionary<BufferUsage, ResourceUsage>()
+        {
+            { BufferUsage.Static, ResourceUsage.Default },
+            { BufferUsage.Dynamic, ResourceUsage.Dynamic },
+        };
+
         public static SharpDX.Direct3D11.DeviceCreationFlags Convert(DotGame.Graphics.DeviceCreationFlags flags)
         {
             SharpDX.Direct3D11.DeviceCreationFlags f = 0;
@@ -334,6 +340,15 @@ namespace DotGame.DirectX11
             if (colorWriteFlags.HasFlag(DotGame.Graphics.ColorWriteMaskFlags.Alpha))
                 f |= SharpDX.Direct3D11.ColorWriteMaskFlags.Alpha;
             return f;
+        }
+
+        public static ResourceUsage Convert(BufferUsage usage)
+        {
+            ResourceUsage f;
+            if (!bufferUsages.TryGetValue(usage, out f))
+                throw new NotSupportedException("Buffer usage not supported.");
+            return f;
+            
         }
 
         public static TextureFormat ConvertToTexture(Format format)

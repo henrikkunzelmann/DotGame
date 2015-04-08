@@ -17,6 +17,9 @@ namespace DotGame.Graphics
         void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct;
         void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct;
 
+        void Update<T>(IVertexBuffer vertexBuffer, T[] data) where T : struct;
+        void Update<T>(IIndexBuffer indexBuffer, T[] data) where T : struct;
+
         void GenerateMips(ITexture2D texture);
         void GenerateMips(ITexture2DArray textureArray);
 
@@ -36,6 +39,9 @@ namespace DotGame.Graphics
         /// <param name="stencil">Der Wert für den Stencilchannel (standardmäßig 0).</param>
         void Clear(ClearOptions clearOptions, Color color, float depth, byte stencil);
 
+        /// <summary>
+        /// Setzt Color-RenderTarget und Depth-RenderTarget auf die Standardwerte.
+        /// </summary>
         void SetRenderTargetsBackBuffer();
         void SetRenderTargets(IRenderTarget2D depth, params IRenderTarget2D[] colorTargets);
         void SetRenderTargetsDepth(IRenderTarget2D depth);
@@ -80,12 +86,48 @@ namespace DotGame.Graphics
         /// <param name="buffer"></param>
         void SetConstantBuffer(IShader shader, string name, IConstantBuffer buffer);
 
+        /// <summary>
+        /// Setzt die Texture für einen Shader auf NULL.
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="name"></param>
         void SetTextureNull(IShader shader, string name);
+
+        /// <summary>
+        /// Setzt die Texture für einen Shader.
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="name"></param>
+        /// <param name="texture"></param>
         void SetTexture(IShader shader, string name, ITexture2D texture);
+        /// <summary>
+        /// Setzt die Texture für einen Shader.
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="name"></param>
+        /// <param name="texture"></param>
         void SetTexture(IShader shader, string name, ITexture2DArray texture);
+        /// <summary>
+        /// Setzt die Texture für einen Shader.
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="name"></param>
+        /// <param name="texture"></param>
         void SetTexture(IShader shader, string name, ITexture3D texture);
+        /// <summary>
+        /// Setzt die Texture für einen Shader.
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="name"></param>
+        /// <param name="texture"></param>
         void SetTexture(IShader shader, string name, ITexture3DArray texture);
 
+        /// <summary>
+        /// Setzt den Sampler für einen Shader.
+        /// </summary>
+        /// <param name="shader"></param>
+        /// <param name="name"></param>
+        /// <param name="sampler"></param>
         void SetSampler(IShader shader, string name, ISampler sampler);
 
         /// <summary>
@@ -94,8 +136,18 @@ namespace DotGame.Graphics
         void Draw();
 
         /// <summary>
+        /// Zeichnet nicht indexierte Vertices mit dem gesetzten PrimitiveType und den übergebenen Parametern.
+        /// </summary>
+        void Draw(int vertexCount, int startVertexLocation);
+
+        /// <summary>
         /// Zeichnet indexierte Vertices mit dem gesetzten PrimitiveType und der Anzahl aller Indices im gesetzten IndexBuffer.
         /// </summary>
         void DrawIndexed();
+
+        /// <summary>
+        /// Zeichnet indexierte Vertices mit dem gesetzten PrimitiveType und den übergebenen Parametern.
+        /// </summary>
+        void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation);
     }
 }

@@ -15,30 +15,37 @@ namespace DotGame.DirectX11
         public IndexFormat Format { get; private set; }
         public int IndexCount { get; private set; }
         public int SizeBytes { get; private set; }
+        public BufferUsage Usage { get; private set; }
 
         internal SharpDX.DXGI.Format IndexFormat { get; private set; }
         internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
 
-        public IndexBuffer(GraphicsDevice graphicsDevice)
-            : base(graphicsDevice, new StackTrace(1))
+        public IndexBuffer(GraphicsDevice graphicsDevice, int indexCount, IndexFormat format, BufferUsage usage)
+            : this(graphicsDevice, format, usage)
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
-            if (graphicsDevice.IsDisposed)
-                throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
+            this.IndexCount = indexCount;
+            this.SizeBytes = graphicsDevice.GetSizeOf(format) * indexCount;
 
-            this.graphicsDevice = graphicsDevice;
+            this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, SizeBytes, 
+                EnumConverter.Convert(usage), 
+                BindFlags.IndexBuffer, Usage == BufferUsage.Static ? CpuAccessFlags.None : CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
         }
 
-        internal void SetData<T>(T[] data, IndexFormat format) where T : struct
+        public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, BufferUsage usage)
+            : base(graphicsDevice, new StackTrace(1))
+        {
+            this.graphicsDevice = graphicsDevice;
+            this.Format = format;
+            this.IndexFormat = EnumConverter.Convert(format);
+            this.Usage = usage;
+        }
+
+        internal void SetData<T>(T[] data) where T : struct
         {
             if (data == null)
                 throw new ArgumentNullException("data");
             if (data.Length == 0)
                 throw new ArgumentException("Data must not be empty.", "data");
-
-            this.Format = format;
-            this.IndexFormat = EnumConverter.Convert(format);
 
             int formatSize = FormatHelper.SizeOfInBytes(IndexFormat);
             this.SizeBytes = SharpDX.Utilities.SizeOf(data);

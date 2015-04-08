@@ -14,15 +14,18 @@ namespace DotGame.OpenGL4
         public IndexFormat Format { get; private set; }
         public int IndexCount { get; private set; }
         public int SizeBytes { get; private set; }
+        public BufferUsage Usage { get; private set;}
 
         internal int IboID { get; private set; }
  
-        public IndexBuffer(GraphicsDevice graphicsDevice) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        public IndexBuffer(GraphicsDevice graphicsDevice, BufferUsage usage) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (graphicsDevice == null)
                 throw new ArgumentNullException("graphicsDevice");
             if (graphicsDevice.IsDisposed)
                 throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
+
+            this.Usage = usage;
 
             IboID = GL.GenBuffer();
             graphicsDevice.CheckGLError();

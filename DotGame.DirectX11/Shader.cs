@@ -102,19 +102,19 @@ namespace DotGame.DirectX11
                 PixelCode.Dispose();
         }
 
-        public IConstantBuffer CreateConstantBuffer()
+        public IConstantBuffer CreateConstantBuffer(BufferUsage usage)
         {
-            return CreateConstantBuffer("$Globals");
+            return CreateConstantBuffer("$Globals", usage);
         }
  
-        public IConstantBuffer CreateConstantBuffer(string name)
+        public IConstantBuffer CreateConstantBuffer(string name, BufferUsage usage)
         {
             if (name == null)
                 throw new ArgumentNullException("name");
             int size;
             if (!constantBufferSizes.TryGetValue(name, out size))
                 throw new ArgumentException("Constant buffer not bound to shader.", "name");
-            return graphicsDevice.Factory.CreateConstantBuffer(size);
+            return graphicsDevice.Factory.CreateConstantBuffer(size, usage);
         }
 
         public bool TryGetSlotVertex(string name, out int slot)

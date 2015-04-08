@@ -33,7 +33,7 @@ namespace DotGame.DirectX11
         private IBlendState currentBlend;
         private DepthStencilState currentDepthStencil;
 
-        private Vector4 currentBlendFactor;
+        private Color currentBlendFactor;
         private byte currentStencilRefrence;
 
 
@@ -52,6 +52,40 @@ namespace DotGame.DirectX11
         {
         }
 
+        public void Update<T>(IVertexBuffer buffer, T[] data) where T : struct
+        {
+            var dxBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
+
+            if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
+                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
+
+            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
+                context.UpdateSubresource(data, dxBuffer.Buffer);
+            else
+            {
+                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+                SharpDX.Utilities.Write(box.DataPointer, data, 0, data.Length);
+                context.UnmapSubresource(dxBuffer.Buffer, 0);
+            }
+        }
+
+        public void Update<T>(IIndexBuffer buffer, T[] data) where T : struct
+        {
+            var dxBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
+
+            if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
+                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
+
+            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
+                context.UpdateSubresource(data, dxBuffer.Buffer);
+            else
+            {
+                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+                SharpDX.Utilities.Write(box.DataPointer, data, 0, data.Length);
+                context.UnmapSubresource(dxBuffer.Buffer, 0);
+            }
+        }
+
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
         {
             var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
@@ -59,11 +93,16 @@ namespace DotGame.DirectX11
             if (SharpDX.Utilities.SizeOf<T>() != buffer.Size)
                 throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
 
-            //context.UpdateSubresource(ref data, dxBuffer.Handle); TODO (henrik1235) Rausfinden ob es einen Performance-Unterschied zwischen UpdateSubresource und Map/Unmap gibt
-            SharpDX.DataBox box = context.MapSubresource(dxBuffer.Handle, 0, MapMode.WriteDiscard, MapFlags.None);
-            SharpDX.Utilities.Write(box.DataPointer, ref data);
-            context.UnmapSubresource(dxBuffer.Handle, 0);
+            if (dxBuffer.Handle.Description.Usage == ResourceUsage.Default)
+                context.UpdateSubresource(ref data, dxBuffer.Handle);
+            else
+            {
+                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Handle, 0, MapMode.WriteDiscard, MapFlags.None);
+                SharpDX.Utilities.Write(box.DataPointer, ref data);
+                context.UnmapSubresource(dxBuffer.Handle, 0);
+            }
         }
+
 
         public void Update<T>(ITexture2D texture, T[] data) where T : struct
         {
@@ -227,12 +266,20 @@ namespace DotGame.DirectX11
 
         public void SetBlendFactor(Color color)
         {
-            context.OutputMerger.BlendFactor = new SharpDX.Color4(color.ToRgba());
+            if (currentBlendFactor != color)
+            {
+                context.OutputMerger.BlendFactor = new SharpDX.Color4(color.ToRgba());
+                currentBlendFactor = color;
+            }
         }
 
         public void SetStencilReference(byte stencilReference)
         {
-            context.OutputMerger.DepthStencilReference = stencilReference;
+            if (currentStencilRefrence != stencilReference)
+            {
+                context.OutputMerger.DepthStencilReference = stencilReference;
+                currentStencilRefrence = stencilReference;
+            }
         }
 
         public void SetShader(IShader shader)
@@ -473,22 +520,42 @@ namespace DotGame.DirectX11
 
         public void Draw()
         {
+            Draw(currentVertexBuffer.VertexCount, 0);
+        }
+
+        public void Draw(int vertexCount, int startVertexLocation)
+        {
             if (currentVertexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without a vertexbuffer set.");
+            if (vertexCount < 0)
+                throw new ArgumentOutOfRangeException("vertexCount");
+            if (startVertexLocation < 0 || startVertexLocation >= currentVertexBuffer.VertexCount)
+                throw new ArgumentOutOfRangeException("startVertexLocation");
 
             ApplyState();
-            context.Draw(currentVertexBuffer.VertexCount, 0);
+            context.Draw(vertexCount, startVertexLocation);
         }
 
         public void DrawIndexed()
+        {
+            DrawIndexed(currentIndexBuffer.IndexCount, 0, 0);
+        }
+
+        public void DrawIndexed(int indexCount, int startIndexLocation, int baseVertexLocation)
         {
             if (currentVertexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without a vertexbuffer set.");
             if (currentIndexBuffer == null)
                 throw new InvalidOperationException("Tried to draw without an indexbuffer set.");
+            if (indexCount < 0)
+                throw new ArgumentOutOfRangeException("indexCount");
+            if (startIndexLocation < 0 || startIndexLocation >= currentIndexBuffer.IndexCount)
+                throw new ArgumentOutOfRangeException("startIndexLocation");
+            if (baseVertexLocation < 0 || baseVertexLocation >= currentVertexBuffer.VertexCount)
+                throw new ArgumentOutOfRangeException("baseVertexLocation");
 
             ApplyState();
-            context.DrawIndexed(currentIndexBuffer.IndexCount, 0, 0);
+            context.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
         }
 
         private struct ShaderStageCache

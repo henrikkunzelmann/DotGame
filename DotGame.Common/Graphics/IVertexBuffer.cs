@@ -22,5 +22,10 @@ namespace DotGame.Graphics
         /// Die Größe des VertexBuffers in Bytes.
         /// </summary>
         int SizeBytes { get; }
+
+        /// <summary>
+        /// Gibt an wie der VertexBuffer benutzt wird.
+        /// </summary>
+        BufferUsage Usage { get; }
     }
 }

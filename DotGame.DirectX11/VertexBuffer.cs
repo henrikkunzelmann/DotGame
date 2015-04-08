@@ -14,11 +14,23 @@ namespace DotGame.DirectX11
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
         public int SizeBytes { get; private set; }
+        public BufferUsage Usage { get; private set; }
 
         internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
         internal VertexBufferBinding Binding { get; private set; }
 
-        public VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
+        public VertexBuffer(GraphicsDevice graphicsDevice, int vertexCount, VertexDescription description, BufferUsage usage)
+            : this(graphicsDevice, description, usage)
+        {
+            this.VertexCount = vertexCount;
+            this.SizeBytes = graphicsDevice.GetSizeOf(description) * vertexCount;
+        
+            this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, SizeBytes, 
+                EnumConverter.Convert(usage), 
+                BindFlags.VertexBuffer, Usage == BufferUsage.Static ? CpuAccessFlags.None : CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
+        }
+
+        public VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, BufferUsage usage)
             : base(graphicsDevice, new StackTrace(1))
         {
             if (graphicsDevice == null)
@@ -28,6 +40,7 @@ namespace DotGame.DirectX11
 
             this.graphicsDevice = graphicsDevice;
             this.Description = description;
+            this.Usage = usage;
         }
 
         internal void SetData<T>(T[] data) where T : struct

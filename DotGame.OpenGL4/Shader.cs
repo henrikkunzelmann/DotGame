@@ -156,14 +156,14 @@ namespace DotGame.OpenGL4
             }
         }
 
-        public IConstantBuffer CreateConstantBuffer()
+        public IConstantBuffer CreateConstantBuffer(BufferUsage usage)
         {
-            return new ConstantBuffer(graphicsDevice, -1);
+            return new ConstantBuffer(graphicsDevice, -1, usage);
         }
 
-        public IConstantBuffer CreateConstantBuffer(string name)
+        public IConstantBuffer CreateConstantBuffer(string name, BufferUsage usage)
         {
-            ConstantBuffer constantBuffer = new ConstantBuffer(graphicsDevice, -1);
+            ConstantBuffer constantBuffer = new ConstantBuffer(graphicsDevice, -1, usage);
 
             return constantBuffer;
         }

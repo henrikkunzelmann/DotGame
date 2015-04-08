@@ -9,8 +9,13 @@ namespace DotGame.Graphics
     public interface IConstantBuffer : IGraphicsObject
     {
         /// <summary>
-        /// Die Größe in Bytes.
+        /// Die Größe des ConstantBuffers in Bytes.
         /// </summary>
         int Size { get; }
+
+        /// <summary>
+        /// Gibt an wie der ConstantBuffer benutzt wird.
+        /// </summary>
+        BufferUsage Usage { get; }
     }
 }

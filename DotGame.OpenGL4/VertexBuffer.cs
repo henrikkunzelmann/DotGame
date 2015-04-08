@@ -16,6 +16,7 @@ namespace DotGame.OpenGL4
 
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
+        public BufferUsage Usage { get; private set; }
 
         internal Shader Shader { get; set; }
 
@@ -24,7 +25,7 @@ namespace DotGame.OpenGL4
             get { throw new NotImplementedException(); } 
         }
 
-        internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description)
+        internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, BufferUsage usage)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             VboID = GL.GenVertexArray();
@@ -32,6 +33,7 @@ namespace DotGame.OpenGL4
             graphicsDevice.CheckGLError();
 
             this.Description = description;
+            this.Usage = usage;
         }
 
         internal void SetData<T>(T[] data) where T : struct
