@@ -14,6 +14,8 @@ namespace DotGame.Graphics
         public IShader Shader;
         public PrimitiveType PrimitiveType;
         public IRasterizerState Rasterizer;
+        public IDepthStencilState DepthStencil;
+        public IBlendState Blend;
 
         /// <inheritdoc/>
         public override bool Equals(object obj)
@@ -26,7 +28,11 @@ namespace DotGame.Graphics
         /// <inheritdoc/>
         public bool Equals(RenderStateInfo other)
         {
-            return this.Shader == other.Shader && this.PrimitiveType == other.PrimitiveType && this.Rasterizer == other.Rasterizer;
+            return this.Shader == other.Shader
+                && this.PrimitiveType == other.PrimitiveType
+                && this.Rasterizer == other.Rasterizer
+                && this.DepthStencil == other.DepthStencil
+                && this.Blend == other.Blend;
         }
 
         public static bool operator ==(RenderStateInfo a, RenderStateInfo b)
@@ -48,6 +54,8 @@ namespace DotGame.Graphics
                 hash = hash * 23 + Shader.GetHashCode();
                 hash = hash * 23 + PrimitiveType.GetHashCode();
                 hash = hash * 23 + Rasterizer.GetHashCode();
+                hash = hash * 23 + DepthStencil.GetHashCode();
+                hash = hash * 23 + Blend.GetHashCode();
                 return hash;
             }
         }

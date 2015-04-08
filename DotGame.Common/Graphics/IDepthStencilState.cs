@@ -4,10 +4,10 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace DotGame
+namespace DotGame.Graphics
 {
-    public enum PrimitiveType
+    public interface IDepthStencilState : IGraphicsObject
     {
-        PointList, LineList, LineStrip, TriangleList, TriangleStrip
+        DepthStencilStateInfo Info { get; }
     }
 }

@@ -61,7 +61,9 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="BlendState.cs" />
     <Compile Include="ConstantBuffer.cs" />
+    <Compile Include="DepthStencilState.cs" />
     <Compile Include="EnumConverter.cs" />
     <Compile Include="GraphicsObject.cs" />
     <Compile Include="RasterizerState.cs" />

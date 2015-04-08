@@ -120,6 +120,54 @@ namespace DotGame.DirectX11
             { DotGame.Graphics.FillMode.Solid, SharpDX.Direct3D11.FillMode.Solid },
         };
 
+        private static readonly Dictionary<DotGame.Graphics.DepthWriteMask, SharpDX.Direct3D11.DepthWriteMask> depthWriteMasks = new Dictionary<Graphics.DepthWriteMask, SharpDX.Direct3D11.DepthWriteMask>()
+        {
+            { DotGame.Graphics.DepthWriteMask.Zero, SharpDX.Direct3D11.DepthWriteMask.Zero },
+            { DotGame.Graphics.DepthWriteMask.All, SharpDX.Direct3D11.DepthWriteMask.All },
+        };
+
+        private static readonly Dictionary<DotGame.Graphics.StencilOperation, SharpDX.Direct3D11.StencilOperation> stencilOperations = new Dictionary<DotGame.Graphics.StencilOperation, SharpDX.Direct3D11.StencilOperation>()
+        {
+            { DotGame.Graphics.StencilOperation.Zero, SharpDX.Direct3D11.StencilOperation.Zero },
+            { DotGame.Graphics.StencilOperation.Replace, SharpDX.Direct3D11.StencilOperation.Replace },
+            { DotGame.Graphics.StencilOperation.Keep, SharpDX.Direct3D11.StencilOperation.Keep },
+            { DotGame.Graphics.StencilOperation.Invert, SharpDX.Direct3D11.StencilOperation.Invert },
+            { DotGame.Graphics.StencilOperation.IncrSat, SharpDX.Direct3D11.StencilOperation.IncrementAndClamp },
+            { DotGame.Graphics.StencilOperation.DecrSat, SharpDX.Direct3D11.StencilOperation.DecrementAndClamp},
+            { DotGame.Graphics.StencilOperation.Incr, SharpDX.Direct3D11.StencilOperation.Increment},
+            { DotGame.Graphics.StencilOperation.Decr, SharpDX.Direct3D11.StencilOperation.Decrement},
+        };
+
+        private static readonly Dictionary<DotGame.Graphics.BlendOp, SharpDX.Direct3D11.BlendOperation> blendOperations = new Dictionary<DotGame.Graphics.BlendOp, SharpDX.Direct3D11.BlendOperation>()
+        {
+            { DotGame.Graphics.BlendOp.Add, SharpDX.Direct3D11.BlendOperation.Add },
+            { DotGame.Graphics.BlendOp.Max, SharpDX.Direct3D11.BlendOperation.Maximum },
+            { DotGame.Graphics.BlendOp.Min, SharpDX.Direct3D11.BlendOperation.Minimum },
+            { DotGame.Graphics.BlendOp.RevSubtract, SharpDX.Direct3D11.BlendOperation.ReverseSubtract },
+            { DotGame.Graphics.BlendOp.Subtract, SharpDX.Direct3D11.BlendOperation.Subtract },
+        };
+
+        private static readonly Dictionary<DotGame.Graphics.Blend, SharpDX.Direct3D11.BlendOption> blendOptions = new Dictionary<DotGame.Graphics.Blend, SharpDX.Direct3D11.BlendOption>() 
+        {
+             { DotGame.Graphics.Blend.BlendFactor,    SharpDX.Direct3D11.BlendOption.BlendFactor   },
+             { DotGame.Graphics.Blend.DestAlpha,      SharpDX.Direct3D11.BlendOption.DestinationAlpha  },
+             { DotGame.Graphics.Blend.DestColor,      SharpDX.Direct3D11.BlendOption.DestinationColor     },
+             { DotGame.Graphics.Blend.InvBlendFactor, SharpDX.Direct3D11.BlendOption.InverseBlendFactor },
+             { DotGame.Graphics.Blend.InvDestAlpha,   SharpDX.Direct3D11.BlendOption.InverseDestinationAlpha  },
+             { DotGame.Graphics.Blend.InvDestColor,   SharpDX.Direct3D11.BlendOption.InverseDestinationColor  },
+             { DotGame.Graphics.Blend.InvSrc1Alpha,   SharpDX.Direct3D11.BlendOption.InverseSecondarySourceAlpha  },
+             { DotGame.Graphics.Blend.InvSrc1Color,   SharpDX.Direct3D11.BlendOption.InverseSecondarySourceColor  },
+             { DotGame.Graphics.Blend.InvSrcAlpha,    SharpDX.Direct3D11.BlendOption.InverseSourceAlpha },
+             { DotGame.Graphics.Blend.InvSrcColor,    SharpDX.Direct3D11.BlendOption.InverseSourceColor   },
+             { DotGame.Graphics.Blend.One,            SharpDX.Direct3D11.BlendOption.One        },
+             { DotGame.Graphics.Blend.Src1Alpha,      SharpDX.Direct3D11.BlendOption.SecondarySourceAlpha     },
+             { DotGame.Graphics.Blend.Src1Color,      SharpDX.Direct3D11.BlendOption.SecondarySourceColor     },
+             { DotGame.Graphics.Blend.SrcAlpha,       SharpDX.Direct3D11.BlendOption.SourceAlpha      },
+             { DotGame.Graphics.Blend.SrcAlphaSat,    SharpDX.Direct3D11.BlendOption.SourceAlphaSaturate   },
+             { DotGame.Graphics.Blend.SrcColor,       SharpDX.Direct3D11.BlendOption.SourceColor      },
+             { DotGame.Graphics.Blend.Zero,           SharpDX.Direct3D11.BlendOption.Zero         },
+        };
+
         public static SharpDX.Direct3D11.DeviceCreationFlags Convert(DotGame.Graphics.DeviceCreationFlags flags)
         {
             SharpDX.Direct3D11.DeviceCreationFlags f = 0;
@@ -239,6 +287,52 @@ namespace DotGame.DirectX11
             SharpDX.Direct3D11.FillMode f;
             if (!fillModes.TryGetValue(fillMode, out f))
                 throw new NotSupportedException("Fill mode not supported.");
+            return f;
+        }
+
+        public static SharpDX.Direct3D11.DepthWriteMask Convert(DotGame.Graphics.DepthWriteMask depthWriteMask)
+        {
+            SharpDX.Direct3D11.DepthWriteMask f;
+            if (!depthWriteMasks.TryGetValue(depthWriteMask, out f))
+                throw new NotSupportedException("Depth write mask not supported.");
+            return f;
+        }
+
+        public static SharpDX.Direct3D11.StencilOperation Convert(DotGame.Graphics.StencilOperation stencilOperation)
+        {
+            SharpDX.Direct3D11.StencilOperation f;
+            if (!stencilOperations.TryGetValue(stencilOperation, out f))
+                throw new NotSupportedException("Stencil operation not supported.");
+            return f;
+        }
+
+        public static SharpDX.Direct3D11.BlendOperation Convert(DotGame.Graphics.BlendOp blendOp)
+        {
+            SharpDX.Direct3D11.BlendOperation f;
+            if (!blendOperations.TryGetValue(blendOp, out f))
+                throw new NotSupportedException("Blend operation not supported.");
+            return f;
+        }
+
+        public static SharpDX.Direct3D11.BlendOption Convert(DotGame.Graphics.Blend blend)
+        {
+            SharpDX.Direct3D11.BlendOption f;
+            if (!blendOptions.TryGetValue(blend, out f))
+                throw new NotSupportedException("Blend option not supported.");
+            return f;
+        }
+
+        public static SharpDX.Direct3D11.ColorWriteMaskFlags Convert(DotGame.Graphics.ColorWriteMaskFlags colorWriteFlags)
+        {
+            SharpDX.Direct3D11.ColorWriteMaskFlags f = 0;
+            if (colorWriteFlags.HasFlag(DotGame.Graphics.ColorWriteMaskFlags.Red))
+                f |= SharpDX.Direct3D11.ColorWriteMaskFlags.Red;
+            if (colorWriteFlags.HasFlag(DotGame.Graphics.ColorWriteMaskFlags.Green))
+                f |= SharpDX.Direct3D11.ColorWriteMaskFlags.Green;
+            if (colorWriteFlags.HasFlag(DotGame.Graphics.ColorWriteMaskFlags.Blue))
+                f |= SharpDX.Direct3D11.ColorWriteMaskFlags.Blue;
+            if (colorWriteFlags.HasFlag(DotGame.Graphics.ColorWriteMaskFlags.Alpha))
+                f |= SharpDX.Direct3D11.ColorWriteMaskFlags.Alpha;
             return f;
         }
 

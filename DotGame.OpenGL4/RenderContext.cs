@@ -225,28 +225,14 @@ namespace DotGame.OpenGL4
             throw new NotImplementedException();
         }
 
-        public void SetShader(IShader shader)
+        public void SetBlendFactor(Color blendFactor)
         {
-            graphicsDevice.Cast<Shader>(shader, "shader"); // Shader überprüfen
-
-            currentState.Shader = shader;
+            throw new NotImplementedException();
         }
 
-        public void SetPrimitiveType(PrimitiveType type)
+        public void SetStencilReference(byte stencilReference)
         {
-            EnumConverter.Convert(type); // Type überprüfen (ob supported ist)
-
-            currentState.PrimitiveType = type;
-        }
-
-        public void SetRasterizer(IRasterizerState rasterizerState)
-        {
-            graphicsDevice.Cast<RasterizerState>(rasterizerState, "rasterizerState");
-
-            if (!rasterizerState.Info.Equals(rasterizerState))
-            {
-                currentState.Rasterizer = rasterizerState;
-            }
+            throw new NotImplementedException();
         }
 
         public void SetState(IRenderState state)

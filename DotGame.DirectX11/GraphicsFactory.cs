@@ -191,6 +191,16 @@ namespace DotGame.DirectX11
             return new RasterizerState(graphicsDevice, info);
         }
 
+        public IDepthStencilState CreateDepthStencilState(DepthStencilStateInfo info)
+        {
+            return new DepthStencilState(graphicsDevice, info);
+        }
+
+        public IBlendState CreateBlendState(BlendStateInfo info)
+        {
+            return new BlendState(graphicsDevice, info);
+        }
+
         protected override void Dispose(bool isDisposing)
         {
         }

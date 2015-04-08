@@ -30,6 +30,11 @@ namespace DotGame.DirectX11
         private PrimitiveType primitiveType;
         private ShaderStageCache vertexCache;
         private ShaderStageCache pixelCache;
+        private IBlendState currentBlend;
+        private DepthStencilState currentDepthStencil;
+
+        private Vector4 currentBlendFactor;
+        private byte currentStencilRefrence;
 
 
         public RenderContext(GraphicsDevice graphicsDevice, DeviceContext context)
@@ -220,6 +225,16 @@ namespace DotGame.DirectX11
             context.Rasterizer.SetScissorRectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Right, (int)rectangle.Bottom);
         }
 
+        public void SetBlendFactor(Color color)
+        {
+            context.OutputMerger.BlendFactor = new SharpDX.Color4(color.ToRgba());
+        }
+
+        public void SetStencilReference(byte stencilReference)
+        {
+            context.OutputMerger.DepthStencilReference = stencilReference;
+        }
+
         public void SetShader(IShader shader)
         {
             if (shader == null)
@@ -363,7 +378,7 @@ namespace DotGame.DirectX11
         {
             if (cache.Views[slot] != view)
             {
-                // um Ressourcen Hazards zu vermeiden (Read und Write gleichzeitig) werden die RTs schon beim Setzten von Texturen neu gesetzt
+                // um Ressourcen Hazards zu vermeiden (Read und Write gleichzeitig) werden die RTs schon beim Setzen von Texturen neu gesetzt
                 ApplyRenderTargets();
 
                 stage.SetShaderResource(slot, view);
@@ -426,6 +441,21 @@ namespace DotGame.DirectX11
                     context.Rasterizer.State = rasterizer.Handle;
 
                     currentRasterizer = rasterizer;
+                }
+                if (currentDepthStencil != currentState.DepthStencil)
+                {
+                    var depthStencil = graphicsDevice.Cast<DepthStencilState>(currentState.DepthStencil, "currentState.DepthStencil");
+                    context.OutputMerger.DepthStencilState = depthStencil.Handle;
+
+                    currentDepthStencil = depthStencil;
+                }
+
+                if (currentBlend != currentState.Blend)
+                {
+                    var blend = graphicsDevice.Cast<BlendState>(currentState.Blend, "currentState.Blend");
+                    context.OutputMerger.BlendState = blend.Handle;
+
+                    currentBlend = blend;
                 }
             }
             if (vertexBufferDirty)

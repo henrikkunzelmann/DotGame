@@ -45,6 +45,10 @@ namespace DotGame.Graphics
 
         void SetScissor(Rectangle rectangle);
 
+        void SetBlendFactor(Color blendFactor);
+
+        void SetStencilReference(byte stencilReference);
+
         /// <summary>
         /// Setzt die Pipeline auf den neuen Zustand.
         /// </summary>

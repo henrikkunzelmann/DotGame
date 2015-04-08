@@ -63,6 +63,12 @@
     <Compile Include="Audio\SampleSources\VorbisSampleSource.cs" />
     <Compile Include="Audio\SoundFlags.cs" />
     <Compile Include="Audio\SampleSources\WaveSampleSource.cs" />
+    <Compile Include="Graphics\Blend.cs" />
+    <Compile Include="Graphics\BlendOp.cs" />
+    <Compile Include="Graphics\BlendStateInfo.cs" />
+    <Compile Include="Graphics\ColorWriteMaskFlags.cs" />
+    <Compile Include="Graphics\DepthStencilStateInfo.cs" />
+    <Compile Include="Graphics\DepthWriteMask.cs" />
     <Compile Include="Graphics\DeviceCreationFlags.cs" />
     <Compile Include="Graphics\AddressMode.cs" />
     <Compile Include="Graphics\ClearOptions.cs" />
@@ -93,9 +99,11 @@
     <Compile Include="Graphics\IVertexType.cs" />
     <Compile Include="Graphics\RasterizerStateInfo.cs" />
     <Compile Include="Graphics\RenderStateInfo.cs" />
+    <Compile Include="Graphics\RTBlendInfo.cs" />
     <Compile Include="Graphics\SamplerInfo.cs" />
     <Compile Include="Graphics\SamplerType.cs" />
     <Compile Include="Graphics\ShaderCompileInfo.cs" />
+    <Compile Include="Graphics\StencilOperation.cs" />
     <Compile Include="Graphics\TextureFilter.cs" />
     <Compile Include="Graphics\TextureFormat.cs" />
     <Compile Include="Graphics\IGameWindow.cs" />
@@ -105,6 +113,8 @@
     <Compile Include="Graphics\VertexElementType.cs" />
     <Compile Include="Graphics\VertexElementUsage.cs" />
     <Compile Include="Graphics\GraphicsCapabilities.cs" />
+    <Compile Include="Graphics\IBlendState.cs" />
+    <Compile Include="Graphics\IDepthStencilState.cs" />
     <Compile Include="Math\Quaternion.cs" />
     <Compile Include="Math\Vector2.cs">
       <DependentUpon>Vector.tt</DependentUpon>
@@ -123,7 +133,7 @@
     <Compile Include="Math\Viewport.cs" />
     <Compile Include="Math\Matrix.cs" />
     <Compile Include="Graphics\CullMode.cs" />
-    <Compile Include="PrimitiveType.cs" />
+    <Compile Include="Graphics\PrimitiveType.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Math\Rectangle.cs" />
     <Compile Include="Utils\Log.cs" />

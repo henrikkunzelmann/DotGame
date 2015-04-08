@@ -36,5 +36,7 @@ namespace DotGame.Graphics
         IRenderState CreateRenderState(RenderStateInfo info);
         ISampler CreateSampler(SamplerInfo info);
         IRasterizerState CreateRasterizerState(RasterizerStateInfo info);
+        IDepthStencilState CreateDepthStencilState(DepthStencilStateInfo info);
+        IBlendState CreateBlendState(BlendStateInfo info);
     }
 }

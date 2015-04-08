@@ -42,13 +42,13 @@ namespace DotGame.OpenGL4
             {"ps_5_0","430"},
         };
 
-        private static readonly Dictionary<PrimitiveType, OpenTK.Graphics.OpenGL4.PrimitiveType> primitiveTypes = new Dictionary<PrimitiveType, OpenTK.Graphics.OpenGL4.PrimitiveType>()
+        private static readonly Dictionary<DotGame.Graphics.PrimitiveType, OpenTK.Graphics.OpenGL4.PrimitiveType> primitiveTypes = new Dictionary<DotGame.Graphics.PrimitiveType, OpenTK.Graphics.OpenGL4.PrimitiveType>()
         {
-            {PrimitiveType.TriangleList, OpenTK.Graphics.OpenGL4.PrimitiveType.Triangles},
-            {PrimitiveType.TriangleStrip, OpenTK.Graphics.OpenGL4.PrimitiveType.TriangleStrip},
-            {PrimitiveType.PointList, OpenTK.Graphics.OpenGL4.PrimitiveType.Points},
-            {PrimitiveType.LineList, OpenTK.Graphics.OpenGL4.PrimitiveType.Lines},
-            {PrimitiveType.LineStrip, OpenTK.Graphics.OpenGL4.PrimitiveType.LineStrip},
+            {DotGame.Graphics.PrimitiveType.TriangleList, OpenTK.Graphics.OpenGL4.PrimitiveType.Triangles},
+            {DotGame.Graphics.PrimitiveType.TriangleStrip, OpenTK.Graphics.OpenGL4.PrimitiveType.TriangleStrip},
+            {DotGame.Graphics.PrimitiveType.PointList, OpenTK.Graphics.OpenGL4.PrimitiveType.Points},
+            {DotGame.Graphics.PrimitiveType.LineList, OpenTK.Graphics.OpenGL4.PrimitiveType.Lines},
+            {DotGame.Graphics.PrimitiveType.LineStrip, OpenTK.Graphics.OpenGL4.PrimitiveType.LineStrip},
         };
 
         private static readonly Dictionary<VertexElementUsage, string> vertexElementUsages = new Dictionary<VertexElementUsage, string>()
@@ -145,14 +145,14 @@ namespace DotGame.OpenGL4
             return dataFormats.First((f) => f.Value == tuple).Key;
         }
 
-        internal static OpenTK.Graphics.OpenGL4.PrimitiveType Convert(PrimitiveType primitiveType)
+        internal static OpenTK.Graphics.OpenGL4.PrimitiveType Convert(DotGame.Graphics.PrimitiveType primitiveType)
         {
             if (!primitiveTypes.ContainsKey(primitiveType))
                 throw new NotImplementedException();
             return primitiveTypes[primitiveType];
         }
 
-        internal static PrimitiveType Convert(OpenTK.Graphics.OpenGL4.PrimitiveType primitiveType)
+        internal static DotGame.Graphics.PrimitiveType Convert(OpenTK.Graphics.OpenGL4.PrimitiveType primitiveType)
         {
             if (!primitiveTypes.ContainsValue(primitiveType))
                 throw new NotImplementedException();

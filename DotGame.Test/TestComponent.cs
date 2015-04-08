@@ -24,6 +24,7 @@ namespace DotGame.Test
         private ITexture2D texture;
         private ISampler sampler;
         private IRenderState state;
+        private IDepthStencilState depthStencil;
 
         public TestComponent(Engine engine)
             : base(engine)
@@ -120,16 +121,25 @@ namespace DotGame.Test
             sampler = GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
             rasterizerState = GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
                 {
-                    CullMode = CullMode.Back,
+                    CullMode = CullMode.None,
                     FillMode = FillMode.Solid,
                     IsFrontCounterClockwise = true,
                 });
+
+            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+            {
+                depthStencil = GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
+                {
+                    IsDepthEnabled = false
+                });
+            }
 
             state = GraphicsDevice.Factory.CreateRenderState(new RenderStateInfo()
             {
                 PrimitiveType = PrimitiveType.TriangleList,
                 Rasterizer = rasterizerState,
-                Shader = shader
+                Shader = shader,
+                DepthStencil = depthStencil
             });
 
             Log.FlushBuffer();
@@ -210,6 +220,9 @@ namespace DotGame.Test
 
             if (depthTarget != null)
                 depthTarget.Dispose();
+
+            if (depthStencil != null)
+                depthStencil.Dispose();
         }
     }
 }

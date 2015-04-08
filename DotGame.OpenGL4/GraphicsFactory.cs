@@ -220,6 +220,16 @@ namespace DotGame.OpenGL4
             return Register(new Sampler(graphicsDevice, info));
         }
 
+        public IDepthStencilState CreateDepthStencilState(DepthStencilStateInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
+        public IBlendState CreateBlendState(BlendStateInfo info)
+        {
+            throw new NotImplementedException();
+        }
+
         internal Fbo CreateFbo(int depth, params int[] color)
         {
             return Register(new Fbo(graphicsDevice, depth, color));
