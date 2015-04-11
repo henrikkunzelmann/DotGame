@@ -129,8 +129,16 @@ namespace DotGame.DirectX11
             if (IsDisposed)
                 return;
 
-            BackBuffer.Dispose();
-            Factory.Dispose();
+            if (RenderContext != null)
+                RenderContext.Dispose();
+            if (BackBuffer != null)
+                BackBuffer.Dispose();
+            if (DepthStencilBuffer != null)
+                DepthStencilBuffer.Dispose();
+            if (Factory != null)
+                Factory.Dispose();
+            if (swapChain != null)
+                swapChain.Dispose();
 
             GraphicsObject[] created = CreatedObjects.ToArray();
             for (int i = 0; i < created.Length; i++)
@@ -140,6 +148,9 @@ namespace DotGame.DirectX11
                     created[i].Dispose();
                 }
             CreatedObjects.Clear();
+
+            if (Device != null)
+                Device.Dispose();
 
             IsDisposed = true;
         }

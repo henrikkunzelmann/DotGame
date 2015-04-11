@@ -18,7 +18,7 @@ namespace DotGame.Test
     {
         public Engine Engine { get; private set; }
 
-        private readonly TestComponent component;
+        private readonly Test2Component component;
         private ISound stream;
         private ISoundInstance streamInstance;
         private ISound threedee; // LOOL
@@ -35,13 +35,13 @@ namespace DotGame.Test
             }, null);
             // splitContainer1.Panel1
 
-            Engine.AddComponent(component = new TestComponent(Engine));
+            Engine.AddComponent(component = new Test2Component(Engine));
 
             Engine.AudioDevice.Listener.Gain = 0.1f;
 
             stream = Engine.AudioDevice.Factory.CreateSound("test.ogg", SoundFlags.Streamed | SoundFlags.AllowRead);
             streamInstance = stream.CreateInstance();
-            component.Visualize = streamInstance;
+            //component.Visualize = streamInstance;
 
             threedee = Engine.AudioDevice.Factory.CreateSound("16-44100.wav", SoundFlags.Support3D);
             threedeeInstance = threedee.CreateInstance();

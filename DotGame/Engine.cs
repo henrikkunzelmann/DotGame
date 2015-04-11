@@ -1,14 +1,15 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Diagnostics;
-using DotGame.Utils;
-using DotGame.Graphics;
 using System.Windows.Forms;
 using DotGame.Audio;
+using DotGame.Graphics;
+using DotGame.Rendering;
+using DotGame.Utils;
 
 namespace DotGame
 {
@@ -28,6 +29,9 @@ namespace DotGame
         /// Die Einstellungen mit dem die Engine gestartet wurde.
         /// </summary>
         public EngineSettings Settings { get; private set; }
+
+        public ShaderManager ShaderManager { get; private set; }
+        public RenderStatePool RenderStatePool { get; private set; }
 
         /// <summary>
         /// Die Version der Engine.
@@ -127,6 +131,9 @@ namespace DotGame
                     this.AudioDevice = new DotGame.OpenAL.AudioDevice(Settings.AudioDevice);
                     break;
             }
+
+            ShaderManager = new ShaderManager(this);
+            RenderStatePool = new RenderStatePool(this);
 
             Log.Debug("Got AudioDevice: " + this.AudioDevice.GetType().FullName);
             GraphicsDevice.DetachCurrent();
@@ -288,6 +295,10 @@ namespace DotGame
 
         protected virtual void Dispose(bool isDisposing)
         {
+            if (ShaderManager != null)
+                ShaderManager.Dispose();
+            if (RenderStatePool != null)
+                RenderStatePool.Dispose();
             if (GraphicsDevice != null)
                 GraphicsDevice.Dispose();
             if (AudioDevice != null)

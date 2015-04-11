@@ -54,9 +54,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Assets\Asset.cs" />
+    <Compile Include="Assets\Material.cs" />
+    <Compile Include="Assets\Texture.cs" />
     <Compile Include="AudioAPI.cs" />
+    <Compile Include="Cameras\ICamera.cs" />
     <Compile Include="Engine.cs" />
+    <Compile Include="EngineObject.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="Entity.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Geometry\VertexPositionTextureNormal.cs" />
@@ -65,8 +71,18 @@
     <Compile Include="Geometry\VertexPositionColor.cs" />
     <Compile Include="Geometry\VertexPosition.cs" />
     <Compile Include="GraphicsAPI.cs" />
+    <Compile Include="Assets\Mesh.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="SpriteBatch.cs" />
+    <Compile Include="Rendering\Pass.cs" />
+    <Compile Include="Rendering\PassPipeline.cs" />
+    <Compile Include="Rendering\RenderItem.cs" />
+    <Compile Include="Rendering\RenderItemCollection.cs" />
+    <Compile Include="Rendering\RenderStatePool.cs" />
+    <Compile Include="Rendering\Shader.cs" />
+    <Compile Include="Rendering\ShaderManager.cs" />
+    <Compile Include="Scene.cs" />
+    <Compile Include="SceneNode.cs" />
+    <Compile Include="Rendering\SpriteBatch.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

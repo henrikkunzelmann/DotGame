@@ -57,7 +57,7 @@ namespace DotGame.DirectX11
             var dxBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
 
             if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
+                throw new ArgumentException("Data does not match VertexBuffer size.", "data");
 
             if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
                 context.UpdateSubresource(data, dxBuffer.Buffer);
@@ -74,7 +74,7 @@ namespace DotGame.DirectX11
             var dxBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
 
             if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
+                throw new ArgumentException("Data does not match IndexBuffer size.", "data");
 
             if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
                 context.UpdateSubresource(data, dxBuffer.Buffer);

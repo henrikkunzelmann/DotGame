@@ -37,23 +37,12 @@ namespace DotGame.Test
             Log.Debug("TestComponent.Init()");
             texture = GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg", true);
 
-            string shaderBinaryFile = "testShader_" + Engine.Settings.GraphicsAPI + ".bin";
-            if (File.Exists(shaderBinaryFile) && GraphicsDevice.Capabilities.SupportsBinaryShaders)
-            {
-                shader = GraphicsDevice.Factory.CreateShader("testShader", File.ReadAllBytes(shaderBinaryFile));
-                Log.Debug("Shader loaded by binary code!");
-            }
+            if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
+                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
+            else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
+                shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
             else
-            {
-                if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
-                    shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.fx", "VS", "vs_4_0"), new ShaderCompileInfo("shader.fx", "PS", "ps_4_0"));
-                else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
-                    shader = GraphicsDevice.Factory.CompileShader("testShader", new ShaderCompileInfo("shader.vertex.glsl", "", "vs_4_0"), new ShaderCompileInfo("shader.fragment.glsl", "", "ps_4_0"));
-                else
-                    throw new NotImplementedException();
-                if (GraphicsDevice.Capabilities.SupportsBinaryShaders)
-                    File.WriteAllBytes(shaderBinaryFile, shader.BinaryCode);
-            }
+                throw new NotImplementedException();
 
             colorTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.RGBA32_Float, false);
             depthTarget = GraphicsDevice.Factory.CreateRenderTarget2D(GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height, TextureFormat.Depth32, false);

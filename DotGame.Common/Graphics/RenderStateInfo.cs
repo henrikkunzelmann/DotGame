@@ -51,11 +51,11 @@ namespace DotGame.Graphics
             unchecked
             {
                 int hash = 17;
-                hash = hash * 23 + Shader.GetHashCode();
+                hash = hash * 23 + (Shader == null ? 0 : Shader.GetHashCode());
                 hash = hash * 23 + PrimitiveType.GetHashCode();
-                hash = hash * 23 + Rasterizer.GetHashCode();
-                hash = hash * 23 + DepthStencil.GetHashCode();
-                hash = hash * 23 + Blend.GetHashCode();
+                hash = hash * 23 + (Rasterizer == null ? 0 : Rasterizer.GetHashCode());
+                hash = hash * 23 + (DepthStencil == null ? 0 : DepthStencil.GetHashCode());
+                hash = hash * 23 + (Blend == null ? 0 : Blend.GetHashCode());
                 return hash;
             }
         }

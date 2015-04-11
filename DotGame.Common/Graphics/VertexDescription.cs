@@ -33,6 +33,22 @@ namespace DotGame.Graphics
                         if (elements[i].Usage == elements[j].Usage && elements[i].UsageIndex == elements[j].UsageIndex)
                             throw new ArgumentException(string.Format("VertexElement {0} and {1} are duplicates: they share the same usage and usage index.", i, j), "elements");
         }
+        
+        public bool HasElement(VertexElementUsage usage)
+        {
+            for (int i = 0; i < elements.Length; i++)
+                if (elements[i].Usage == usage)
+                    return true;
+            return false;
+        }
+
+        public bool HasElement(VertexElementUsage usage, int usageIndex)
+        {
+            for (int i = 0; i < elements.Length; i++)
+                if (elements[i].Usage == usage && elements[i].UsageIndex == usageIndex)
+                    return true;
+            return false;
+        }
 
         public VertexElement[] GetElements()
         {
