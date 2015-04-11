@@ -30,7 +30,7 @@ namespace DotGame.Test
 
             Engine = new Engine(new EngineSettings()
             {
-                GraphicsAPI = GraphicsAPI.DirectX11,
+                GraphicsAPI = GraphicsAPI.OpenGL4,
                 AudioAPI = AudioAPI.OpenAL
             }, null);
             // splitContainer1.Panel1

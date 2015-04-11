@@ -46,14 +46,14 @@ namespace DotGame.OpenGL4
                                 GL.Disable(IndexedEnableCap.Blend, i);
                         }
 
-                        if (graphicsDevice.GLSLVersionMajor >= 4)
+                        if (graphicsDevice.OpenGLCapabilities.GLSLVersion.Major >= 4)
                         {
                             //BlendOperation und Blend für jedes RT einzeln setzen
 
                             if ((!compareRenderTargetExists || (compareTo.Info.RenderTargets[i].SrcBlend != Info.RenderTargets[i].SrcBlend || compareTo.Info.RenderTargets[i].DestBlend != Info.RenderTargets[i].DestBlend || compareTo.Info.RenderTargets[i].SrcBlendAlpha != Info.RenderTargets[i].SrcBlendAlpha || compareTo.Info.RenderTargets[i].DestBlendAlpha != Info.RenderTargets[i].DestBlendAlpha)))
                                 GL.BlendFuncSeparate(i, EnumConverter.Convert(Info.RenderTargets[i].SrcBlend), (BlendingFactorDest)EnumConverter.Convert(Info.RenderTargets[i].DestBlend), EnumConverter.Convert(Info.RenderTargets[i].SrcBlendAlpha), (BlendingFactorDest)EnumConverter.Convert(Info.RenderTargets[i].DestBlendAlpha));
 
-                            if (graphicsDevice.GLSLVersionMajor >= 4 && (!compareRenderTargetExists || (Info.RenderTargets[i].BlendOp != compareTo.Info.RenderTargets[i].BlendOp || Info.RenderTargets[i].BlendOpAlpha != compareTo.Info.RenderTargets[i].BlendOpAlpha)))
+                            if (graphicsDevice.OpenGLCapabilities.GLSLVersion.Major >= 4 && (!compareRenderTargetExists || (Info.RenderTargets[i].BlendOp != compareTo.Info.RenderTargets[i].BlendOp || Info.RenderTargets[i].BlendOpAlpha != compareTo.Info.RenderTargets[i].BlendOpAlpha)))
                                 GL.BlendEquationSeparate(i, EnumConverter.Convert(Info.RenderTargets[i].BlendOp), EnumConverter.Convert(Info.RenderTargets[i].BlendOpAlpha));
                         }
                         else
@@ -86,7 +86,7 @@ namespace DotGame.OpenGL4
                         else
                             GL.Disable(IndexedEnableCap.Blend, i);
 
-                        if (graphicsDevice.GLSLVersionMajor >= 4)
+                        if (graphicsDevice.OpenGLCapabilities.GLSLVersion.Major >= 4)
                         {
                             //BlendOperation und Blend für jedes RT einzeln setzen
 
@@ -96,7 +96,7 @@ namespace DotGame.OpenGL4
 
                         GL.ColorMask(i, Info.RenderTargets[i].RenderTargetWriteMask.HasFlag(ColorWriteMaskFlags.Red), Info.RenderTargets[i].RenderTargetWriteMask.HasFlag(ColorWriteMaskFlags.Blue), Info.RenderTargets[i].RenderTargetWriteMask.HasFlag(ColorWriteMaskFlags.Green), Info.RenderTargets[i].RenderTargetWriteMask.HasFlag(ColorWriteMaskFlags.Alpha));
                     }
-                    if (graphicsDevice.GLSLVersionMajor < 4 && Info.RenderTargets != null && Info.RenderTargets.Length > 0)
+                    if (graphicsDevice.OpenGLCapabilities.GLSLVersion.Major < 4 && Info.RenderTargets != null && Info.RenderTargets.Length > 0)
                     {
                         //BlendOperation und Blend setzen
 

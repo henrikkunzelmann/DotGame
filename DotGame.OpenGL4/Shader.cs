@@ -188,21 +188,22 @@ namespace DotGame.OpenGL4
         /// <returns></returns>
         internal int GetUniformBlockBindingPoint(string name)
         {
-            if (!uniformBindingPoints.ContainsKey(name))
-            {
-                if (!uniformBlockLocations.ContainsKey(name))
-                    throw new Exception(string.Format("Uniform block {0} not found"));
+            int bindingPoint;
+            if (uniformBindingPoints.TryGetValue(name, out bindingPoint))
+                return bindingPoint;
 
-                graphicsDevice.BindManager.Shader = this;
+            if (!uniformBlockLocations.ContainsKey(name))
+                throw new Exception(string.Format("Uniform block {0} not found"));
 
-                int blockIndex = uniformBlockLocations[name];
-                int bindingPoint = uniformBindingPoints.Count;
-                GL.UniformBlockBinding(ProgramID, blockIndex, bindingPoint);
+            graphicsDevice.BindManager.Shader = this;
 
-                uniformBindingPoints[name] = bindingPoint;
-            }
+            int blockIndex = uniformBlockLocations[name];
+            bindingPoint = uniformBindingPoints.Count;
+            GL.UniformBlockBinding(ProgramID, blockIndex, bindingPoint);
 
-            return uniformBindingPoints[name];
+            uniformBindingPoints[name] = bindingPoint;
+
+            return bindingPoint;
         }
 
         /// <summary>
@@ -212,21 +213,26 @@ namespace DotGame.OpenGL4
         /// <returns></returns>
         internal int GetTextureUnit(string name)
         {
-            if (!textureUnits.ContainsKey(name))
+            int textureUnit;
+            if (textureUnits.TryGetValue(name, out textureUnit))
+                return textureUnit;
+
+            textureUnit = textureUnits.Count;
+
+            if (textureUnit > graphicsDevice.OpenGLCapabilities.TextureUnits - 1)
+                throw new PlatformNotSupportedException("No more texture units available");
+
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
-                int textureUnit = textureUnits.Count;
-
-                if (textureUnit > graphicsDevice.TextureUnits - 1)
-                    throw new PlatformNotSupportedException("No more texture units available");
-
                 graphicsDevice.BindManager.Shader = this;
-
                 GL.Uniform1(GetUniformLocation(name), textureUnit);
-
-                textureUnits[name] = textureUnit;
             }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+                OpenTK.Graphics.OpenGL.GL.Ext.ProgramUniform1(ProgramID, GetUniformLocation(name), textureUnit);
 
-            return textureUnits[name];            
+            textureUnits[name] = textureUnit;
+
+            return textureUnit;
         }
 
         protected override void Dispose(bool isDisposing)

@@ -20,6 +20,8 @@ namespace DotGame.OpenGL4
 
         internal Shader Shader { get; set; }
 
+        internal bool LayoutDirty { get; set; }
+
         public int SizeBytes 
         { 
             get { throw new NotImplementedException(); } 
@@ -28,8 +30,14 @@ namespace DotGame.OpenGL4
         internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, BufferUsage usage)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            VboID = GL.GenVertexArray();
-            VaoID = GL.GenBuffer();
+            VboID = GL.GenBuffer();
+
+            if (!graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
+            {
+                VaoID = GL.GenVertexArray();
+                LayoutDirty = true;
+            }
+            
             graphicsDevice.CheckGLError();
 
             this.Description = description;
@@ -57,8 +65,16 @@ namespace DotGame.OpenGL4
                 VertexCount = size / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
             }
 
-            GL.BindBuffer(BufferTarget.ArrayBuffer, VaoID);
-            GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, BufferUsageHint.StaticDraw);
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.VertexBuffer = this;
+                GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, EnumConverter.Convert(Usage));
+            } 
+            else if(graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData<T>(VboID, new IntPtr(size), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess) EnumConverter.Convert(Usage));
+            }
+
             graphicsDevice.CheckGLError();
         }
 
@@ -66,7 +82,9 @@ namespace DotGame.OpenGL4
         {
             if (!GraphicsDevice.IsDisposed)
             {
-                GL.DeleteVertexArray(VboID);
+                if (!graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
+                    GL.DeleteVertexArray(VboID);
+
                 GL.DeleteBuffer(VaoID);
             }
         }

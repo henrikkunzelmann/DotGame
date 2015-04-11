@@ -33,8 +33,9 @@ namespace DotGame.OpenGL4
             AssertCurrent();
 
             Bitmap bitmap = new Bitmap(file);
-            BitmapData bmpData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
-            Texture2D texture = Register(new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, TextureFormat.RGBA16_UIntNorm, bmpData.Scan0));
+            BitmapData bmpData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            Texture2D texture = Register(new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, generateMipMaps, TextureFormat.RGBA8_UIntNorm));
+            texture.SetData(bmpData.Scan0, 0, bmpData.Stride * bmpData.Width * bmpData.Height);
             bitmap.UnlockBits(bmpData);
 
             return texture;
@@ -43,13 +44,16 @@ namespace DotGame.OpenGL4
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            return Register(new Texture2D(graphicsDevice, width, height, 0, format));
+            Texture2D texture = Register(new Texture2D(graphicsDevice, width, height, generateMipMaps, format));
+            texture.SetData(IntPtr.Zero, 0, 0);
+
+            return texture;
         }
 
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            return Register(new Texture3D(graphicsDevice, width, height, length, generateMipMaps, format));
         }
 
         public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -60,20 +64,19 @@ namespace DotGame.OpenGL4
 
         public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
         {
-            AssertCurrent();
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            return Register(new Texture2D(graphicsDevice, width,height, 1, format));
+            return (IRenderTarget2D)CreateTexture2D(width, height, format, generateMipMaps);
         }
 
         public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            return Register(new Texture3D(graphicsDevice, width, height,length, generateMipMaps, format));
         }
 
         public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -84,13 +87,14 @@ namespace DotGame.OpenGL4
 
         public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
         {
-            AssertCurrent();
-            throw new NotImplementedException();
+            throw new NotSupportedException();
         }
 
         public IVertexBuffer CreateVertexBuffer(int vertexCount, VertexDescription description, BufferUsage usage)
         {
-            throw new NotImplementedException();
+            AssertCurrent();
+
+            return Register(new VertexBuffer(graphicsDevice, description, usage));
         }
 
         public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description, BufferUsage usage) where T : struct
@@ -104,15 +108,15 @@ namespace DotGame.OpenGL4
 
         public IIndexBuffer CreateIndexBuffer(int indexCount, IndexFormat format, BufferUsage usage)
         {
-            throw new NotImplementedException();
+            AssertCurrent();
+            return Register(new IndexBuffer(graphicsDevice, usage, format));
         }
 
         public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format, BufferUsage usage) where T : struct
         {
             AssertCurrent();
-
-            IndexBuffer buffer = Register(new IndexBuffer(graphicsDevice, usage));
-            buffer.SetData<T>(data, format);
+            IndexBuffer buffer = Register(new IndexBuffer(graphicsDevice, usage, format));
+            buffer.SetData<T>(data);
             return buffer;
         }
 
@@ -189,9 +193,10 @@ namespace DotGame.OpenGL4
                 if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
                     throw new Exception("Could not determine GLSL version for shader " + shaderName);
 
+                Version shaderGLSLVersion = new Version(glslVersionMajor, glslVersionMinor);
+
                 //Überprüfen, ob angegebene GLSL version vom Treiber unterstützt wird
-                GraphicsDevice internalGraphicsDevice = (GraphicsDevice)GraphicsDevice;
-                if (internalGraphicsDevice.GLSLVersionMajor < glslVersionMajor || (internalGraphicsDevice.GLSLVersionMajor == glslVersionMajor && internalGraphicsDevice.GLSLVersionMinor < glslVersionMinor))
+                if (graphicsDevice.OpenGLCapabilities.GLSLVersion < shaderGLSLVersion)
                     throw new PlatformNotSupportedException(string.Format("GLSL version of shader {0} is not supported by the driver.", shaderName));
             }
             else
@@ -214,7 +219,7 @@ namespace DotGame.OpenGL4
             if (code == null)
                 throw new ArgumentNullException("code");
 
-            if (!graphicsDevice.Capabilities.SupportsBinaryShaders)
+            if (!GraphicsDevice.Capabilities.SupportsBinaryShaders)
                 throw new NotSupportedException("Creating shaders by byte code is not supported.");
 
             return new Shader(graphicsDevice, code);

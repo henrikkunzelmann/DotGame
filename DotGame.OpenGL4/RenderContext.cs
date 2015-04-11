@@ -43,53 +43,37 @@ namespace DotGame.OpenGL4
 
         public void Update<T>(IVertexBuffer buffer, T[] data) where T : struct
         {
-            throw new NotImplementedException();
+            var internalBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
+
+            internalBuffer.SetData<T>(data);
         }
 
         public void Update<T>(IIndexBuffer buffer, T[] data) where T : struct
         {
-            throw new NotImplementedException();
+            var internalBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
+
+            internalBuffer.SetData<T>(data);
         }
 
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
         {
             var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
-            if (internalBuffer.Size < 0)
-                internalBuffer.Size = Marshal.SizeOf(data);
-            else if (Marshal.SizeOf(data) != internalBuffer.Size)
-                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
 
-            graphicsDevice.BindManager.ConstantBuffer = buffer;
-            // TODO (Robin) BufferUsageHint
-            GL.BufferData<T>(BufferTarget.UniformBuffer, new IntPtr(buffer.Size), ref data, BufferUsageHint.DynamicDraw);
-            graphicsDevice.CheckGLError();
+            internalBuffer.SetData<T>(data);
         }
 
         public void Update<T>(ITexture2D texture, T[] data) where T : struct
         {
-            Update(texture, 0, data);
+            var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
+
+            internalTexture.SetData<T>(data, 0);
         }
 
         public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
         {
-            graphicsDevice.Cast<Texture2D>(texture, "texture");
-            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
+            var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
 
-            graphicsDevice.BindManager.SetTexture(texture, 0);
-
-            GCHandle arrayHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            IntPtr ptr = arrayHandle.AddrOfPinnedObject();
-
-            if (!TextureFormatHelper.IsCompressed(texture.Format))
-            {
-                Tuple<OpenTK.Graphics.OpenGL4.PixelFormat, PixelType> tuple = EnumConverter.ConvertPixelDataFormat(texture.Format);
-                GL.TexImage2D(TextureTarget.Texture2D, mipLevel, EnumConverter.Convert(texture.Format), texture.Width, texture.Height, 0, tuple.Item1, tuple.Item2, ptr);
-            }
-            else
-                GL.CompressedTexImage2D(TextureTarget.Texture2D, mipLevel, EnumConverter.Convert(texture.Format), texture.Width, texture.Height, 0, Marshal.SizeOf(typeof(T)) * data.Length, ptr);
-
-            arrayHandle.Free();
+            internalTexture.SetData<T>(data, mipLevel);
         }
 
         public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
@@ -116,8 +100,16 @@ namespace DotGame.OpenGL4
             if (texture.IsDisposed)
                 throw new ObjectDisposedException("texture");
 
-            graphicsDevice.BindManager.SetTexture(texture, 0);
-            GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(texture, 0);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
+                OpenTK.Graphics.OpenGL.GL.Ext.GenerateTextureMipmap(internalTexture.TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D);
+            }
         }
 
         public void GenerateMips(ITexture2DArray textureArray)
@@ -288,7 +280,7 @@ namespace DotGame.OpenGL4
             graphicsDevice.BindManager.Shader = shader;
 
             graphicsDevice.BindManager.ConstantBuffer = buffer;
-            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, internalShader.GetUniformBlockBindingPoint(name), internalBuffer.UniformBufferObjectID);
+            GL.BindBufferBase(BufferRangeTarget.UniformBuffer, internalShader.GetUniformBlockBindingPoint(name), internalBuffer.UboId);
             graphicsDevice.CheckGLError();
         }
 
@@ -297,6 +289,7 @@ namespace DotGame.OpenGL4
             SetConstantBuffer(shader, "global", buffer);
         }
 
+        /*
         private void SetTexture(IShader shader, string name, IGraphicsObject texture, TextureTarget target)
         {
             var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
@@ -306,7 +299,7 @@ namespace DotGame.OpenGL4
                 throw new ArgumentNullException("texture");
 
             graphicsDevice.BindManager.SetTexture(texture, internalShader.GetTextureUnit(name), target);
-        }
+        }*/
 
         public void SetTextureNull(IShader shader, string name)
         {
@@ -360,12 +353,12 @@ namespace DotGame.OpenGL4
 
         public void SetSampler(IShader shader, string name, ISampler sampler)
         {
-            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            var internalSampler = graphicsDevice.Cast<Sampler>(sampler, "sampler");
-            GL.BindSampler(internalShader.GetTextureUnit(name), internalSampler.SamplerID);
+            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
+            
+            graphicsDevice.BindManager.SetSampler(sampler, internalShader.GetTextureUnit(name));
         }
 
         private void ApplyRenderTarget()
@@ -411,27 +404,56 @@ namespace DotGame.OpenGL4
                 depthStencil.Apply(currentDepthStencil, 0);
                 currentDepthStencil = depthStencil;
             }
-
-            graphicsDevice.BindManager.VertexBuffer = currentVertexBuffer;
-
+            
             // Das VertexArrayObject speichert die Attribute calls eines bestimmten Shaders
             // Falls ein anderer Shader gesetzt ist oder diese Attribute gesetzt sind, müssen diese VertexAttributePointer gesetzt werden
-            Shader internalShader = graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.Shader");
+
             if (currentVertexBuffer.Shader != currentState.Shader)
             {
-                GL.BindBuffer(BufferTarget.ArrayBuffer, currentVertexBuffer.VaoID);
-
-                int offset = 0;
                 VertexElement[] elements = currentVertexBuffer.Description.GetElements();
                 for (int i = 0; i < currentVertexBuffer.Description.ElementCount; i++)
                 {
-                    GL.EnableVertexAttribArray(i);
-                    GL.BindAttribLocation(internalShader.ProgramID, i, EnumConverter.Convert(elements[i].Usage));
-
-                    GL.VertexAttribPointer(i, graphicsDevice.GetComponentsOf(elements[i].Type), VertexAttribPointerType.Float, false, graphicsDevice.GetSizeOf(currentVertexBuffer.Description), offset);
-                    offset += graphicsDevice.GetSizeOf(elements[i].Type);
+                    GL.BindAttribLocation(shader.ProgramID, i, EnumConverter.Convert(elements[i].Usage));
                 }
-                currentVertexBuffer.Shader = internalShader;
+
+                currentVertexBuffer.Shader = shader;
+            }
+
+            if (!graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
+            {
+                graphicsDevice.BindManager.VertexArray = currentVertexBuffer.VaoID;
+
+                if (currentVertexBuffer.LayoutDirty)
+                {
+                    graphicsDevice.BindManager.VertexBuffer = currentVertexBuffer;
+
+                    int offset = 0;
+                    VertexElement[] elements = currentVertexBuffer.Description.GetElements();
+                    for (int i = 0; i < graphicsDevice.OpenGLCapabilities.MaxVertexAttribs; i++)
+                    {
+                        if (i < currentVertexBuffer.Description.ElementCount)
+                        {
+                            GL.EnableVertexAttribArray(i);
+
+                            GL.VertexAttribPointer(i, graphicsDevice.GetComponentsOf(elements[i].Type), VertexAttribPointerType.Float, false, graphicsDevice.GetSizeOf(currentVertexBuffer.Description), offset);
+                            offset += graphicsDevice.GetSizeOf(elements[i].Type);
+                        }
+                        else
+                        {
+                            GL.DisableVertexAttribArray(i);
+                        }
+                    }
+
+                    currentVertexBuffer.LayoutDirty = false;
+                }
+            }
+            else
+            {
+                graphicsDevice.BindManager.VertexBuffer = null;
+                int layout = graphicsDevice.GetLayout(currentVertexBuffer.Description, graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.shader"));
+                graphicsDevice.BindManager.VertexArray = layout;
+
+                graphicsDevice.BindManager.SetVertexBuffer(0, currentVertexBuffer);
             }
 
             graphicsDevice.BindManager.IndexBuffer = currentIndexBuffer;
@@ -451,7 +473,7 @@ namespace DotGame.OpenGL4
 
             ApplyRenderTarget();
             ApplyState();
-            GL.DrawArrays(EnumConverter.Convert(currentState.PrimitiveType), 0, vertexCount); // TODO (henrik1235) firstVertexLocation einbauen
+            GL.DrawArrays(EnumConverter.Convert(currentState.PrimitiveType), firstVertexLocation, vertexCount);
         }
 
         public void DrawIndexed()
@@ -467,9 +489,7 @@ namespace DotGame.OpenGL4
                 throw new InvalidOperationException("Tried to draw without an indexbuffer set.");
 
             ApplyState();
-            // TODO (henrik1235) firstIndexLocation und firstVertexLocation einbauen
-            // -> glDrawElementsBaseVertex 
-            GL.DrawElements((BeginMode)EnumConverter.Convert(currentState.PrimitiveType), indexCount, EnumConverter.Convert(currentIndexBuffer.Format), 0);
+            GL.DrawElements((BeginMode)EnumConverter.Convert(currentState.PrimitiveType), indexCount, EnumConverter.Convert(currentIndexBuffer.Format), firstVertexLocation * graphicsDevice.GetSizeOf(currentIndexBuffer.Format));
         }
 
         protected override void Dispose(bool isDisposing)

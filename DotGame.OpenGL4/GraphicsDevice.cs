@@ -10,6 +10,7 @@ using DotGame.Utils;
 using OpenTK.Graphics;
 using OpenTK;
 using OpenTK.Graphics.OpenGL4;
+using Ext = OpenTK.Graphics.OpenGL.GL.Ext;
 using DotGame.OpenGL4.Windows;
 
 namespace DotGame.OpenGL4
@@ -25,6 +26,12 @@ namespace DotGame.OpenGL4
         {
             get { return capabilities; }
         }
+        private OpenGLGraphicsCapabilities openGLCapabilities;
+        public OpenGLGraphicsCapabilities OpenGLCapabilities
+        {
+            get { return openGLCapabilities; }
+        }
+
         public IGraphicsFactory Factory { get; private set; }
         public IRenderContext RenderContext { get; private set; }
 
@@ -48,20 +55,8 @@ namespace DotGame.OpenGL4
 
         private List<Fbo> fboPool = new List<Fbo>();
 
-        //Hardware/ Driver Information
-        internal int GLSLVersionMajor { get; private set; }
-        internal int GLSLVersionMinor { get; private set; }
-        internal int OpenGLVersionMajor { get; private set; }
-        internal int OpenGLVersionMinor { get; private set; }
-        internal bool SupportsAnisotropicFiltering { get; private set; }
-        internal bool SupportsS3TextureCompression { get; private set; }
-        internal bool SupportsDebugOutput { get; private set; }
-        internal int TextureUnits { get; private set; }
-
-        //Sampler Values
-        internal int MaxAnisotropicFiltering { get; private set; }
-        internal int MaxTextureLoDBias { get; private set; }
-
+        private Dictionary<VertexDescription, int> inputLayoutPool = new Dictionary<VertexDescription, int>();
+        
         private DebugProc onDebugMessage;
 
         internal static int MipLevels(int width, int height, int depth = 0)
@@ -99,7 +94,7 @@ namespace DotGame.OpenGL4
 
             capabilities = new GraphicsCapabilities();
 
-            CheckVersion();
+            CheckGraphicsCapabilities(LogLevel.Verbose);
 
             Factory = new GraphicsFactory(this);
             BindManager = new OpenGL4.BindManager(this);
@@ -121,16 +116,19 @@ namespace DotGame.OpenGL4
             Context.MakeCurrent(null);
         }
 
-        private void CheckVersion()
+        private void CheckGraphicsCapabilities(LogLevel logLevel)
         {
-            OpenGLVersionMajor = GL.GetInteger(GetPName.MajorVersion);
-            OpenGLVersionMinor = GL.GetInteger(GetPName.MinorVersion);
+            openGLCapabilities= new OpenGLGraphicsCapabilities();
+            capabilities = new GraphicsCapabilities();
 
-            Log.Debug("OpenGL Version: {0}.{1}", OpenGLVersionMajor, OpenGLVersionMinor);
+            openGLCapabilities.OpenGLVersion = new Version(GL.GetInteger(GetPName.MajorVersion), GL.GetInteger(GetPName.MinorVersion));
+
+            Log.Write(logLevel, "OpenGL Diagnostics:");
+            Log.Write(logLevel, "\tOpenGL Version: {0}", openGLCapabilities.OpenGLVersion.ToString());
 
             //GLSL Version string auslesen
             string glslVersionString = GL.GetString(StringName.ShadingLanguageVersion);
-            if(string.IsNullOrWhiteSpace(glslVersionString))
+            if (string.IsNullOrWhiteSpace(glslVersionString))
                 throw new Exception("Could not determine supported GLSL version");
 
             string glslVersionStringMajor = glslVersionString.Substring(0, glslVersionString.IndexOf('.'));
@@ -141,47 +139,89 @@ namespace DotGame.OpenGL4
             if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
                 throw new Exception("Could not determine supported GLSL version");
 
-            GLSLVersionMajor = glslVersionMajor;
-            GLSLVersionMinor = glslVersionMinor;
+            //Nicht Version mit String initialisieren da 4.40 als Major 4 und Minor 40 aufgefasst wird
+            openGLCapabilities.GLSLVersion = new Version(glslVersionMajor, glslVersionMinor);
 
-            Log.Debug("GLSL Version: {0}.{1}", GLSLVersionMajor, GLSLVersionMinor);
+            Log.Write(logLevel, "\tGLSL Version: {0}", openGLCapabilities.GLSLVersion.ToString());
+            Log.Write(logLevel, "\tExtensions supported:");
 
             //Extensions überprüfen
             int extensionCount = GL.GetInteger(GetPName.NumExtensions);
             for (int i = 0; i < extensionCount; i++)
             {
                 string extension = GL.GetString(StringNameIndexed.Extensions, i);
-                if (extension == "GL_EXT_texture_compression_s3tc")
+                switch (extension)
                 {
-                    SupportsS3TextureCompression = true;
-                }
+                    case "GL_EXT_texture_compression_s3tc":
+                        openGLCapabilities.SupportsS3TextureCompression = true;
+                        Log.Write(logLevel, "\t\t" + "GL_EXT_texture_compression_s3tc");
+                        break;
 
-                else if (extension == "GL_EXT_texture_filter_anisotropic")
-                {
-                    SupportsAnisotropicFiltering = true;
-                    MaxAnisotropicFiltering  = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
-                }
+                    case "GL_EXT_texture_filter_anisotropic":
+                        openGLCapabilities.SupportsAnisotropicFiltering = true;
+                        openGLCapabilities.MaxAnisotropicFiltering = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
+                        Log.Write(logLevel, "\t\t" + "GL_EXT_texture_filter_anisotropic");
+                        break;
 
-                else if (extension == "GL_ARB_debug_output")
-                {
-                    SupportsDebugOutput = true;
 
-                    if (CreationFlags.HasFlag(DeviceCreationFlags.Debug))
-                    {
-                        onDebugMessage = new DebugProc(OnDebugMessage);
-                        GL.Enable(EnableCap.DebugOutput);
-                        GL.DebugMessageCallback(onDebugMessage, IntPtr.Zero);
+                    case "GL_ARB_debug_output":
+                        openGLCapabilities.SupportsDebugOutput = true;
 
-                        GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
-                    }
-                }
-                else if (extension == "GL_ARB_get_program_binary")
-                {
-                    capabilities.SupportsBinaryShaders = true;
+                        if (CreationFlags.HasFlag(DeviceCreationFlags.Debug))
+                        {
+                            onDebugMessage = new DebugProc(OnDebugMessage);
+                            GL.Enable(EnableCap.DebugOutput);
+                            GL.DebugMessageCallback(onDebugMessage, IntPtr.Zero);
+
+                            GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
+                        }
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_debug_output");
+                        break;
+
+                    case "GL_ARB_get_program_binary":
+                        capabilities.SupportsBinaryShaders = true;
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_get_program_binary");
+                        break;
+
+                    case "GL_ARB_texture_storage":
+                        openGLCapabilities.SupportsTextureStorage = true;
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_texture_storage");
+                        break;
+
+                    case "GL_ARB_buffer_storage":
+                        openGLCapabilities.SupportsBufferStorage = true;
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_buffer_storage");
+                        break;
+
+                    case "GL_ARB_invalidate_subdata":
+                        openGLCapabilities.SupportsResourceValidation = true;
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_invalidate_subdata");
+                        break;
+
+                    case "GL_EXT_direct_state_access":
+                        if(openGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+                            openGLCapabilities.DirectStateAccess = DirectStateAccess.Extension;
+
+                        Log.Write(logLevel, "\t\t" + "GL_EXT_direct_state_access");
+                        break;
+
+                    case "GL_ARB_direct_state_access":
+                        //openGLCapabilities.DirectStateAccess = DirectStateAccess.Core;
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_direct_state_access");
+                        break;
+
+                    case "GL_ARB_vertex_attrib_binding":
+                        openGLCapabilities.VertexAttribBinding = true;
+                        openGLCapabilities.MaxVertexAttribBindings = GL.GetInteger((GetPName)All.MaxVertexAttribBindings);
+                        openGLCapabilities.MaxVertexAttribBindingOffset = GL.GetInteger((GetPName)All.MaxVertexAttribRelativeOffset);
+                        Log.Write(logLevel, "\t\t" + "GL_ARB_vertex_attrib_binding");
+                        break;
                 }
             }
-            TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
-            MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
+            openGLCapabilities.TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
+            openGLCapabilities.MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
+            openGLCapabilities.MaxTextureSize = GL.GetInteger(GetPName.MaxTextureSize);
+            openGLCapabilities.MaxVertexAttribs = GL.GetInteger(GetPName.MaxVertexAttribs);
 
             CheckGLError();
         }
@@ -200,7 +240,12 @@ namespace DotGame.OpenGL4
             if (severityString.StartsWith("DebugSeverity"))
                 severityString = severityString.Remove(0, "DebugSeverity".Length);
 
-            Log.Debug("(OpenGL) ({0}) ({1}) ({2}) {3}", severityString, sourceString, typeString, Marshal.PtrToStringAnsi(message, length));
+            string messageString = string.Format("(OpenGL) ({0}) ({1}) ({2}) {3}", severityString, sourceString, typeString, Marshal.PtrToStringAnsi(message, length));
+
+            if (severityString != "Notification")
+                throw new Exception(messageString);
+
+            Log.Debug(messageString);
             Log.FlushBuffer();
         }
 
@@ -220,7 +265,25 @@ namespace DotGame.OpenGL4
 
         public int GetSizeOf(TextureFormat format)
         {
-            throw new NotImplementedException();
+            switch (format)
+            {
+                case TextureFormat.RGB32_Float:
+                    return 32 * 3;
+                case TextureFormat.RGBA32_Float:
+                    return 32 * 4;
+                case TextureFormat.RGBA16_UIntNorm:
+                    return 16 * 16;
+                case TextureFormat.RGBA8_UIntNorm:
+                    return 8 * 4;
+                case TextureFormat.Depth16:
+                    return 16;
+                case TextureFormat.Depth24Stencil8:
+                    return 24 + 8;
+                case TextureFormat.Depth32:
+                    return 32;
+                default:
+                    throw new NotSupportedException("Format is not supported.");
+            }
         }
 
         public int GetSizeOf(VertexElementType format)
@@ -319,6 +382,56 @@ namespace DotGame.OpenGL4
         internal Fbo GetFBO(int depth)
         {
             return GetFBO(depth, new int[] { });
+        }
+
+        internal int GetLayout(VertexDescription description, Shader shader)
+        {
+            if (!OpenGLCapabilities.VertexAttribBinding)
+                throw new PlatformNotSupportedException("VertexAttribBinding (separat vertex attributes) are not supported by the driver");
+
+            int layout;
+            if (inputLayoutPool.TryGetValue(description, out layout))
+                return layout;
+            
+            layout = GL.GenVertexArray();
+
+            if (OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                BindManager.VertexArray = layout;
+
+                int offset = 0;
+                VertexElement[] elements = description.GetElements();
+                for (int i = 0; i < description.ElementCount; i++)
+                {
+                    if (offset > OpenGLCapabilities.MaxVertexAttribBindingOffset)
+                        throw new PlatformNotSupportedException("offset is higher than maximum supportet offset.");
+
+                    GL.EnableVertexAttribArray(i);
+
+                    GL.VertexAttribBinding(i, 0);
+                    GL.VertexAttribFormat(i, GetComponentsOf(elements[i].Type), VertexAttribType.Float, false, offset);
+                    offset += GetSizeOf(elements[i].Type);
+                }
+            }
+            else if (OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                int offset = 0;
+                VertexElement[] elements = description.GetElements();
+                for (int i = 0; i < description.ElementCount; i++)
+                {
+                    if (offset > OpenGLCapabilities.MaxVertexAttribBindingOffset)
+                        throw new PlatformNotSupportedException("offset is higher than maximum supportet offset.");
+                    
+                    Ext.EnableVertexArrayAttrib(layout, i);
+
+                    Ext.VertexArrayVertexAttribBinding(layout, i, 0);
+                    Ext.VertexArrayVertexAttribFormat(layout, i, GetComponentsOf(elements[i].Type), (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)VertexAttribType.Float, false, offset);
+                    offset += GetSizeOf(elements[i].Type);
+                }
+            }
+
+            inputLayoutPool.Add(description, layout);
+            return layout;
         }
 
         internal void CheckGLError()

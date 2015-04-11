@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using Ext = OpenTK.Graphics.OpenGL.GL.Ext;
 
 namespace DotGame.OpenGL4
 {
@@ -35,39 +36,75 @@ namespace DotGame.OpenGL4
         {
             if (depthAttachment == -1 && (colorAttachments == null || colorAttachments.Length == 0))
                 throw new Exception("Can't create a framebuffer object without attachments.");
-            
-            graphicsDevice.BindManager.Fbo = this;
+
             ColorAttachmentIDs = colorAttachments;
             DepthAttachmentID = depthAttachment;
 
-            if (colorAttachments != null)
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
-                DrawBuffersEnum[] buffers = new DrawBuffersEnum[colorAttachments.Length];                
+                graphicsDevice.BindManager.Fbo = this;
 
-                for (int i = 0; i < colorAttachments.Length; i++)
+                if (colorAttachments != null)
                 {
-                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, colorAttachments[i], 0);
-                    buffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
+                    DrawBuffersEnum[] buffers = new DrawBuffersEnum[colorAttachments.Length];
+
+                    for (int i = 0; i < colorAttachments.Length; i++)
+                    {
+                        GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, colorAttachments[i], 0);
+                        buffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
+                    }
+
+                    if (colorAttachments.Length == 0)
+                        GL.DrawBuffer(DrawBufferMode.None);
+                    else
+                        GL.DrawBuffers(buffers.Length, buffers);
                 }
-
-                if (colorAttachments.Length == 0)
-                    GL.DrawBuffer(DrawBufferMode.None);
                 else
-                    GL.DrawBuffers(buffers.Length, buffers);
-            }
-            else            
-                GL.DrawBuffer(DrawBufferMode.None);
+                    GL.DrawBuffer(DrawBufferMode.None);
 
-            if (depthAttachment != -1)
+                if (depthAttachment != -1)
+                {
+                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, depthAttachment, 0);
+                }
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-                GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, depthAttachment, 0);
+                if (colorAttachments != null)
+                {
+                    OpenTK.Graphics.OpenGL.DrawBufferMode[] buffers = new OpenTK.Graphics.OpenGL.DrawBufferMode[colorAttachments.Length];
+
+                    for (int i = 0; i < colorAttachments.Length; i++)
+                    {
+                        Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.ColorAttachment0 + i, colorAttachments[i], 0);
+                        buffers[i] = OpenTK.Graphics.OpenGL.DrawBufferMode.ColorAttachment0 + i;
+                    }
+
+                    if (colorAttachments.Length == 0)
+                        Ext.FramebufferDrawBuffer(FboID, OpenTK.Graphics.OpenGL.DrawBufferMode.None);
+                    else
+                        Ext.FramebufferDrawBuffers(FboID, buffers.Length, buffers);
+                }
+                else
+                    GL.DrawBuffer(DrawBufferMode.None);
+
+                if (depthAttachment != -1)
+                {
+                    Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.DepthAttachment, depthAttachment, 0);
+                }
             }
         }
 
         internal void CheckStatus()
         {
-            graphicsDevice.BindManager.Fbo = this;
-            FramebufferErrorCode error = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            FramebufferErrorCode error = 0;
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.Fbo = this;
+                error = GL.CheckFramebufferStatus(FramebufferTarget.Framebuffer);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+                error = (FramebufferErrorCode)Ext.CheckNamedFramebufferStatus(FboID, OpenTK.Graphics.OpenGL.FramebufferTarget.Framebuffer);
+
             if (error != FramebufferErrorCode.FramebufferComplete)
                 throw new Exception(error.ToString());
         }

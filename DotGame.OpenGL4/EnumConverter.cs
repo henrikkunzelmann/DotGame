@@ -10,28 +10,22 @@ namespace DotGame.OpenGL4
 {
     internal static class EnumConverter
     {
-        private static readonly Dictionary<TextureFormat, PixelInternalFormat> formats = new Dictionary<TextureFormat, PixelInternalFormat>() 
+        private static readonly Dictionary<TextureFormat, Tuple<PixelInternalFormat, PixelFormat, PixelType>> formats = new Dictionary<TextureFormat, Tuple<PixelInternalFormat, PixelFormat, PixelType>>() 
         {
-            {TextureFormat.RGB32_Float, PixelInternalFormat.Rgb32f},
-            {TextureFormat.RGBA32_Float, PixelInternalFormat.Rgba32f},
-            {TextureFormat.DXT1, PixelInternalFormat.CompressedRgbaS3tcDxt1Ext},
-            {TextureFormat.DXT3, PixelInternalFormat.CompressedRgbaS3tcDxt3Ext},
-            {TextureFormat.DXT5, PixelInternalFormat.CompressedRgbaS3tcDxt5Ext},
-            {TextureFormat.RGBA16_UIntNorm, PixelInternalFormat.Rgba16},
-            {TextureFormat.RGBA8_UIntNorm, PixelInternalFormat.Rgba8},
-            {TextureFormat.Depth16, PixelInternalFormat.DepthComponent16},
-            {TextureFormat.Depth32, PixelInternalFormat.DepthComponent32},
-            {TextureFormat.Depth24Stencil8, PixelInternalFormat.Depth24Stencil8},
+            {TextureFormat.RGB32_Float, Tuple.Create(PixelInternalFormat.Rgb, PixelFormat.Rgb, PixelType.Float)},
+            {TextureFormat.RGBA32_Float, Tuple.Create(PixelInternalFormat.Rgba, PixelFormat.Rgba, PixelType.Float)},
+            {TextureFormat.RGBA16_UIntNorm, Tuple.Create(PixelInternalFormat.Rgba, PixelFormat.Rgba, PixelType.UnsignedShort)},
+            {TextureFormat.RGBA8_UIntNorm, Tuple.Create(PixelInternalFormat.Rgba, PixelFormat.Rgba, PixelType.UnsignedByte)},
+            {TextureFormat.Depth16, Tuple.Create(PixelInternalFormat.DepthComponent, PixelFormat.DepthComponent, PixelType.UnsignedInt)},
+            {TextureFormat.Depth32, Tuple.Create(PixelInternalFormat.DepthComponent, PixelFormat.DepthComponent, PixelType.Float)},
+            {TextureFormat.Depth24Stencil8, Tuple.Create(PixelInternalFormat.DepthStencil, PixelFormat.DepthStencil, PixelType.UnsignedInt248)},
         };
-        private static readonly Dictionary<TextureFormat, Tuple<PixelFormat, PixelType>> dataFormats = new Dictionary<TextureFormat, Tuple<PixelFormat, PixelType>>() 
+        private static readonly Dictionary<TextureFormat, SizedInternalFormat> sizedInternalFormats = new Dictionary<TextureFormat, SizedInternalFormat>() 
         {
-            {TextureFormat.RGB32_Float, Tuple.Create(PixelFormat.Rgb, PixelType.Float)},
-            {TextureFormat.RGBA32_Float, Tuple.Create(PixelFormat.Rgba, PixelType.Float)},
-            {TextureFormat.RGBA16_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
-            {TextureFormat.RGBA8_UIntNorm, Tuple.Create(PixelFormat.Rgba, PixelType.UnsignedInt)},
-            {TextureFormat.Depth16, Tuple.Create(PixelFormat.DepthComponent, PixelType.UnsignedInt)},
-            {TextureFormat.Depth32, Tuple.Create(PixelFormat.DepthComponent, PixelType.Float)},
-            {TextureFormat.Depth24Stencil8, Tuple.Create(PixelFormat.DepthStencil, PixelType.UnsignedInt248)},
+            {TextureFormat.RGB32_Float, SizedInternalFormat.Rgba32f},
+            {TextureFormat.RGBA32_Float, SizedInternalFormat.Rgba32f},
+            {TextureFormat.RGBA16_UIntNorm, SizedInternalFormat.Rgba16ui},
+            {TextureFormat.RGBA8_UIntNorm, SizedInternalFormat.Rgba8ui},
         };
 
         private static readonly Dictionary<string, string> shaderModels = new Dictionary<string, string>() 
@@ -152,35 +146,38 @@ namespace DotGame.OpenGL4
             {StencilOperation.Replace, StencilOp.Replace},
             {StencilOperation.Zero, StencilOp.Zero},
         };
+        private static readonly Dictionary<BufferUsage, BufferUsageHint> bufferUsages = new Dictionary<BufferUsage, BufferUsageHint>() 
+        {
+            {BufferUsage.Dynamic, BufferUsageHint.DynamicDraw},
+            {BufferUsage.Static, BufferUsageHint.StaticDraw},
+        };
 
-        internal static PixelInternalFormat Convert(TextureFormat format)
+        internal static Tuple<PixelInternalFormat, PixelFormat, PixelType> Convert(TextureFormat format)
         {
             if (!formats.ContainsKey(format))
                 throw new NotSupportedException("format is not supported");
             return formats[format];
         }
-
-        internal static TextureFormat Convert(PixelInternalFormat format)
+        internal static TextureFormat Convert(PixelInternalFormat internalFormat, PixelFormat pixelFormat, PixelType pixelType)
         {
-            if (!formats.ContainsValue(format))
-                throw new NotImplementedException();
-            return formats.First((f) => f.Value == format).Key;
-        }
+            var tuple = Tuple.Create<PixelInternalFormat, PixelFormat, PixelType>(internalFormat, pixelFormat, pixelType);
 
-        internal static Tuple<PixelFormat, PixelType> ConvertPixelDataFormat(TextureFormat format)
-        {
-            if (!dataFormats.ContainsKey(format))
+            if (!formats.ContainsValue(tuple))
                 throw new NotSupportedException("format is not supported");
-            return dataFormats[format];
+            return formats.First((f) => f.Value == tuple).Key;
         }
 
-        internal static TextureFormat Convert(PixelFormat format, PixelType type)
+        internal static SizedInternalFormat ConvertSizedInternalFormat(TextureFormat format)
         {
-            var tuple = Tuple.Create<PixelFormat, PixelType>(format, type);
-
-            if (!dataFormats.ContainsValue(tuple))
+            if (!sizedInternalFormats.ContainsKey(format))
                 throw new NotImplementedException();
-            return dataFormats.First((f) => f.Value == tuple).Key;
+            return sizedInternalFormats[format];
+        }
+        internal static TextureFormat ConvertSizedInternalFormat(SizedInternalFormat format)
+        {
+            if (!sizedInternalFormats.ContainsValue(format))
+                throw new NotImplementedException();
+            return sizedInternalFormats.First((f) => f.Value == format).Key;
         }
 
         internal static OpenTK.Graphics.OpenGL4.PrimitiveType Convert(DotGame.Graphics.PrimitiveType primitiveType)
@@ -358,6 +355,22 @@ namespace DotGame.OpenGL4
                 throw new NotImplementedException();
 
             return stencilOperations.First((f) => f.Value == stencilOperation).Key;
+        }
+
+        internal static BufferUsageHint Convert(BufferUsage bufferUsage)
+        {
+            if (!bufferUsages.ContainsKey(bufferUsage))
+                throw new NotSupportedException("indexFormat is not supported");
+
+            return bufferUsages[bufferUsage];
+        }
+
+        internal static BufferUsage Convert(BufferUsageHint bufferUsage)
+        {
+            if (!bufferUsages.ContainsValue(bufferUsage))
+                throw new NotImplementedException();
+
+            return bufferUsages.First((f) => f.Value == bufferUsage).Key;
         }
     }
 }

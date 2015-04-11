@@ -50,7 +50,15 @@ namespace DotGame.OpenGL4.Windows
 
         public IGraphicsDevice CreateDevice(DeviceCreationFlags flags)
         {
-            WindowInfo = Utilities.CreateWindowsWindowInfo(control.Handle);
+            //SDL2 supported das Einbinden in ein Fenster nicht
+            Toolkit toolkit = Toolkit.Init(new ToolkitOptions() { Backend = PlatformBackend.PreferNative });
+            
+            if (OpenTK.Configuration.RunningOnWindows)
+                WindowInfo = Utilities.CreateWindowsWindowInfo(control.Handle);
+            else if (OpenTK.Configuration.RunningOnMacOS)
+                WindowInfo = Utilities.CreateMacOSWindowInfo(control.Handle);
+
+
             GraphicsContext context = new GraphicsContext(GraphicsMode.Default, WindowInfo);
             context.LoadAll();
             return new GraphicsDevice(this, this, context, flags);

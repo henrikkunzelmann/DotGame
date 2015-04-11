@@ -16,6 +16,7 @@ namespace DotGame.OpenGL4
     {
         private GraphicsDevice graphicsDevice;
 
+        private int currentVertexArray;
         private IVertexBuffer currentVertexBuffer;
         private IIndexBuffer currentIndexBuffer;
         private IConstantBuffer currentConstantBuffer;
@@ -26,6 +27,9 @@ namespace DotGame.OpenGL4
         private IGraphicsObject[] currentTextures;
         private IGraphicsObject[] currentSamplers;
 
+        //OGL 4.3
+        private IVertexBuffer[] currentVertexBuffers;
+
         internal IVertexBuffer VertexBuffer 
         {
             get { return currentVertexBuffer; }
@@ -35,13 +39,12 @@ namespace DotGame.OpenGL4
                 {
                     if (value == null)
                     {
-                        GL.BindVertexArray(0);
                         GL.BindBuffer(BufferTarget.ArrayBuffer, 0);
                     }
                     else
                     {
                         VertexBuffer internalVertexBuffer = graphicsDevice.Cast<VertexBuffer>(value, "value");
-                        GL.BindVertexArray(internalVertexBuffer.VboID);
+                        GL.BindBuffer(BufferTarget.ArrayBuffer, internalVertexBuffer.VboID);
                     }
                     currentVertexBuffer = value;
                 }
@@ -59,15 +62,33 @@ namespace DotGame.OpenGL4
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, 0);
                     else
                     {
-
                         IndexBuffer internalVertexBuffer = graphicsDevice.Cast<IndexBuffer>(value, "value");
-
                         GL.BindBuffer(BufferTarget.ElementArrayBuffer, internalVertexBuffer.IboID);
                     }
                     currentIndexBuffer = value;
                 }
                     
             } 
+        }
+
+        internal int VertexArray
+        {
+            get { return currentVertexArray; }
+            set
+            {
+                if (value != currentVertexArray)
+                {
+                    if (value <= 0)
+                    {
+                        GL.BindVertexArray(0);
+                    }
+                    else
+                    {                        
+                        GL.BindVertexArray(value);
+                    }
+                    currentVertexArray = value;
+                }
+            }
         }
 
         internal IConstantBuffer ConstantBuffer
@@ -83,7 +104,7 @@ namespace DotGame.OpenGL4
                     {
                         ConstantBuffer internalConstantBuffer = graphicsDevice.Cast<ConstantBuffer>(value, "value");
 
-                        GL.BindBuffer(BufferTarget.UniformBuffer, internalConstantBuffer.UniformBufferObjectID);
+                        GL.BindBuffer(BufferTarget.UniformBuffer, internalConstantBuffer.UboId);
                     }
                     currentConstantBuffer = value;
                 }
@@ -132,8 +153,12 @@ namespace DotGame.OpenGL4
         public BindManager(GraphicsDevice graphicsDevice)
         {
             this.graphicsDevice = graphicsDevice;
-            this.currentTextures = new IGraphicsObject[graphicsDevice.TextureUnits];
-            this.currentSamplers = new IGraphicsObject[graphicsDevice.TextureUnits];
+
+            this.currentTextures = new IGraphicsObject[graphicsDevice.OpenGLCapabilities.TextureUnits];
+            this.currentSamplers = new IGraphicsObject[graphicsDevice.OpenGLCapabilities.TextureUnits];
+            
+            if(graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
+                this.currentVertexBuffers = new IVertexBuffer[graphicsDevice.OpenGLCapabilities.MaxVertexAttribBindings];
         }
 
         internal void SetSampler(ISampler sampler, int unit)
@@ -191,7 +216,7 @@ namespace DotGame.OpenGL4
                 }
                 else
                 {
-                    Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
+                    Texture3D internalTexture = graphicsDevice.Cast<Texture3D>(texture, "texture");
                     GL.ActiveTexture(TextureUnit.Texture0 + unit);
                     GL.BindTexture(TextureTarget.Texture3D, internalTexture.TextureID);
                 }
@@ -206,34 +231,43 @@ namespace DotGame.OpenGL4
                 if (texture == null)
                 {
                     GL.ActiveTexture(TextureUnit.Texture0 + unit);
+                    GL.BindTexture(TextureTarget.TextureCubeMap, 0);
                     GL.BindTexture(TextureTarget.Texture2DArray, 0);
                 }
                 else
                 {
-                    Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
+                    Texture2DArray internalTexture = graphicsDevice.Cast<Texture2DArray>(texture, "texture");
                     GL.ActiveTexture(TextureUnit.Texture0 + unit);
-                    GL.BindTexture(TextureTarget.Texture2DArray, internalTexture.TextureID);
+
+                    GL.BindTexture(internalTexture.TextureTarget, internalTexture.TextureID);
                 }
                 currentTextures[unit] = texture;
             }
         }
 
-        internal void SetTexture(IGraphicsObject texture, int unit, TextureTarget target)
+        internal void SetVertexBuffer(int bindingPoint, IVertexBuffer buffer)
         {
-            if (currentTextures[unit] != texture)
+            if (!graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
+                throw new PlatformNotSupportedException("VertexAttribBinding is not supported");
+
+            if (buffer != currentVertexBuffers[bindingPoint])
             {
-                if (texture == null)
+                if (buffer == null)
                 {
-                    GL.ActiveTexture(TextureUnit.Texture0 + unit);
-                    GL.BindTexture(target, 0);
+                    GL.BindVertexBuffer(bindingPoint, 0, (IntPtr)0, 0);
                 }
                 else
                 {
-                    Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
-                    GL.ActiveTexture(TextureUnit.Texture0 + unit);
-                    GL.BindTexture(TextureTarget.Texture2DArray, internalTexture.TextureID);
+                    if (bindingPoint >= graphicsDevice.OpenGLCapabilities.MaxVertexAttribBindings)
+                        throw new PlatformNotSupportedException("bindingPoint exceeds maximum amount of VertexAttribBindings");
+
+                    if (currentVertexBuffer == buffer)
+                        currentVertexBuffer = null;
+
+                    VertexBuffer internalVertexBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
+                    GL.BindVertexBuffer(0, internalVertexBuffer.VboID, (IntPtr)0, graphicsDevice.GetSizeOf(internalVertexBuffer.Description));
                 }
-                currentTextures[unit] = texture;
+                currentVertexBuffers[bindingPoint] = buffer;
             }
         }
     }

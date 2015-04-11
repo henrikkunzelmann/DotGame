@@ -16,12 +16,12 @@ namespace DotGame.Null
 
         public IGraphicsFactory Factory
         {
-            get { throw new NotImplementedException(); }
+            get { throw new NotSupportedException(); }
         }
 
         public IGameWindow DefaultWindow
         {
-            get { throw new NotImplementedException(); }
+            get { throw new NotSupportedException(); }
         }
 
         public bool VSync { get; set; }
@@ -62,13 +62,13 @@ namespace DotGame.Null
 
         public IRenderContext RenderContext
         {
-            get { throw new NotImplementedException(); }
+            get { throw new NotSupportedException(); }
         }
 
 
         public GraphicsCapabilities Capabilities
         {
-            get { throw new NotImplementedException(); }
+            get { throw new NotSupportedException(); }
         }
 
         public void Dispose()

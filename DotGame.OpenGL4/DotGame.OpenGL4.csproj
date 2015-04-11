@@ -54,6 +54,7 @@
     <Compile Include="DepthStencilState.cs" />
     <Compile Include="EnumConverter.cs" />
     <Compile Include="Fbo.cs" />
+    <Compile Include="OpenGLGraphicsCapabilities.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="RasterizerState.cs" />
     <Compile Include="RenderContext.cs" />
@@ -62,6 +63,8 @@
     <Compile Include="Shader.cs" />
     <Compile Include="ShaderPart.cs" />
     <Compile Include="BindManager.cs" />
+    <Compile Include="Texture2DArray.cs" />
+    <Compile Include="Texture3D.cs" />
     <Compile Include="VertexBuffer.cs" />
     <Compile Include="Windows\GameControl.cs" />
     <Compile Include="GraphicsDevice.cs" />
