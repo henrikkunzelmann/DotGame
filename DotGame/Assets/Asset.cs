@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace DotGame.Assets
 {
-    public abstract class Asset : EngineObject, IDisposable
+    public abstract class Asset : EngineObject
     {
         public string Name { get; private set; }
 

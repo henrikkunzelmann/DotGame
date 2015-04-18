@@ -19,18 +19,24 @@ namespace DotGame.Rendering
 
         public IRenderState GetRenderState(RenderStateInfo info)
         {
-            IRenderState rs;
-            if (renderStates.TryGetValue(info, out rs))
+            lock (renderStates)
+            {
+                IRenderState rs;
+                if (renderStates.TryGetValue(info, out rs))
+                    return rs;
+                rs = Engine.GraphicsDevice.Factory.CreateRenderState(info);
+                renderStates[info] = rs;
                 return rs;
-            rs = Engine.GraphicsDevice.Factory.CreateRenderState(info);
-            renderStates[info] = rs;
-            return rs;
+            }
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            foreach (KeyValuePair<RenderStateInfo, IRenderState> state in renderStates)
-                state.Value.Dispose();
+            lock (renderStates)
+            {
+                foreach (KeyValuePair<RenderStateInfo, IRenderState> state in renderStates)
+                    state.Value.Dispose();
+            }
         }
     }
 }

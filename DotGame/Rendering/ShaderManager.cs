@@ -19,10 +19,24 @@ namespace DotGame.Rendering
 
         public void RegisterShader(Shader shader)
         {
-            if (shader == null)
-                throw new ArgumentNullException("shader");
+            lock (shaders)
+            {
+                if (shader == null)
+                    throw new ArgumentNullException("shader");
 
-            shaders.Add(shader.Name, shader);
+                shaders.Add(shader.Name, shader);
+            }
+        }
+
+        public Shader GetShaderByName(string name)
+        {
+            lock (shaders)
+            {
+                foreach (KeyValuePair<string, Shader> shader in shaders)
+                    if (shader.Key == name)
+                        return shader.Value;
+            }
+            return null;
         }
 
         public IShader CompileShader(string name)

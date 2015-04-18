@@ -6,10 +6,15 @@ using System.Threading.Tasks;
 
 namespace DotGame.Rendering
 {
+    /// <summary>
+    /// Speichert die Passes und deren Reihenfolge die für das Rendering benutzt werden soll.
+    /// </summary>
     public class PassPipeline : EngineObject
     {
-        private List<Pass> passes = new List<Pass>();
+        private object locker = new object();
+        private Pass[] passes;
         private List<Pass> nextPasses = new List<Pass>();
+        private bool passesDirty = true;
 
         public PassPipeline(Engine engine)
             : base(engine)
@@ -21,10 +26,15 @@ namespace DotGame.Rendering
         {
             if (pass == null)
                 throw new ArgumentNullException("pass");
-            if (nextPasses.Contains(pass))
-                throw new InvalidOperationException("Pass already added.");
 
-            nextPasses.Add(pass);
+            lock (locker)
+            {
+                if (nextPasses.Contains(pass))
+                    throw new InvalidOperationException("Pass already added.");
+
+                nextPasses.Add(pass);
+                passesDirty = true;
+            }
         }
 
         public void RemovePass(Pass pass)
@@ -32,21 +42,35 @@ namespace DotGame.Rendering
             if (pass == null)
                 throw new ArgumentNullException("pass");
 
-            nextPasses.Remove(pass);
+            lock (locker)
+            {
+                nextPasses.Remove(pass);
+                passesDirty = true;
+            }
         }
 
         public void Draw(GameTime gameTime)
         {
-            passes = nextPasses.ToList();
-      
-            foreach (Pass pass in passes)
-                pass.Render(gameTime);
+            lock (locker)
+            {
+                if (passesDirty)
+                {
+                    passes = nextPasses.ToArray();
+                    passesDirty = false;
+                }
+            }
+
+            for (int i = 0; i < passes.Length; i++)
+                passes[i].Render(gameTime);
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            foreach (Pass pass in nextPasses)
-                pass.Dispose();
+            lock (locker)
+            {
+                foreach (Pass pass in nextPasses)
+                    pass.Dispose();
+            }
         }
     }
 }

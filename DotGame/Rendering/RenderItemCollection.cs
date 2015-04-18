@@ -10,6 +10,17 @@ namespace DotGame.Rendering
     {
         private List<RenderItem> items = new List<RenderItem>();
 
+        public int ItemCount 
+        { 
+            get 
+            {
+                lock (items)
+                {
+                    return items.Count;
+                }
+            } 
+        }
+
         public RenderItemCollection()
         {
 
@@ -17,14 +28,20 @@ namespace DotGame.Rendering
 
         public void AddItem(RenderItem item)
         {
-            if (item == null)
-                throw new ArgumentNullException("item");
-            items.Add(item);
+            lock (items)
+            {
+                if (item == null)
+                    throw new ArgumentNullException("item");
+                items.Add(item);
+            }
         }
 
         public RenderItem[] GetItems()
         {
-            return items.ToArray();
+            lock (items)
+            {
+                return items.ToArray();
+            }
         }
     }
 }
