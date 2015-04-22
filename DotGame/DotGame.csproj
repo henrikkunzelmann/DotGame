@@ -23,6 +23,7 @@
     <ErrorReport>prompt</ErrorReport>
     <WarningLevel>4</WarningLevel>
     <UseVSHostingProcess>false</UseVSHostingProcess>
+    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
     <PlatformTarget>AnyCPU</PlatformTarget>
@@ -55,8 +56,14 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Asset.cs" />
+    <Compile Include="Assets\Importers\ImporterBase.cs" />
+    <Compile Include="Assets\AssetManager.cs" />
+    <Compile Include="Assets\Importers\SimpleTextureImporter.cs" />
+    <Compile Include="Assets\Importers\TextureHeader.cs" />
     <Compile Include="Assets\Material.cs" />
     <Compile Include="Assets\Texture.cs" />
+    <Compile Include="Assets\Importers\TextureImporterBase.cs" />
+    <Compile Include="Assets\TextureLoadSettings.cs" />
     <Compile Include="AudioAPI.cs" />
     <Compile Include="Cameras\ICamera.cs" />
     <Compile Include="Engine.cs" />
@@ -112,6 +119,7 @@
       <SubType>UserControl</SubType>
     </Content>
   </ItemGroup>
+  <ItemGroup />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
   <Import Project="..\packages\SharpDX.2.6.3\build\SharpDX.targets" Condition="Exists('..\packages\SharpDX.2.6.3\build\SharpDX.targets')" />
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">

@@ -10,6 +10,7 @@ using DotGame.Audio;
 using DotGame.Graphics;
 using DotGame.Rendering;
 using DotGame.Utils;
+using DotGame.Assets;
 
 namespace DotGame
 {
@@ -30,6 +31,7 @@ namespace DotGame
         /// </summary>
         public EngineSettings Settings { get; private set; }
 
+        public AssetManager AssetManager { get; private set; }
         public ShaderManager ShaderManager { get; private set; }
         public RenderStatePool RenderStatePool { get; private set; }
 
@@ -46,6 +48,11 @@ namespace DotGame
         /// </summary>
         public bool IsRunning { get; private set; }
 
+        /// <summary>
+        /// Gibt die aktuelle Spielzeit zurück.
+        /// </summary>
+        public GameTime GameTime { get; private set; }
+
         private object locker = new object();
 
         private IGameWindow window;
@@ -57,7 +64,7 @@ namespace DotGame
         /// </summary>
         private ManualResetEvent onStart = new ManualResetEvent(false);
 
-        // der Grund für drei Liste erlaubt es das man Komponenten flexibler hinzufügen bzw. entfernen kann
+        // drei Listen erlauben es, dass man Komponenten flexibler hinzufügen bzw. entfernen kann
         private List<GameComponent> components = new List<GameComponent>();
         private List<GameComponent> componentsToAdd = new List<GameComponent>();
         private List<GameComponent> componentsToRemove = new List<GameComponent>();
@@ -132,6 +139,7 @@ namespace DotGame
                     break;
             }
 
+            AssetManager = new AssetManager(this);
             ShaderManager = new ShaderManager(this);
             RenderStatePool = new RenderStatePool(this);
 
@@ -156,7 +164,8 @@ namespace DotGame
                 TimeSpan frame = frameTime.Elapsed;
                 frameTime.Restart();
 
-                Tick(new GameTime(gameTime.Elapsed, frame, tickCount));
+                GameTime = new GameTime(gameTime.Elapsed, frame, tickCount);
+                Tick(GameTime);
 
                 const int targetFPS = 60;
                 //Thread.Sleep ist viel zu ungenau

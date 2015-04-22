@@ -27,6 +27,8 @@ namespace DotGame.Assets
                 }
             }
         }
+
+
         public Texture Texture
         {
             get { return texture; }
@@ -40,8 +42,8 @@ namespace DotGame.Assets
             }
         }
 
-        public Material(Engine engine, string name)
-            : base(engine, name)
+        public Material(AssetManager manager, string name)
+            : base(manager, name, null)
         {
 
         }
@@ -54,9 +56,12 @@ namespace DotGame.Assets
                 shader.Apply(pass, context, this, world);
         }
 
-        protected override void Dispose(bool isDisposing)
+        protected override void Load()
         {
+        }
 
+        protected override void Unload()
+        {
         }
     }
 }

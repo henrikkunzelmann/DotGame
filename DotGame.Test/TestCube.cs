@@ -18,10 +18,10 @@ namespace DotGame
         public TestCube(Engine engine)
             : base(engine, "TestCube")
         {
-            material = new Material(engine, "TestMaterial");
-            material.Texture = new Texture(engine, "TestTexture", engine.GraphicsDevice.Factory.LoadTexture2D("GeneticaMortarlessBlocks.jpg", true));
+            material = new Material(engine.AssetManager, "TestMaterial");
+            material.Texture = engine.AssetManager.LoadTexture("CubeTexture", "GeneticaMortarlessBlocks.jpg");
 
-            mesh = Mesh.Create(Engine, "cube", new VertexPositionTexture[] 
+            mesh = engine.AssetManager.LoadMesh("cube", new VertexPositionTexture[] 
                 {
                     new VertexPositionTexture(new Vector3(-1.0f, -1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
                     new VertexPositionTexture(new Vector3(-1.0f,  1.0f, -1.0f),   new Vector2(0.0f, 0.0f)),

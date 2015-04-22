@@ -42,6 +42,7 @@ namespace DotGame.OpenGL4
             Texture2D texture = Register(new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, generateMipMaps, TextureFormat.RGBA8_UIntNorm));
             texture.SetData(bmpData.Scan0, 0, bmpData.Stride * bmpData.Width * bmpData.Height);
             bitmap.UnlockBits(bmpData);
+            bitmap.Dispose();
 
             return texture;
         }

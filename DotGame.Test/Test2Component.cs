@@ -34,6 +34,8 @@ namespace DotGame.Test
             scene.Nodes.Add(cube);
 
             scene.Camera = new TestCamera(Engine);
+
+            Log.FlushBuffer();
         }
 
         public override void Update(GameTime gameTime)

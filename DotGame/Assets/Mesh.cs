@@ -11,8 +11,8 @@ namespace DotGame.Assets
     {
         private IVertexBuffer vertexBuffer;
 
-        private Mesh(Engine engine, string name, IVertexBuffer vertexBuffer)
-            : base(engine, name)
+        internal Mesh(AssetManager manager, string name, IVertexBuffer vertexBuffer)
+            : base(manager, name, null)
         {
             if (vertexBuffer == null)
                 throw new ArgumentNullException("vertexBuffer");
@@ -20,27 +20,27 @@ namespace DotGame.Assets
             this.vertexBuffer = vertexBuffer;
         }
 
-        public static Mesh Create<T>(Engine engine, string name, T[] vertices) where T : struct, IVertexType
+        internal IVertexBuffer GetVertexHandle()
         {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name must be not null, empty or white-space.", "name");
-            if (vertices == null)
-                throw new ArgumentNullException("vertices");
-            if (vertices.Length == 0)
-                throw new ArgumentException("Vertices must not be empty.", "vertices");
-
-            return new Mesh(engine, name, engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertices[0].VertexDescription, BufferUsage.Static));
+            MarkForUsage();
+            return vertexBuffer;
         }
 
         public void Draw(IRenderContext context)
         {
+            IVertexBuffer vertexBuffer = GetVertexHandle();
+            if (vertexBuffer == null) // VertexBuffer noch nicht geladen, nichts zeichnen
+                return;
+
             context.SetVertexBuffer(vertexBuffer);
             context.Draw();
         }
 
-        protected override void Dispose(bool isDisposing)
+        protected override void Load()
+        {
+        }
+
+        protected override void Unload()
         {
             if (vertexBuffer != null)
                 vertexBuffer.Dispose();
