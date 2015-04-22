@@ -10,6 +10,8 @@ namespace DotGame.Test
 {
     public class TestPass : Pass
     {
+        private List<RenderItem> renderItems = new List<RenderItem>();
+
         public TestPass(Engine engine, PassPipeline pipeline, Scene scene)
             : base(engine, pipeline, scene, new TestShader(engine))
         {
@@ -17,12 +19,11 @@ namespace DotGame.Test
 
         public override void Render(GameTime gameTime)
         {
-            RenderItemCollection itemCollection = new RenderItemCollection();
-            Scene.Draw(gameTime, itemCollection);
+            renderItems.Clear();
+            Scene.PrepareForDraw(gameTime, renderItems);
 
-            RenderItem[] items = itemCollection.GetItems();
-            for (int i = 0; i < items.Length; i++)
-                items[i].Draw(gameTime, this, GraphicsDevice.RenderContext);
+            for (int i = 0; i < renderItems.Count; i++)
+                renderItems[i].Draw(gameTime, this, GraphicsDevice.RenderContext);
         }
 
         protected override void Dispose(bool isDisposing)

@@ -35,17 +35,17 @@ namespace DotGame
 
         public void Update(GameTime gameTime)
         {
-            foreach (SceneNode node in Nodes.ToArray())
+            foreach (SceneNode node in Nodes)
                 node.UpdateTree(gameTime);
         }
 
-        public void Draw(GameTime gameTime, RenderItemCollection collection)
+        public void PrepareForDraw(GameTime gameTime, List<RenderItem> items)
         {
-            if (collection == null)
-                throw new ArgumentNullException("collection");
+            if (items == null)
+                throw new ArgumentNullException("items");
 
-            foreach (SceneNode node in Nodes.ToArray())
-                node.DrawTree(gameTime, collection);
+            foreach (SceneNode node in Nodes)
+                node.PrepareForDrawTree(gameTime, items);
         }
 
         protected override void Dispose(bool isDisposing)

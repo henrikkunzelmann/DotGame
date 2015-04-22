@@ -35,9 +35,9 @@ namespace DotGame
             Update(gameTime);
         }
 
-        public void DrawTree(GameTime gameTime, RenderItemCollection items)
+        public void PrepareForDrawTree(GameTime gameTime, List<RenderItem> items)
         {
-            items.AddItem(this);
+            items.Add(this);
         }
 
         public void DisposeTree()
