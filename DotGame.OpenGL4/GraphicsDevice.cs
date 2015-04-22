@@ -53,7 +53,7 @@ namespace DotGame.OpenGL4
 
         private IWindowContainer container;
 
-        private List<Fbo> fboPool = new List<Fbo>();
+        private Dictionary<FrameBufferDescription, FrameBuffer> fboPool = new Dictionary<FrameBufferDescription, FrameBuffer>();
 
         private Dictionary<VertexDescription, int> inputLayoutPool = new Dictionary<VertexDescription, int>();
         
@@ -354,34 +354,30 @@ namespace DotGame.OpenGL4
         }
 
         //RenderTarget
-        internal Fbo GetFBO(int depth, params int[] color)
+        internal FrameBuffer GetFBO(FrameBufferDescription description)
         {
-            if(depth == -1 && (color == null || color.Length == 0))
+            if(!description.HasAttachments)
                 return null;
 
-            for (int i = 0; i < fboPool.Count; i++)
-            {
-                if (fboPool[i].DepthAttachmentID == depth && (fboPool[i].ColorAttachmentIDs == color || fboPool[i].ColorAttachmentIDs.Equals(color) || fboPool[i].ColorAttachmentIDs.SequenceEqual(color) || ((color == null || color.Length == 0) && (fboPool[i].ColorAttachmentIDs == null || fboPool[i].ColorAttachmentIDs.Length == 0))))
-                {
-                    return fboPool[i];
-                }
-            }
+            FrameBuffer fbo;
+            if (fboPool.TryGetValue(description, out fbo))
+                return fbo;
 
-            GraphicsFactory factory = Cast<GraphicsFactory>(Factory, "factory");
+            GraphicsFactory factory = (GraphicsFactory) Factory;
 
-            Fbo fbo = factory.CreateFbo(depth, color);
-            fboPool.Add(fbo);
+            fbo = factory.CreateFrameBuffer(description);
+            fboPool.Add(description, fbo);
             return fbo;
         }
 
-        internal Fbo GetFBO(int depth, int color)
+        internal FrameBuffer GetFBO(int depthAttachmentID)
         {
-            return GetFBO(depth, new int[] { color });
+            return GetFBO(new FrameBufferDescription(depthAttachmentID, new int[] { }));
         }
 
-        internal Fbo GetFBO(int depth)
+        internal FrameBuffer GetFBO(int depthAttachmentID, params int[] colorAttachmentIDs)
         {
-            return GetFBO(depth, new int[] { });
+            return GetFBO(new FrameBufferDescription(depthAttachmentID, colorAttachmentIDs));
         }
 
         internal int GetLayout(VertexDescription description, Shader shader)

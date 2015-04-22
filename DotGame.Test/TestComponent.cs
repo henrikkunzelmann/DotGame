@@ -111,9 +111,9 @@ namespace DotGame.Test
 
             rasterizerState = GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
                 {
-                    CullMode = CullMode.None,
+                    //CullMode = CullMode.None,
                     FillMode = FillMode.Solid,
-                    IsFrontCounterClockwise = true,
+                    IsFrontCounterClockwise = false,
                 });
 
             depthStencil = GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
@@ -129,7 +129,7 @@ namespace DotGame.Test
                 PrimitiveType = PrimitiveType.TriangleList,
                 Rasterizer = rasterizerState,
                 Shader = shader,
-                DepthStencil = depthStencil
+                //DepthStencil = depthStencil
             });
 
             Log.FlushBuffer();

@@ -21,7 +21,7 @@ namespace DotGame.OpenGL4
         private IIndexBuffer currentIndexBuffer;
         private IConstantBuffer currentConstantBuffer;
         private IShader currentShader;
-        private Fbo currentFbo;
+        private FrameBuffer currentFbo;
         
         //Texture & Sampler
         private IGraphicsObject[] currentTextures;
@@ -133,7 +133,7 @@ namespace DotGame.OpenGL4
             }
         }
 
-        internal Fbo Fbo
+        internal FrameBuffer Fbo
         {
             get { return currentFbo; }
             set

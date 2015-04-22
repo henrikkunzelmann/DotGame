@@ -132,6 +132,15 @@ namespace DotGame
             }
         }
 
+        public static bool operator ==(Rectangle rec1, Rectangle rec2) 
+        {
+            return rec1.Equals(rec2);
+        }
+        public static bool operator !=(Rectangle rec1, Rectangle rec2)
+        {
+            return !rec1.Equals(rec2);
+        }
+
         public override string ToString()
         {
             var builder = new StringBuilder();

@@ -26,11 +26,11 @@ namespace DotGame.DirectX11
         private RenderTargetView[] currentColorTargets = new RenderTargetView[0];
         private DepthStencilView currentDepthTarget;
 
-        private IRasterizerState currentRasterizer;
+        private RasterizerState currentRasterizer;
         private PrimitiveType primitiveType;
         private ShaderStageCache vertexCache;
         private ShaderStageCache pixelCache;
-        private IBlendState currentBlend;
+        private BlendState currentBlend;
         private DepthStencilState currentDepthStencil;
 
         private Color currentBlendFactor;

@@ -11,29 +11,34 @@ using DotGame.Utils;
 using System.IO;
 using System.Drawing;
 using System.Drawing.Imaging;
+using System.Runtime.InteropServices;
 
 namespace DotGame.OpenGL4
 {
-    public class GraphicsFactory : GraphicsObject, IGraphicsFactory
+    public class GraphicsFactory : IGraphicsFactory
     {
-        internal readonly List<GraphicsObject> DeferredDispose; // Wird zum disposen benutzt, um MakeCurrent Aufrufe zu vermeiden. Siehe DisposeUnused und Referenzen dazu.
-        internal ReadOnlyCollection<WeakReference<GraphicsObject>> Objects { get { return objects.AsReadOnly(); } }
+        private readonly List<GraphicsObject> deferredDispose = new List<GraphicsObject>();
+        internal List<GraphicsObject> DeferredDispose { get { return deferredDispose; } } // Wird zum disposen benutzt, um MakeCurrent Aufrufe zu vermeiden. Siehe DisposeUnused und Referenzen dazu.
         private readonly List<WeakReference<GraphicsObject>> objects;
+        internal ReadOnlyCollection<WeakReference<GraphicsObject>> Objects { get { return objects.AsReadOnly(); } }
+
+        private GraphicsDevice graphicsDevice;
+        public bool IsDisposed { get; private set; }
+        public event EventHandler<EventArgs> OnDisposing;
+        public event EventHandler<EventArgs> OnDisposed;
 
         internal GraphicsFactory(GraphicsDevice graphicsDevice)
-            : base(graphicsDevice, new StackTrace(1))
         {
-            DeferredDispose = new List<GraphicsObject>();
             objects = new List<WeakReference<GraphicsObject>>();
+            this.graphicsDevice = graphicsDevice;
         }
         
         public ITexture2D LoadTexture2D(string file, bool generateMipMaps)
         {
-            // TODO (henrik1235) generateMipMaps benutzen
             AssertCurrent();
 
             Bitmap bitmap = new Bitmap(file);
-            BitmapData bmpData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppArgb);
+            BitmapData bmpData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
             Texture2D texture = Register(new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, generateMipMaps, TextureFormat.RGBA8_UIntNorm));
             texture.SetData(bmpData.Scan0, 0, bmpData.Stride * bmpData.Width * bmpData.Height);
             bitmap.UnlockBits(bmpData);
@@ -59,7 +64,7 @@ namespace DotGame.OpenGL4
         public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize, false, generateMipMaps, format));
         }
 
         public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -82,7 +87,7 @@ namespace DotGame.OpenGL4
         public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
-            throw new NotImplementedException();
+            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize, false, generateMipMaps, format));
         }
 
         public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -93,7 +98,6 @@ namespace DotGame.OpenGL4
         public IVertexBuffer CreateVertexBuffer(int vertexCount, VertexDescription description, BufferUsage usage)
         {
             AssertCurrent();
-
             return Register(new VertexBuffer(graphicsDevice, description, usage));
         }
 
@@ -147,7 +151,9 @@ namespace DotGame.OpenGL4
 
         public IConstantBuffer CreateConstantBuffer<T>(T data, BufferUsage usage) where T : struct
         {
-            throw new NotImplementedException();
+            ConstantBuffer constantBuffer = new ConstantBuffer(graphicsDevice, Marshal.SizeOf(typeof(T)), usage);
+            constantBuffer.SetData<T>(data);
+            return constantBuffer;
         }
 
         public IShader CompileShader(string name, ShaderCompileInfo vertex, ShaderCompileInfo pixel)
@@ -219,7 +225,7 @@ namespace DotGame.OpenGL4
             if (code == null)
                 throw new ArgumentNullException("code");
 
-            if (!GraphicsDevice.Capabilities.SupportsBinaryShaders)
+            if (!graphicsDevice.Capabilities.SupportsBinaryShaders)
                 throw new NotSupportedException("Creating shaders by byte code is not supported.");
 
             return new Shader(graphicsDevice, code);
@@ -250,18 +256,9 @@ namespace DotGame.OpenGL4
             return new BlendState(graphicsDevice, info);
         }
 
-        internal Fbo CreateFbo(int depth, params int[] color)
+        internal FrameBuffer CreateFrameBuffer(FrameBufferDescription description)
         {
-            return Register(new Fbo(graphicsDevice, depth, color));
-        }
-
-        internal static void CheckGLError()
-        {
-            var error = GL.GetError();
-            if (error != ErrorCode.NoError)
-            {
-                throw new InvalidOperationException(error.ToString());
-            }
+            return Register(new FrameBuffer(graphicsDevice, description));
         }
 
         private T Register<T>(T obj) where T : GraphicsObject
@@ -280,10 +277,6 @@ namespace DotGame.OpenGL4
             {
                 foreach (var obj in DeferredDispose)     
                 {
-                    // TODO: (henrik1235) Klären ob die Liste nicht in IGraphicsDevice verschieben können
-                    if (obj is GraphicsFactory)
-                        return;
-
                     // Das sollte eigentlich nie passieren.
                     if (obj.IsDisposed)
                     {
@@ -299,10 +292,65 @@ namespace DotGame.OpenGL4
             }
         }
 
-        protected override void Dispose(bool isDisposing)
+        internal void DisposeAll()
         {
-            DisposeUnused();
-            // TODO (Joex3): Alle restlichen Objekte disposen.
+            // TODO (Robin): Auch hier wieder eigene Exception? 
+            if (!graphicsDevice.IsDisposed && !graphicsDevice.IsCurrent)
+                throw new Exception("DisposeAll must be called in the render thread, or after the GraphicsDevice has been disposed.");
+
+            if (objects.Count > 0)
+            {
+                foreach (var obj in objects)
+                {
+                    GraphicsObject graphicsObject;
+
+                    if(!obj.TryGetTarget(out graphicsObject) || graphicsObject.IsDisposed)
+                        continue;   
+
+                    graphicsObject.Dispose(); // TODO: (henrik1235) Überprüfen ob wir nicht obj.Dispose(bool isDisposing) aufrufen sollten, inbesondere weil dann die DeferredDispose Liste verändert werden kann
+                }
+                objects.Clear();
+            }
+        }
+
+        protected void AssertNotDisposed()
+        {
+            if (graphicsDevice.IsDisposed)
+                throw new ObjectDisposedException(graphicsDevice.GetType().FullName);
+
+            if (IsDisposed)
+                throw new ObjectDisposedException(GetType().FullName);
+        }
+
+        protected void AssertCurrent()
+        {
+            AssertNotDisposed();
+
+            // TODO (Joex3): Eigene Exception.
+            if (!graphicsDevice.IsCurrent)
+                throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
+        }
+
+        private void Dispose(bool isDisposing)
+        {
+            DisposeAll();
+            DeferredDispose.Clear();
+        }
+
+        public void Dispose()
+        {
+            if (IsDisposed)
+                return;
+
+            if (OnDisposing != null)
+                OnDisposing(this, EventArgs.Empty);
+
+            Dispose(true);
+            IsDisposed = true;
+            GC.SuppressFinalize(this);
+
+            if (OnDisposed != null)
+                OnDisposed(this, EventArgs.Empty);
         }
     }
 }

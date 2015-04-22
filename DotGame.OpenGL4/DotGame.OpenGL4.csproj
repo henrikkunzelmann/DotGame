@@ -53,7 +53,8 @@
     <Compile Include="ConstantBuffer.cs" />
     <Compile Include="DepthStencilState.cs" />
     <Compile Include="EnumConverter.cs" />
-    <Compile Include="Fbo.cs" />
+    <Compile Include="FrameBuffer.cs" />
+    <Compile Include="FrameBufferDescription.cs" />
     <Compile Include="OpenGLGraphicsCapabilities.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="RasterizerState.cs" />

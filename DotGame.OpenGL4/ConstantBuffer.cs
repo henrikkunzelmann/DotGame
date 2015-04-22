@@ -17,10 +17,12 @@ namespace DotGame.OpenGL4
         public int Size { get; internal set; }
         public BufferUsage Usage { get; private set; }
 
-        internal ConstantBuffer(GraphicsDevice graphicsDevice, int size, BufferUsage usage)
+        internal ConstantBuffer(GraphicsDevice graphicsDevice, int sizeBytes, BufferUsage usage)
             : base(graphicsDevice, new System.Diagnostics.StackTrace())
         {
-            this.Size = size;
+            if (sizeBytes < 0)
+                throw new ArgumentException("Size must be bigger or equal to 0.", "sizeBytes");
+            this.Size = sizeBytes;
             this.Usage = usage;
 
             UboId = GL.GenBuffer();
@@ -30,7 +32,8 @@ namespace DotGame.OpenGL4
         internal void SetData<T>(T data) where T : struct
         {
             // TODO (henrik1235) Format und SizeBytes supporten
-            this.Size = Marshal.SizeOf(data);
+            if (this.Size == Marshal.SizeOf(data))
+                throw new ArgumentException("data size exceeds constant buffer size");
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {

@@ -12,7 +12,6 @@ namespace DotGame.Rendering
         public RenderItem(Engine engine)
             : base(engine)
         {
-
         }
 
         public abstract void Draw(GameTime gameTime, Pass pass, IRenderContext context);

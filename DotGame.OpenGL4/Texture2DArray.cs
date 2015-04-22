@@ -5,10 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
 using OpenTK.Graphics.OpenGL4;
+using System.Runtime.InteropServices;
+using Ext = OpenTK.Graphics.OpenGL.GL.Ext;
 
 namespace DotGame.OpenGL4
 {
-    class Texture2DArray : GraphicsObject, ITexture2DArray, IRenderTarget2D
+    class Texture2DArray : GraphicsObject, ITexture2DArray, IRenderTarget2DArray
     {
         public int Width { get; private set; }
         public int Height { get; private set; }
@@ -20,8 +22,8 @@ namespace DotGame.OpenGL4
         internal int TextureID { get; private set; }
 
         internal TextureTarget TextureTarget { get; private set; }
-
-        public Texture2DArray(GraphicsDevice graphicsDevice, int width, int height, int arraySize, bool isCubeMap, bool generateMipMaps, TextureFormat format)
+        
+        internal Texture2DArray(GraphicsDevice graphicsDevice, int width, int height, int arraySize, bool isCubeMap, bool generateMipMaps, TextureFormat format)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -34,6 +36,8 @@ namespace DotGame.OpenGL4
                 throw new PlatformNotSupportedException("width exceeds the maximum texture size");
             if (height > graphicsDevice.OpenGLCapabilities.MaxTextureSize)
                 throw new PlatformNotSupportedException("height exceeds the maximum texture size");
+            if ((width % 2 != 0 || height % 2 != 0) && graphicsDevice.OpenGLCapabilities.SupportsNonPowerOf2Textures)
+                throw new PlatformNotSupportedException("Driver doesn't support non power of two textures");
             if (width != height)
                 throw new PlatformNotSupportedException("Texture arrays must be quadratic");
             if (width != height)
@@ -48,18 +52,10 @@ namespace DotGame.OpenGL4
             this.Format = format;
             this.TextureTarget = isCubeMap ? TextureTarget.Texture2DArray : OpenTK.Graphics.OpenGL4.TextureTarget.TextureCubeMap;
 
-            this.TextureID = GL.GenTexture();
-
-            graphicsDevice.BindManager.SetTexture(this, 0);
-            /*
-            Tuple<OpenTK.Graphics.OpenGL4.PixelFormat, PixelType> tuple = EnumConverter.ConvertPixelDataFormat(Format);
-            GL.TexImage2D(TextureTarget.Texture2DArray, 0, EnumConverter.Convert(Format), this.Width, this.Height, 0, tuple.Item1, tuple.Item2, IntPtr.Zero);
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
-            */
-            graphicsDevice.CheckGLError();
+            this.TextureID = GL.GenTexture();       
         }
 
-        public Texture2DArray(GraphicsDevice graphicsDevice, int width, int height, int arraySize, bool isCubeMap, int mipLevels, bool generateMipMaps, TextureFormat format, IntPtr data)
+        internal Texture2DArray(GraphicsDevice graphicsDevice, int width, int height, int arraySize, bool isCubeMap, int mipLevels, bool generateMipMaps, TextureFormat format)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -76,6 +72,8 @@ namespace DotGame.OpenGL4
                 throw new PlatformNotSupportedException("height exceeds the maximum texture size");
             if (width != height)
                 throw new PlatformNotSupportedException("Texture arrays must be quadratic");
+            if (width != height)
+                throw new PlatformNotSupportedException("Texture arrays must be quadratic");
             if (arraySize != 0)
                 throw new ArgumentOutOfRangeException("Array Size must be at least one", "arraySize");
 
@@ -88,18 +86,74 @@ namespace DotGame.OpenGL4
 
             this.TextureID = GL.GenTexture();
 
-            graphicsDevice.BindManager.SetTexture(this, 0);
-            /*
-            // TODO (Robin): Texturen mit Inhalt über ResourceManager laden
-            //Tuple<OpenTK.Graphics.OpenGL4.PixelFormat, PixelType> tuple = EnumConverter.ConvertPixelDataFormat(Format);
-            //GL.TexImage2D(TextureTarget.Texture2DArray, 0, EnumConverter.Convert(Format), Width, Height, 0, tuple.Item1, tuple.Item2, data);
-            GL.TexImage2D(TextureTarget.Texture2DArray, 0, EnumConverter.Convert(Format), Width, Height, 0, PixelFormat.Bgr, PixelType.UnsignedByte, data);
-            GL.TexParameter(TextureTarget.Texture2DArray, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
-
-            if (generateMipMaps)
-                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-            */
             graphicsDevice.CheckGLError();
+        }
+
+        internal void SetData<T>(T[] data, int mipLevel)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+            if (data.Length == 0)
+                throw new ArgumentException("Data must not be empty.", "data");
+
+            GCHandle arrayHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                IntPtr ptr = arrayHandle.AddrOfPinnedObject();
+                SetData(ptr, mipLevel, data.Length * Marshal.SizeOf(typeof(T)));
+            }
+            finally
+            {
+                arrayHandle.Free();
+            }
+        }
+
+        internal void SetData(IntPtr data, int mipLevel, int imageSize)
+        {
+            var format = EnumConverter.Convert(Format);
+
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                
+                if (!TextureFormatHelper.IsCompressed(Format))
+                    GL.TexImage2D(TextureTarget, mipLevel, format.Item1, Width, Height, 0, format.Item2, format.Item3, data);
+                else
+                    GL.CompressedTexImage2D(TextureTarget, mipLevel, format.Item1, Width, Height, 0, imageSize, data);
+
+                GL.TexParameter(TextureTarget, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                if (!TextureFormatHelper.IsCompressed(Format))
+                    Ext.TextureImage2D(TextureID, (OpenTK.Graphics.OpenGL.TextureTarget)TextureTarget, mipLevel, (int)format.Item1, Width, Height, 0, (OpenTK.Graphics.OpenGL.PixelFormat)format.Item2, (OpenTK.Graphics.OpenGL.PixelType)format.Item3, data);
+                else
+                    Ext.CompressedTextureImage2D(TextureID, (OpenTK.Graphics.OpenGL.TextureTarget)TextureTarget, mipLevel, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Format).Item1, Width, Height, 0, Marshal.SizeOf(data), data);
+                
+                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, (OpenTK.Graphics.OpenGL.TextureTarget)TextureTarget, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
+            { 
+                //OpenGL 4.5
+            }
+
+            graphicsDevice.CheckGLError();
+        }
+
+        internal void GenerateMipMaps()
+        {
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2DArray);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                Ext.GenerateTextureMipmap(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2DArray);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
+            {
+            }
         }
 
         protected override void Dispose(bool isDisposing)

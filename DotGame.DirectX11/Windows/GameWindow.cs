@@ -19,16 +19,14 @@ namespace DotGame.DirectX11.Windows
         
         public GameWindow() : base() { }
 
-        public GameWindow(int width, int height) : base() 
-        { 
-            Width = width; 
-            Height = height;
+        public GameWindow(int width, int height) : base()
+        {
+            ClientSize = new System.Drawing.Size(width, height);
         }
 
         public GameWindow(int width, int height, string title) : base(title)
         {
-            Width = width;
-            Height = height;
+            ClientSize = new System.Drawing.Size(width, height);
         }
 
         public IGraphicsDevice CreateDevice(DotGame.Graphics.DeviceCreationFlags flags)

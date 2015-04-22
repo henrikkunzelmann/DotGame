@@ -27,10 +27,13 @@ namespace DotGame.OpenGL4
         private int clearStencil;
         
         private Viewport currentViewPort;
+        private Rectangle currentScissor;
 
         private RasterizerState currentRasterizer;
+        private Color currentBlendFactor;
         private BlendState currentBlend;
-        private IDepthStencilState currentDepthStencil;
+        private int currentDepthStencilReference = 0;
+        private DepthStencilState currentDepthStencil;
 
         //BlendState
         private bool[] currentBlendingEnabled = new bool[8];
@@ -38,11 +41,80 @@ namespace DotGame.OpenGL4
         public RenderContext(GraphicsDevice graphicsDevice)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
+            CreateDefaultState();
+        }
 
+        /// <summary>
+        /// OpenGL States auf DirectX11 default Werte setzen
+        /// </summary>
+        private void CreateDefaultState()
+        {
+            IBlendState defaultBlend = graphicsDevice.Factory.CreateBlendState(new BlendStateInfo() 
+            { 
+                AlphaToCoverageEnable = false,
+                IndependentBlendEnable = false,
+                RenderTargets = new RTBlendInfo[]{
+                    new RTBlendInfo() {
+                         IsBlendEnabled = false,
+                         SrcBlend = Blend.One,
+                         DestBlend = Blend.Zero,
+                         BlendOp = Graphics.BlendOp.Add,
+                         SrcBlendAlpha = Blend.One,
+                         DestBlendAlpha = Blend.Zero,
+                         BlendOpAlpha = BlendOp.Add,
+                         RenderTargetWriteMask = ColorWriteMaskFlags.All,
+                    }
+                },
+            });
+
+            IRasterizerState defaultRasterizer = graphicsDevice.Factory.CreateRasterizerState( new RasterizerStateInfo() {
+                FillMode = FillMode.Solid,
+                CullMode = CullMode.None,
+                IsFrontCounterClockwise = false,
+                DepthBias = 0,
+                SlopeScaledDepthBias = 0.0f,
+                DepthBiasClamp = 0.0f,
+                IsDepthClipEnabled = true,
+                IsScissorEnabled = true,
+                IsMultisampleEnabled = false,
+                IsAntialiasedLineEnabled = false,
+            });
+
+            IDepthStencilState defaultDepthStencil = graphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
+            {
+                IsDepthEnabled = true,
+                DepthWriteMask = DepthWriteMask.All,
+                DepthComparsion = Comparison.Less,
+                IsStencilEnabled = false,
+                StencilReadMask = 0x0,
+                StencilWriteMask = 0x0,
+                FrontFace = new DepthStencilOperator() { 
+                    Comparsion = Comparison.Always,
+                    DepthFailOperation = StencilOperation.Keep,
+                    PassOperation = StencilOperation.Keep,
+                    FailOperation = StencilOperation.Keep,
+                },
+                BackFace = new DepthStencilOperator()
+                {
+                    Comparsion = Comparison.Always,
+                    DepthFailOperation = StencilOperation.Keep,
+                    PassOperation = StencilOperation.Keep,
+                    FailOperation = StencilOperation.Keep,
+                },
+            });
+
+            graphicsDevice.Cast<BlendState>(defaultBlend, "defaultBlend").Apply();
+            graphicsDevice.Cast<RasterizerState>(defaultRasterizer, "defaultRasterizer").Apply();
+            graphicsDevice.Cast<DepthStencilState>(defaultDepthStencil, "depthStencil").Apply(currentDepthStencilReference);
         }
 
         public void Update<T>(IVertexBuffer buffer, T[] data) where T : struct
         {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+            if (buffer.IsDisposed)
+                throw new ObjectDisposedException("buffer");
+
             var internalBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
 
             internalBuffer.SetData<T>(data);
@@ -50,6 +122,11 @@ namespace DotGame.OpenGL4
 
         public void Update<T>(IIndexBuffer buffer, T[] data) where T : struct
         {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+            if (buffer.IsDisposed)
+                throw new ObjectDisposedException("buffer");
+
             var internalBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
 
             internalBuffer.SetData<T>(data);
@@ -57,6 +134,11 @@ namespace DotGame.OpenGL4
 
         public void Update<T>(IConstantBuffer buffer, T data) where T : struct
         {
+            if (buffer == null)
+                throw new ArgumentNullException("buffer");
+            if (buffer.IsDisposed)
+                throw new ObjectDisposedException("buffer");
+
             var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
 
             internalBuffer.SetData<T>(data);
@@ -64,6 +146,11 @@ namespace DotGame.OpenGL4
 
         public void Update<T>(ITexture2D texture, T[] data) where T : struct
         {
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+            if (texture.IsDisposed)
+                throw new ObjectDisposedException("texture");
+
             var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
 
             internalTexture.SetData<T>(data, 0);
@@ -71,6 +158,13 @@ namespace DotGame.OpenGL4
 
         public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
         {
+            if (texture == null)
+                throw new ArgumentNullException("texture");
+            if (texture.IsDisposed)
+                throw new ObjectDisposedException("texture");
+            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+
             var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
 
             internalTexture.SetData<T>(data, mipLevel);
@@ -78,6 +172,13 @@ namespace DotGame.OpenGL4
 
         public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
         {
+            if (textureArray == null)
+                throw new ArgumentNullException("textureArray");
+            if (textureArray.IsDisposed)
+                throw new ObjectDisposedException("textureArray");
+            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
+                throw new ArgumentOutOfRangeException("arrayIndex");
+
             Update(textureArray, arrayIndex, 0, data);
         }
 
@@ -90,7 +191,9 @@ namespace DotGame.OpenGL4
             if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
                 throw new ArgumentOutOfRangeException("mipLevel");
 
-            throw new NotImplementedException();
+            var internalTexture = graphicsDevice.Cast<Texture2DArray>(textureArray, "buffer");
+
+            internalTexture.SetData<T>(data, mipLevel);
         }
 
         public void GenerateMips(ITexture2D texture)
@@ -100,24 +203,19 @@ namespace DotGame.OpenGL4
             if (texture.IsDisposed)
                 throw new ObjectDisposedException("texture");
 
-            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
-            {
-                graphicsDevice.BindManager.SetTexture(texture, 0);
-                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
-            }
-            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
-            {
-                var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
-                OpenTK.Graphics.OpenGL.GL.Ext.GenerateTextureMipmap(internalTexture.TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D);
-            }
+            var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
+            internalTexture.GenerateMipMaps();
         }
 
         public void GenerateMips(ITexture2DArray textureArray)
         {
             if (textureArray == null)
                 throw new ArgumentNullException("textureArray");
+            if (textureArray.IsDisposed)
+                throw new ObjectDisposedException("textureArray");
 
-            throw new NotImplementedException();
+            var internalTexture = graphicsDevice.Cast<Texture2DArray>(textureArray, "texture");
+            internalTexture.GenerateMipMaps();
         }
 
 
@@ -231,17 +329,22 @@ namespace DotGame.OpenGL4
 
         public void SetScissor(Rectangle rectangle)
         {
-            throw new NotImplementedException();
+            if(currentScissor != rectangle)
+                GL.Scissor((int)rectangle.X, (int)rectangle.Y, (int)rectangle.Width, (int)rectangle.Height);
+
+            currentScissor = rectangle;
         }
 
         public void SetBlendFactor(Color blendFactor)
         {
-            throw new NotImplementedException();
+            if(blendFactor != currentBlendFactor)
+                GL.BlendColor(blendFactor.R, blendFactor.G, blendFactor.B, blendFactor.A);
+            currentBlendFactor = blendFactor;
         }
 
         public void SetStencilReference(byte stencilReference)
         {
-            throw new NotImplementedException();
+            currentDepthStencilReference = stencilReference;
         }
 
         public void SetState(IRenderState state)
@@ -289,23 +392,14 @@ namespace DotGame.OpenGL4
             SetConstantBuffer(shader, "global", buffer);
         }
 
-        /*
-        private void SetTexture(IShader shader, string name, IGraphicsObject texture, TextureTarget target)
-        {
-            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
-            if (name == null)
-                throw new ArgumentNullException("name");
-            if (texture == null)
-                throw new ArgumentNullException("texture");
-
-            graphicsDevice.BindManager.SetTexture(texture, internalShader.GetTextureUnit(name), target);
-        }*/
-
         public void SetTextureNull(IShader shader, string name)
         {
-            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
+            if (shader == null)
+                throw new ArgumentNullException("shader");
             if (name == null)
                 throw new ArgumentNullException("name");
+
+            var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
 
             graphicsDevice.BindManager.SetTexture((Texture2D)null, internalShader.GetTextureUnit(name));
         }
@@ -316,6 +410,8 @@ namespace DotGame.OpenGL4
                 throw new ArgumentNullException("name");
             if (texture == null)
                 throw new ArgumentNullException("texture");
+            if (shader == null)
+                throw new ArgumentNullException("shader");
 
             var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
 
@@ -328,6 +424,8 @@ namespace DotGame.OpenGL4
                 throw new ArgumentNullException("name");
             if (texture == null)
                 throw new ArgumentNullException("texture");
+            if (shader == null)
+                throw new ArgumentNullException("shader");
 
             var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
 
@@ -340,6 +438,8 @@ namespace DotGame.OpenGL4
                 throw new ArgumentNullException("name");
             if (texture == null)
                 throw new ArgumentNullException("texture");
+            if (shader == null)
+                throw new ArgumentNullException("shader");
 
             var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
 
@@ -355,6 +455,10 @@ namespace DotGame.OpenGL4
         {
             if (name == null)
                 throw new ArgumentNullException("name");
+            if (sampler == null)
+                throw new ArgumentNullException("sampler");
+            if (shader == null)
+                throw new ArgumentNullException("shader");
 
             var internalShader = graphicsDevice.Cast<Shader>(shader, "shader");
             
@@ -401,7 +505,7 @@ namespace DotGame.OpenGL4
             {
                 DepthStencilState depthStencil = graphicsDevice.Cast<DepthStencilState>(currentState.DepthStencil, "currentState.DepthStencil");
 
-                depthStencil.Apply(currentDepthStencil, 0);
+                depthStencil.Apply(currentDepthStencil, currentDepthStencilReference);
                 currentDepthStencil = depthStencil;
             }
             

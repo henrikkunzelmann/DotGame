@@ -8,8 +8,10 @@ namespace DotGame
 {
     public struct EngineSettings
     {
-        public GraphicsAPI GraphicsAPI { get; set; }
-        public AudioAPI AudioAPI { get; set; }
-        public string AudioDevice { get; set; }
+        public GraphicsAPI GraphicsAPI;
+        public AudioAPI AudioAPI;
+        public string AudioDevice;
+        public int Width;
+        public int Height;
     }
 }

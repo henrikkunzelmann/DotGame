@@ -46,7 +46,6 @@ namespace DotGame.Test
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.LightSkyBlue, 1f, 0);
 
             pipeline.Draw(gameTime);
-            GraphicsDevice.SwapBuffers();
         }
 
         public override void Unload()

@@ -22,7 +22,7 @@ namespace DotGame.OpenGL4
             if ((Info.MagFilter == TextureFilter.Anisotropic || Info.MinFilter == TextureFilter.Anisotropic) && (!graphicsDevice.OpenGLCapabilities.SupportsAnisotropicFiltering || Info.MaximumAnisotropy > graphicsDevice.OpenGLCapabilities.MaxAnisotropicFiltering))
                 throw new PlatformNotSupportedException("Anisotropic filtering is not supported at that level or at all.");
 
-            if (Info.MaximumAnisotropy == 0)
+            if (Info.MaximumAnisotropy == 0 && (Info.MagFilter == TextureFilter.Anisotropic || Info.MinFilter == TextureFilter.Anisotropic))
                 throw new Exception("MaximumAnisotropy must not be 0");
 
             if (Info.MipLodBias > graphicsDevice.OpenGLCapabilities.MaxTextureLoDBias)
@@ -31,7 +31,7 @@ namespace DotGame.OpenGL4
 
             SamplerID = GL.GenSampler();
 
-            graphicsDevice.BindManager.SetSampler(this, 0);
+            //graphicsDevice.BindManager.SetSampler(this, 0);
 
             //AddressMode
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureWrapS, (float)EnumConverter.Convert(Info.AddressU));

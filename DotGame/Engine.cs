@@ -26,7 +26,7 @@ namespace DotGame
         public IAudioDevice AudioDevice { get; private set; }
 
         /// <summary>
-        /// Die Einstellungen mit dem die Engine gestartet wurde.
+        /// Die Einstellungen mit denen die Engine gestartet wurde.
         /// </summary>
         public EngineSettings Settings { get; private set; }
 
@@ -88,14 +88,14 @@ namespace DotGame
             {
                 case GraphicsAPI.OpenGL4:
                     if (container == null)
-                        window = new DotGame.OpenGL4.Windows.GameWindow();
+                        window = new DotGame.OpenGL4.Windows.GameWindow(Settings.Width, Settings.Height);
                     else
                         window = new DotGame.OpenGL4.Windows.GameControl(container);
                     break;
 
                 case GraphicsAPI.DirectX11:
                     if (container == null)
-                        window = new DotGame.DirectX11.Windows.GameWindow();
+                        window = new DotGame.DirectX11.Windows.GameWindow(Settings.Width, Settings.Height);
                     else
                         window = new DotGame.DirectX11.Windows.GameControl(container);
                     break;

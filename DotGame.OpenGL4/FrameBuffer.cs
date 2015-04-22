@@ -9,52 +9,41 @@ using Ext = OpenTK.Graphics.OpenGL.GL.Ext;
 
 namespace DotGame.OpenGL4
 {
-    internal class Fbo : GraphicsObject
+    internal class FrameBuffer : GraphicsObject
     {
         internal int FboID { get; private set; }
-        internal int[] ColorAttachmentIDs { get; private set; }
-        internal int DepthAttachmentID { get; private set; }
+        internal FrameBufferDescription Description { get; private set; }
 
-        internal Fbo(GraphicsDevice graphicsDevice, int depth, params int[] color)
+        internal FrameBuffer(GraphicsDevice graphicsDevice, FrameBufferDescription description)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             FboID = GL.GenFramebuffer();
-            Attach(depth, color);
+            Attach(description);
             CheckStatus();
         }
 
-        internal Fbo(GraphicsDevice graphicsDevice, params int[] color)
-            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        private void Attach(FrameBufferDescription description)
         {
-            FboID = GL.GenFramebuffer();
-            Attach(-1, color);
-            CheckStatus();
-            graphicsDevice.CheckGLError();
-        }
-
-        private void Attach(int depthAttachment, params int[] colorAttachments)
-        {
-            if (depthAttachment == -1 && (colorAttachments == null || colorAttachments.Length == 0))
+            if (!description.HasAttachments)
                 throw new Exception("Can't create a framebuffer object without attachments.");
 
-            ColorAttachmentIDs = colorAttachments;
-            DepthAttachmentID = depthAttachment;
+            Description = description;
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
                 graphicsDevice.BindManager.Fbo = this;
 
-                if (colorAttachments != null)
+                if (description.ColorAttachmentIDs != null)
                 {
-                    DrawBuffersEnum[] buffers = new DrawBuffersEnum[colorAttachments.Length];
+                    DrawBuffersEnum[] buffers = new DrawBuffersEnum[description.ColorAttachmentIDs.Length];
 
-                    for (int i = 0; i < colorAttachments.Length; i++)
+                    for (int i = 0; i < description.ColorAttachmentIDs.Length; i++)
                     {
-                        GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, colorAttachments[i], 0);
+                        GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.ColorAttachment0 + i, description.ColorAttachmentIDs[i], 0);
                         buffers[i] = DrawBuffersEnum.ColorAttachment0 + i;
                     }
 
-                    if (colorAttachments.Length == 0)
+                    if (description.ColorAttachmentIDs.Length == 0)
                         GL.DrawBuffer(DrawBufferMode.None);
                     else
                         GL.DrawBuffers(buffers.Length, buffers);
@@ -62,24 +51,24 @@ namespace DotGame.OpenGL4
                 else
                     GL.DrawBuffer(DrawBufferMode.None);
 
-                if (depthAttachment != -1)
+                if (description.DepthAttachmentID != -1)
                 {
-                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, depthAttachment, 0);
+                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, description.DepthAttachmentID, 0);
                 }
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-                if (colorAttachments != null)
+                if (description.ColorAttachmentIDs != null)
                 {
-                    OpenTK.Graphics.OpenGL.DrawBufferMode[] buffers = new OpenTK.Graphics.OpenGL.DrawBufferMode[colorAttachments.Length];
+                    OpenTK.Graphics.OpenGL.DrawBufferMode[] buffers = new OpenTK.Graphics.OpenGL.DrawBufferMode[description.ColorAttachmentIDs.Length];
 
-                    for (int i = 0; i < colorAttachments.Length; i++)
+                    for (int i = 0; i < description.ColorAttachmentIDs.Length; i++)
                     {
-                        Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.ColorAttachment0 + i, colorAttachments[i], 0);
+                        Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.ColorAttachment0 + i, description.ColorAttachmentIDs[i], 0);
                         buffers[i] = OpenTK.Graphics.OpenGL.DrawBufferMode.ColorAttachment0 + i;
                     }
 
-                    if (colorAttachments.Length == 0)
+                    if (description.ColorAttachmentIDs.Length == 0)
                         Ext.FramebufferDrawBuffer(FboID, OpenTK.Graphics.OpenGL.DrawBufferMode.None);
                     else
                         Ext.FramebufferDrawBuffers(FboID, buffers.Length, buffers);
@@ -87,9 +76,9 @@ namespace DotGame.OpenGL4
                 else
                     GL.DrawBuffer(DrawBufferMode.None);
 
-                if (depthAttachment != -1)
+                if (description.DepthAttachmentID != -1)
                 {
-                    Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.DepthAttachment, depthAttachment, 0);
+                    Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.DepthAttachment, description.DepthAttachmentID, 0);
                 }
             }
         }

@@ -16,6 +16,8 @@ namespace DotGame.Graphics
         RGBA32_Float,
         RGB32_Float,
 
+        BGRA8_UIntNorm,
+
         DXT1,
         DXT3,
         DXT5,

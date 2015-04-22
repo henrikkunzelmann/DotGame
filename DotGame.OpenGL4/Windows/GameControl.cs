@@ -33,7 +33,7 @@ namespace DotGame.OpenGL4.Windows
         public bool IsFullScreen
         {
             get { return false; }
-            set { throw new NotImplementedException(); }
+            set { throw new NotSupportedException("GameControl can't be fullscreen. Change the form to borderless fullscreen instead."); }
         }
 
         public IWindowInfo WindowInfo { get; private set; }

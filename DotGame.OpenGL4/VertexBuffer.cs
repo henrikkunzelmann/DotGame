@@ -22,10 +22,7 @@ namespace DotGame.OpenGL4
 
         internal bool LayoutDirty { get; set; }
 
-        public int SizeBytes 
-        { 
-            get { throw new NotImplementedException(); } 
-        }
+        public int SizeBytes { get; private set; }
 
         internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, BufferUsage usage)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
@@ -52,27 +49,26 @@ namespace DotGame.OpenGL4
                 throw new ArgumentException("Data must not be empty.", "data");
 
             int sizePerVertex = GraphicsDevice.GetSizeOf(Description);
-            int size = 0;
 
             if (typeof(T) == typeof(IVertexType))
             {
-                size = data.Length * sizePerVertex;
+                SizeBytes = data.Length * sizePerVertex;
                 VertexCount = data.Length;
             }
             else
             {
-                size = data.Length * Marshal.SizeOf(typeof(T));
-                VertexCount = size / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
+                SizeBytes = data.Length * Marshal.SizeOf(typeof(T));
+                VertexCount = SizeBytes / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
             }
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
                 graphicsDevice.BindManager.VertexBuffer = this;
-                GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(size), data, EnumConverter.Convert(Usage));
+                GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(SizeBytes), data, EnumConverter.Convert(Usage));
             } 
             else if(graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData<T>(VboID, new IntPtr(size), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess) EnumConverter.Convert(Usage));
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData<T>(VboID, new IntPtr(SizeBytes), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
             }
 
             graphicsDevice.CheckGLError();

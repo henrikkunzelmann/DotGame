@@ -135,8 +135,8 @@ namespace DotGame.DirectX11
                 BackBuffer.Dispose();
             if (DepthStencilBuffer != null)
                 DepthStencilBuffer.Dispose();
-            if (Factory != null)
-                Factory.Dispose();
+            //if (Factory != null)
+                //Factory.Dispose();
             if (swapChain != null)
                 swapChain.Dispose();
 

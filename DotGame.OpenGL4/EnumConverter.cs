@@ -16,6 +16,7 @@ namespace DotGame.OpenGL4
             {TextureFormat.RGBA32_Float, Tuple.Create(PixelInternalFormat.Rgba, PixelFormat.Rgba, PixelType.Float)},
             {TextureFormat.RGBA16_UIntNorm, Tuple.Create(PixelInternalFormat.Rgba, PixelFormat.Rgba, PixelType.UnsignedShort)},
             {TextureFormat.RGBA8_UIntNorm, Tuple.Create(PixelInternalFormat.Rgba, PixelFormat.Rgba, PixelType.UnsignedByte)},
+            {TextureFormat.BGRA8_UIntNorm, Tuple.Create(PixelInternalFormat.Rgb, PixelFormat.Bgra, PixelType.UnsignedByte)},
             {TextureFormat.Depth16, Tuple.Create(PixelInternalFormat.DepthComponent, PixelFormat.DepthComponent, PixelType.UnsignedInt)},
             {TextureFormat.Depth32, Tuple.Create(PixelInternalFormat.DepthComponent, PixelFormat.DepthComponent, PixelType.Float)},
             {TextureFormat.Depth24Stencil8, Tuple.Create(PixelInternalFormat.DepthStencil, PixelFormat.DepthStencil, PixelType.UnsignedInt248)},
@@ -24,8 +25,9 @@ namespace DotGame.OpenGL4
         {
             {TextureFormat.RGB32_Float, SizedInternalFormat.Rgba32f},
             {TextureFormat.RGBA32_Float, SizedInternalFormat.Rgba32f},
-            {TextureFormat.RGBA16_UIntNorm, SizedInternalFormat.Rgba16ui},
-            {TextureFormat.RGBA8_UIntNorm, SizedInternalFormat.Rgba8ui},
+            {TextureFormat.RGBA16_UIntNorm, SizedInternalFormat.Rgba16},
+            {TextureFormat.RGBA8_UIntNorm, SizedInternalFormat.Rgba8},
+            {TextureFormat.BGRA8_UIntNorm, SizedInternalFormat.Rgba8},
         };
 
         private static readonly Dictionary<string, string> shaderModels = new Dictionary<string, string>() 
@@ -170,27 +172,27 @@ namespace DotGame.OpenGL4
         internal static SizedInternalFormat ConvertSizedInternalFormat(TextureFormat format)
         {
             if (!sizedInternalFormats.ContainsKey(format))
-                throw new NotImplementedException();
+                throw new NotSupportedException("format is not supported");
             return sizedInternalFormats[format];
         }
         internal static TextureFormat ConvertSizedInternalFormat(SizedInternalFormat format)
         {
             if (!sizedInternalFormats.ContainsValue(format))
-                throw new NotImplementedException();
+                throw new NotSupportedException("format is not supported");
             return sizedInternalFormats.First((f) => f.Value == format).Key;
         }
 
         internal static OpenTK.Graphics.OpenGL4.PrimitiveType Convert(DotGame.Graphics.PrimitiveType primitiveType)
         {
             if (!primitiveTypes.ContainsKey(primitiveType))
-                throw new NotImplementedException();
+                throw new NotSupportedException("primitiveType is not supported");
             return primitiveTypes[primitiveType];
         }
 
         internal static DotGame.Graphics.PrimitiveType Convert(OpenTK.Graphics.OpenGL4.PrimitiveType primitiveType)
         {
             if (!primitiveTypes.ContainsValue(primitiveType))
-                throw new NotImplementedException();
+                throw new NotSupportedException("primitiveType is not supported");
             return primitiveTypes.First((pT) => pT.Value == primitiveType).Key;
         }
 
@@ -220,7 +222,7 @@ namespace DotGame.OpenGL4
         internal static IndexFormat Convert(DrawElementsType indexFormat)
         {
             if (!indexFormats.ContainsValue(indexFormat))
-                throw new NotImplementedException();
+                throw new NotSupportedException("cullMode is not supported");
 
             return indexFormats.First((f) => f.Value == indexFormat).Key;
         }
@@ -236,7 +238,7 @@ namespace DotGame.OpenGL4
         internal static CullMode Convert(CullFaceMode cullMode)
         {
             if (!cullModes.ContainsValue(cullMode))
-                throw new NotImplementedException();
+                throw new NotSupportedException("cullMode is not supported");
 
             return cullModes.First((f) => f.Value == cullMode).Key;
         }
@@ -252,7 +254,7 @@ namespace DotGame.OpenGL4
         internal static FillMode Convert(PolygonMode fillMode)
         {
             if (!fillModes.ContainsValue(fillMode))
-                throw new NotImplementedException();
+                throw new NotSupportedException("fillMode is not supported");
 
             return fillModes.First((f) => f.Value == fillMode).Key;
         }
@@ -268,7 +270,7 @@ namespace DotGame.OpenGL4
         internal static AddressMode Convert(TextureWrapMode addressMode)
         {
             if (!addressModes.ContainsValue(addressMode))
-                throw new NotImplementedException();
+                throw new NotSupportedException("addressMode is not supported");
 
             return addressModes.First((f) => f.Value == addressMode).Key;
         }
@@ -288,7 +290,7 @@ namespace DotGame.OpenGL4
             Tuple<TextureMinFilter, TextureMagFilter> tuple = new Tuple<TextureMinFilter, TextureMagFilter>(min, mag);
 
             if (!filters.ContainsValue(tuple))
-                throw new NotImplementedException();
+                throw new NotSupportedException("filters are not supported");
 
             return filters.First((f) => f.Value == tuple).Key;
         }
@@ -304,7 +306,7 @@ namespace DotGame.OpenGL4
         internal static Comparison Convert(DepthFunction comparison)
         {
             if (!comparisons.ContainsValue(comparison))
-                throw new NotImplementedException();
+                throw new NotSupportedException("comparison are not supported");
 
             return comparisons.First((f) => f.Value == comparison).Key;
         }
@@ -320,7 +322,7 @@ namespace DotGame.OpenGL4
         internal static Blend Convert(BlendingFactorSrc blend)
         {
             if (!blends.ContainsValue(blend))
-                throw new NotImplementedException();
+                throw new NotSupportedException("blend is not supported");
 
             return blends.First((f) => f.Value == blend).Key;
         }
@@ -336,7 +338,7 @@ namespace DotGame.OpenGL4
         internal static BlendOp Convert(BlendEquationMode blendOp)
         {
             if (!blendOps.ContainsValue(blendOp))
-                throw new NotImplementedException();
+                throw new NotSupportedException("blend is not supported");
 
             return blendOps.First((f) => f.Value == blendOp).Key;
         }
@@ -352,7 +354,7 @@ namespace DotGame.OpenGL4
         internal static StencilOperation Convert(StencilOp stencilOperation)
         {
             if (!stencilOperations.ContainsValue(stencilOperation))
-                throw new NotImplementedException();
+                throw new NotSupportedException("stencilOperation is not supported");
 
             return stencilOperations.First((f) => f.Value == stencilOperation).Key;
         }
@@ -368,7 +370,7 @@ namespace DotGame.OpenGL4
         internal static BufferUsage Convert(BufferUsageHint bufferUsage)
         {
             if (!bufferUsages.ContainsValue(bufferUsage))
-                throw new NotImplementedException();
+                throw new NotSupportedException("bufferUsage is not supported");
 
             return bufferUsages.First((f) => f.Value == bufferUsage).Key;
         }

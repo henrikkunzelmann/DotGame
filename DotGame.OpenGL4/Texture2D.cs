@@ -121,6 +121,22 @@ namespace DotGame.OpenGL4
             graphicsDevice.CheckGLError();
         }
 
+        internal void GenerateMipMaps()
+        {
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                GL.GenerateMipmap(GenerateMipmapTarget.Texture2D);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                Ext.GenerateTextureMipmap(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
+            {
+            }
+        }
+
         protected override void Dispose(bool isDisposing)
         {
             if (!GraphicsDevice.IsDisposed)
