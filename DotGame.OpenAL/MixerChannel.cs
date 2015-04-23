@@ -31,7 +31,7 @@ namespace DotGame.OpenAL
 
         internal readonly int ID;
 
-        public MixerChannel(AudioDevice audioDevice, string name) : base(audioDevice)
+        internal MixerChannel(AudioDevice audioDevice, string name) : base(audioDevice)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException("name");

@@ -27,7 +27,6 @@ namespace DotGame.OpenAL
 
         internal AudioCapture(AudioDevice audioDevice, string deviceName, int sampleRate, AudioFormat bitDepth, int channels, int bufferSize) : base(audioDevice)
         {
-            // TODO (Joex3): Den deviceName parameter eventuell als Suche benutzen, um trotzdem ein Device zu finden, wenn der Name nicht 100% übereinstimmt.
             if (deviceName != null && !AvailableDevices.Contains(deviceName))
                 throw new InvalidOperationException(string.Format("CaptureDevice \"{0}\" does not exist.", deviceName));
 

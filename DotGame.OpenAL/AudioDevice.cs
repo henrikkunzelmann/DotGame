@@ -52,7 +52,6 @@ namespace DotGame.OpenAL
 
         public AudioDevice(string deviceName)
         {
-            // TODO (Joex3): Den deviceName parameter eventuell als Suche benutzen, um trotzdem ein Device zu finden, wenn der Name nicht 100% übereinstimmt.
             if (deviceName != null && !AvailableDevices.Contains(deviceName))
                 throw new InvalidOperationException(string.Format("AudioDevice \"{0}\" does not exist.", deviceName));
 
@@ -151,7 +150,6 @@ namespace DotGame.OpenAL
                 }
 
                 var factory = (AudioFactory)Factory;
-                // TODO (Joex3): AudioObject.Update?
                 AudioObject obj;
                 factory.ObjectsLock.EnterReadLock();
                 try
@@ -159,12 +157,7 @@ namespace DotGame.OpenAL
                     foreach (var reference in factory.Objects)
                     {
                         if (reference.TryGetTarget(out obj))
-                        {
-                            if (obj is Sound)
-                            {
-                                ((Sound)obj).Update();
-                            }
-                        }
+                            obj.Update();
                     }
                 }
                 finally

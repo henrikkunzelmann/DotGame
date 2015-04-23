@@ -39,7 +39,7 @@ namespace DotGame.Test
                     Shader = shader,
                     Rasterizer = rasterizerState
                 }));
-            context.SetTexture(shader, "picture", material.Texture.GetHandle());
+            context.SetTexture(shader, "picture", material.Texture.Handle);
             if (Engine.Settings.GraphicsAPI == GraphicsAPI.DirectX11)
                 context.SetSampler(shader, "pictureSampler", sampler);
             else

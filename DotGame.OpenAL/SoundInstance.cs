@@ -10,8 +10,8 @@ namespace DotGame.OpenAL
 {
     public class SoundInstance : AudioObject, ISoundInstance
     {
-        public const int RINGBUFFER_SIZE = 4;
-        public const int RINGBUFFER_SAMPLES = 44100 * 4; // 4sec
+        public const int RINGBUFFER_COUNT = 6;
+        public const int RINGBUFFER_SAMPLES = 44100 * 3; // 4sec
         public const int PEAK_FRAME_SIZE = 1000;
 
         public ISound Sound { get; private set; }
@@ -39,7 +39,7 @@ namespace DotGame.OpenAL
 
         private readonly object locker = new object();
 
-        public SoundInstance(AudioDevice audioDevice, Sound sound)  : base(audioDevice)
+        internal SoundInstance(AudioDevice audioDevice, Sound sound)  : base(audioDevice)
         {
             if (sound == null)
                 throw new ArgumentNullException("sound");
@@ -62,9 +62,9 @@ namespace DotGame.OpenAL
             
             if (sound.IsStreamed)
             {
-                ringbuffers = new AudioBuffer<short>[bufferCount, RINGBUFFER_SIZE];
+                ringbuffers = new AudioBuffer<short>[bufferCount, RINGBUFFER_COUNT];
                 for (int i = 0; i < bufferCount; i++)
-                    for (int j = 0; j < RINGBUFFER_SIZE; j++)
+                    for (int j = 0; j < RINGBUFFER_COUNT; j++)
                         ringbuffers[i, j] = new AudioBuffer<short>(AudioDeviceInternal, false);
                 ringBufferIndex = 0;
             }
@@ -112,7 +112,6 @@ namespace DotGame.OpenAL
                 AssertNotDisposed();
 
                 var state = AL.GetSourceState(IDs[0]);
-                Console.WriteLine(state);
                 if (Sound.IsStreamed && ((state == ALSourceState.Stopped && !manualPause) || state == ALSourceState.Playing))
                     Stop();
                 manualPause = false;
@@ -170,7 +169,7 @@ namespace DotGame.OpenAL
             }
         }
 
-        internal void Update()
+        internal override void Update()
         {
             lock (locker)
             {
@@ -189,7 +188,7 @@ namespace DotGame.OpenAL
                         Refill(processed);
                     }
 
-                    int extra = RINGBUFFER_SIZE - Get(ALGetSourcei.BuffersQueued);
+                    int extra = RINGBUFFER_COUNT - Get(ALGetSourcei.BuffersQueued);
                     if (extra > 0)
                         Refill(extra);
                 }
@@ -227,7 +226,7 @@ namespace DotGame.OpenAL
                         buffer.SetData(AudioFormat.Short16, channelCount, samplesChannel, sampleRate);
                         AL.SourceQueueBuffer(IDs[i], buffer.ID);
                     }
-                    ringBufferIndex = (ringBufferIndex + 1) % RINGBUFFER_SIZE;
+                    ringBufferIndex = (ringBufferIndex + 1) % RINGBUFFER_COUNT;
                 }
                 var newState = AL.GetSourceState(IDs[0]);
                 if (newState != ALSourceState.Playing && state == ALSourceState.Playing)
@@ -337,7 +336,7 @@ namespace DotGame.OpenAL
             if (Sound.IsStreamed)
             {
                 int sample = Get(ALGetSourcei.SampleOffset);
-                int bufferIndex = (ringBufferIndex + Get(ALGetSourcei.BuffersProcessed)) % RINGBUFFER_SIZE;
+                int bufferIndex = (ringBufferIndex + Get(ALGetSourcei.BuffersProcessed)) % RINGBUFFER_COUNT;
                 var b = ringbuffers[0, bufferIndex];
                 if (b.Data == null) // Buffer hat noch keine Daten -> 0.0f zurückgeben.
                     return 0.0f;
@@ -346,7 +345,7 @@ namespace DotGame.OpenAL
                     sample -= b.Data.Count / b.Channels;
                     if (bufferIndex + 1 == ringBufferIndex)
                         throw new Exception();
-                    bufferIndex = (bufferIndex + 1) % RINGBUFFER_SIZE;
+                    bufferIndex = (bufferIndex + 1) % RINGBUFFER_COUNT;
                     b = ringbuffers[0, bufferIndex];
                 }
                 float maxPeak = 0.0f;

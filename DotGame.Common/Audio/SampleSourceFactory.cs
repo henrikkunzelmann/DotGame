@@ -34,7 +34,6 @@ namespace DotGame.Audio
 
         private static string GetMagic(string file)
         {
-            // TODO (Joex3): besseres handlen.
             return System.IO.Path.GetExtension(file);
         }
     }

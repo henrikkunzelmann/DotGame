@@ -347,9 +347,7 @@ namespace DotGame.OpenGL4
 
         public void SwapBuffers()
         {
-            // TODO (Joex3): Evtl. woanders hinschieben.
             ((GraphicsFactory)Factory).DisposeUnused();
-
             Context.SwapBuffers();
         }
 

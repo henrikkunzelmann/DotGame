@@ -10,6 +10,7 @@ namespace DotGame.Assets
     public class Mesh : Asset
     {
         private IVertexBuffer vertexBuffer;
+        public IVertexBuffer VertexBufferHandle { get { MarkForUsage(); return vertexBuffer; } }
 
         internal Mesh(AssetManager manager, string name, IVertexBuffer vertexBuffer)
             : base(manager, name, null)
@@ -20,15 +21,9 @@ namespace DotGame.Assets
             this.vertexBuffer = vertexBuffer;
         }
 
-        internal IVertexBuffer GetVertexHandle()
-        {
-            MarkForUsage();
-            return vertexBuffer;
-        }
-
         public void Draw(IRenderContext context)
         {
-            IVertexBuffer vertexBuffer = GetVertexHandle();
+            IVertexBuffer vertexBuffer = VertexBufferHandle;
             if (vertexBuffer == null) // VertexBuffer noch nicht geladen, nichts zeichnen
                 return;
 

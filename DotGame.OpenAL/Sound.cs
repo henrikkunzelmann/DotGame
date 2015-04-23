@@ -21,7 +21,7 @@ namespace DotGame.OpenAL
         private readonly List<AudioBuffer<short>> buffers;
         private readonly List<WeakReference<SoundInstance>> instances;
 
-        public Sound(AudioDevice audioDevice, string file, SoundFlags flags) : base(audioDevice)
+        internal Sound(AudioDevice audioDevice, string file, SoundFlags flags) : base(audioDevice)
         {
             if (string.IsNullOrEmpty(file))
                 throw new ArgumentNullException("file");
@@ -73,7 +73,7 @@ namespace DotGame.OpenAL
             instances.Add(new WeakReference<SoundInstance>(instance));
         }
 
-        internal void Update()
+        internal override void Update()
         {
             if (IsStreamed)
             {

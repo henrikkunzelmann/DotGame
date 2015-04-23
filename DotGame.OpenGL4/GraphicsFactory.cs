@@ -147,12 +147,12 @@ namespace DotGame.OpenGL4
 
         public IConstantBuffer CreateConstantBuffer(int size, BufferUsage usage)
         {
-            return new ConstantBuffer(graphicsDevice, size, usage);
+            return Register(new ConstantBuffer(graphicsDevice, size, usage));
         }
 
         public IConstantBuffer CreateConstantBuffer<T>(T data, BufferUsage usage) where T : struct
         {
-            ConstantBuffer constantBuffer = new ConstantBuffer(graphicsDevice, Marshal.SizeOf(typeof(T)), usage);
+            ConstantBuffer constantBuffer = Register(new ConstantBuffer(graphicsDevice, Marshal.SizeOf(typeof(T)), usage));
             constantBuffer.SetData<T>(data);
             return constantBuffer;
         }
@@ -229,17 +229,17 @@ namespace DotGame.OpenGL4
             if (!graphicsDevice.Capabilities.SupportsBinaryShaders)
                 throw new NotSupportedException("Creating shaders by byte code is not supported.");
 
-            return new Shader(graphicsDevice, code);
+            return Register(new Shader(graphicsDevice, code));
         }
 
         public IRenderState CreateRenderState(RenderStateInfo info)
         {
-            return new RenderState(graphicsDevice, info);
+            return Register(new RenderState(graphicsDevice, info));
         }
 
         public IRasterizerState CreateRasterizerState(RasterizerStateInfo info)
         {
-            return new RasterizerState(graphicsDevice, info);
+            return Register(new RasterizerState(graphicsDevice, info));
         }
 
         public ISampler CreateSampler(SamplerInfo info)
@@ -249,12 +249,12 @@ namespace DotGame.OpenGL4
 
         public IDepthStencilState CreateDepthStencilState(DepthStencilStateInfo info)
         {
-            return new DepthStencilState(graphicsDevice, info);
+            return Register(new DepthStencilState(graphicsDevice, info));
         }
 
         public IBlendState CreateBlendState(BlendStateInfo info)
         {
-            return new BlendState(graphicsDevice, info);
+            return Register(new BlendState(graphicsDevice, info));
         }
 
         internal FrameBuffer CreateFrameBuffer(FrameBufferDescription description)
@@ -329,7 +329,7 @@ namespace DotGame.OpenGL4
 
             // TODO (Joex3): Eigene Exception.
             if (!graphicsDevice.IsCurrent)
-                throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
+                throw new GraphicsDeviceNotCurrentException(graphicsDevice);
         }
 
         private void Dispose(bool isDisposing)

@@ -32,6 +32,11 @@ namespace DotGame.OpenAL
             Dispose(false);
         }
 
+        internal virtual void Update()
+        {
+
+        }
+
         public void Dispose()
         {
             Dispose(true);

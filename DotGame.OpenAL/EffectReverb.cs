@@ -24,7 +24,7 @@ namespace DotGame.OpenAL
         public float ReflectionsGain { get { return Get(EfxEffectf.ReverbReflectionsGain); } set { Set(EfxEffectf.ReverbReflectionsGain, value); } }
         public float RoomRolloffFactor { get { return Get(EfxEffectf.ReverbRoomRolloffFactor); } set { Set(EfxEffectf.ReverbRoomRolloffFactor, value); } }
 
-        public EffectReverb(AudioDevice audioDevice) : base(audioDevice, EfxEffectType.Reverb)
+        internal EffectReverb(AudioDevice audioDevice) : base(audioDevice, EfxEffectType.Reverb)
         {
         }
 

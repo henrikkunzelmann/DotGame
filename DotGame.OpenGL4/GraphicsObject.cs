@@ -71,9 +71,8 @@ namespace DotGame.OpenGL4
         {
             AssertNotDisposed();
             
-            // TODO (Joex3): Eigene Exception.
             if (!graphicsDevice.IsCurrent)
-                throw new Exception(string.Format("GraphicsDevice is not available on Thread {0}.", System.Threading.Thread.CurrentThread.Name));
+                throw new GraphicsDeviceNotCurrentException(graphicsDevice);
         }
     }
 }

@@ -65,9 +65,10 @@ namespace DotGame.Audio.SampleSources
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count < 1."));
             if (channels > 2)
                 throw new NotSupportedException(string.Format("WaveSampleSource does not support a Channel Count > 2."));
+            if (sampleRate != 44100)
+                throw new NotSupportedException(string.Format("WaveSampleSource does not support a SampleRate != 44100."));
 
             this.Channels = channels;
-            // TODO (Joex3): Herausfinden, warum dataSize bei veränderter SampleRate gleich bleibt.
             this.TotalSamples = dataSize / (bitDepth / 8);
             this.SampleRate = sampleRate;
 

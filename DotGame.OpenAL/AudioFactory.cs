@@ -21,7 +21,7 @@ namespace DotGame.OpenAL
         internal readonly ReaderWriterLockSlim ObjectsLock;
         private readonly List<WeakReference<AudioObject>> objects;
 
-        public AudioFactory(AudioDevice audioDevice)
+        internal AudioFactory(AudioDevice audioDevice)
         {
             this.AudioDevice = audioDevice;
             this.AudioDeviceInternal = audioDevice;
@@ -72,12 +72,6 @@ namespace DotGame.OpenAL
             {
                 ObjectsLock.ExitWriteLock();
             }
-        }
-
-        private string GetMagic(string file)
-        {
-            // TODO (Joex3): besseres handlen.
-            return System.IO.Path.GetExtension(file);
         }
 
         /// <inheritdoc/>
