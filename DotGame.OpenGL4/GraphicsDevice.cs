@@ -128,16 +128,22 @@ namespace DotGame.OpenGL4
 
             //GLSL Version string auslesen
             string glslVersionString = GL.GetString(StringName.ShadingLanguageVersion);
-            if (string.IsNullOrWhiteSpace(glslVersionString))
-                throw new Exception("Could not determine supported GLSL version");
-
-            string glslVersionStringMajor = glslVersionString.Substring(0, glslVersionString.IndexOf('.'));
-            string glslVersionStringMinor = glslVersionString.Substring(glslVersionString.IndexOf('.') + 1, 1);
-
             int glslVersionMajor;
             int glslVersionMinor;
-            if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
-                throw new Exception("Could not determine supported GLSL version");
+            if (GL.GetError() != ErrorCode.NoError || string.IsNullOrWhiteSpace(glslVersionString))
+            {
+                glslVersionMajor = 3;
+                glslVersionMinor = 3;
+            }
+            else
+            {
+                string glslVersionStringMajor = glslVersionString.Substring(0, glslVersionString.IndexOf('.'));
+                string glslVersionStringMinor = glslVersionString.Substring(glslVersionString.IndexOf('.') + 1, 1);
+
+                if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
+                    throw new Exception("Could not determine supported GLSL version");
+            }
+            CheckGLError("Init Version");
 
             //Nicht Version mit String initialisieren da 4.40 als Major 4 und Minor 40 aufgefasst wird
             openGLCapabilities.GLSLVersion = new Version(glslVersionMajor, glslVersionMinor);
@@ -147,9 +153,19 @@ namespace DotGame.OpenGL4
 
             //Extensions überprüfen
             int extensionCount = GL.GetInteger(GetPName.NumExtensions);
-            for (int i = 0; i < extensionCount; i++)
+            var extensions = new List<string>();
+            if (GL.GetError() == ErrorCode.NoError)
             {
-                string extension = GL.GetString(StringNameIndexed.Extensions, i);
+                for (int i = 0; i < extensionCount; i++)
+                    extensions.Add(GL.GetString(StringNameIndexed.Extensions, i));
+            }
+            else
+            {
+                var extensionString = GL.GetString(StringName.Extensions);
+                extensions.AddRange(extensionString.Split(' '));
+            }
+            foreach (var extension in extensions)
+            {
                 switch (extension)
                 {
                     case "GL_EXT_texture_compression_s3tc":
@@ -161,6 +177,7 @@ namespace DotGame.OpenGL4
                         openGLCapabilities.SupportsAnisotropicFiltering = true;
                         openGLCapabilities.MaxAnisotropicFiltering = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
                         Log.Write(logLevel, "\t\t" + "GL_EXT_texture_filter_anisotropic");
+                        CheckGLError("Init GL_EXT_texture_filter_anisotropic");
                         break;
 
 
@@ -176,6 +193,7 @@ namespace DotGame.OpenGL4
                             GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
                         }
                         Log.Write(logLevel, "\t\t" + "GL_ARB_debug_output");
+                        CheckGLError("Init GL_ARB_debug_output");
                         break;
 
                     case "GL_ARB_get_program_binary":
@@ -215,15 +233,19 @@ namespace DotGame.OpenGL4
                         openGLCapabilities.MaxVertexAttribBindings = GL.GetInteger((GetPName)All.MaxVertexAttribBindings);
                         openGLCapabilities.MaxVertexAttribBindingOffset = GL.GetInteger((GetPName)All.MaxVertexAttribRelativeOffset);
                         Log.Write(logLevel, "\t\t" + "GL_ARB_vertex_attrib_binding");
+                        CheckGLError("Init GL_ARB_vertex_attrib_binding");
                         break;
                 }
             }
-            openGLCapabilities.TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
-            openGLCapabilities.MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
-            openGLCapabilities.MaxTextureSize = GL.GetInteger(GetPName.MaxTextureSize);
-            openGLCapabilities.MaxVertexAttribs = GL.GetInteger(GetPName.MaxVertexAttribs);
 
-            CheckGLError();
+            openGLCapabilities.TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
+            CheckGLError("Init MaxCombinedTextureImageUnits");
+            openGLCapabilities.MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
+            CheckGLError("Init MaxTextureLodBias");
+            openGLCapabilities.MaxTextureSize = GL.GetInteger(GetPName.MaxTextureSize);
+            CheckGLError("Init MaxTextureSize");
+            openGLCapabilities.MaxVertexAttribs = GL.GetInteger(GetPName.MaxVertexAttribs);
+            CheckGLError("Init MaxVertexAttribs");
         }
 
         private void OnDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr user)
@@ -428,7 +450,7 @@ namespace DotGame.OpenGL4
             return layout;
         }
 
-        internal void CheckGLError()
+        internal void CheckGLError(string msg = "N/A")
         {
             if (!CreationFlags.HasFlag(DeviceCreationFlags.Debug))
                 return;
@@ -436,7 +458,7 @@ namespace DotGame.OpenGL4
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
             {
-                throw new InvalidOperationException("OpenGL threw an error: " + error.ToString());
+                throw new InvalidOperationException(string.Format("OpenGL threw an error at \"{0}\": {1}", msg, error.ToString()));
             }
         }
 

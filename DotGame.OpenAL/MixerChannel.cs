@@ -17,12 +17,14 @@ namespace DotGame.OpenAL
                 if (value == null)
                 {
                     effect = null;
-                    AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, 0);
+                    if (ID != -1)
+                        AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, 0);
                 }
                 else
                 {
                     effect = AudioDeviceInternal.Cast<Effect>(value, "Effect");
-                    AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, effect.ID);
+                    if (ID != -1)
+                        AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, effect.ID);
                 }
             }
         }
@@ -36,25 +38,32 @@ namespace DotGame.OpenAL
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentNullException("name");
 
-            ID = AudioDeviceInternal.Efx.GenAuxiliaryEffectSlot();
-            DotGame.OpenAL.AudioDevice.CheckALError();
-
-            AudioDeviceInternal.Efx.AuxiliaryEffectSlot(ID, EfxAuxiliaryi.EffectslotAuxiliarySendAuto, 1);
-
-            //effect = AudioDeviceInternal.Efx.GenEffect();
-            //AudioDeviceInternal.Efx.BindEffect(effect, EfxEffectType.Chorus);
-            //AudioDeviceInternal.Efx.Effect()
-            //AudioDeviceInternal.Efx.BindEffectToAuxiliarySlot(ID, effect);
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                ID = AudioDeviceInternal.Efx.GenAuxiliaryEffectSlot();
+                DotGame.OpenAL.AudioDevice.CheckALError();
+                AudioDeviceInternal.Efx.AuxiliaryEffectSlot(ID, EfxAuxiliaryi.EffectslotAuxiliarySendAuto, 1);
+            }
+            else
+            {
+                ID = -1;
+            }
         }
 
         private void Set(EfxAuxiliaryf param, float value)
         {
+            if (ID == -1)
+                return;
+
             AudioDeviceInternal.Efx.AuxiliaryEffectSlot(ID, param, value);
             DotGame.OpenAL.AudioDevice.CheckALError();
         }
 
         private float Get(EfxAuxiliaryf param)
         {
+            if (ID == -1)
+                return 0;
+
             float value;
             AudioDeviceInternal.Efx.GetAuxiliaryEffectSlot(ID, param, out value);
             DotGame.OpenAL.AudioDevice.CheckALError();

@@ -30,9 +30,9 @@ namespace DotGame.OpenGL4.Windows
             } 
         }
 
-        public GameWindow() : base() { }
-        public GameWindow(int width, int height) : base(width, height) { }
-        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title) { }
+        public GameWindow() : base(800, 600, GraphicsMode.Default, "DotGame", GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.Default) { }
+        public GameWindow(int width, int height) : base(width, height, GraphicsMode.Default, "DotGame", GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.Default) { }
+        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title, GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.Default) { }
 
 
         public IGraphicsDevice CreateDevice(DeviceCreationFlags flags)

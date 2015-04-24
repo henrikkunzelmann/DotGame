@@ -78,6 +78,9 @@
     <Compile Include="TestComponent.cs" />
     <Compile Include="TestPass.cs" />
     <Compile Include="TestShader.cs" />
+    <None Include="OpenTK.dll.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Include="shader.fragment.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

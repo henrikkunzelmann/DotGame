@@ -78,9 +78,12 @@ namespace DotGame.OpenAL
                 }
             }
 
-            directFilter = AudioDeviceInternal.Efx.GenFilter();
-            AudioDeviceInternal.Efx.Filter(directFilter, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
-            Set(ALSourcei.EfxDirectFilter, directFilter);
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                directFilter = AudioDeviceInternal.Efx.GenFilter();
+                AudioDeviceInternal.Efx.Filter(directFilter, EfxFilteri.FilterType, (int)EfxFilterType.Lowpass);
+                Set(ALSourcei.EfxDirectFilter, directFilter);
+            }
 
             sound.Register(this);
         }
@@ -91,17 +94,20 @@ namespace DotGame.OpenAL
             {
                 AssertNotDisposed();
 
-                if (slot < 0 && slot >= AudioDevice.MaxRoutes)
-                    throw new ArgumentOutOfRangeException("slot", "Slot must be between 0 and MaxRoutes.");
-
-                for (int i = 0; i < IDs.Count; i++)
+                if (AudioDevice.Capabilities.SupportsEfx)
                 {
-                    if (route == null)
-                        AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], 0, slot, 0);
-                    else
-                        AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], ((MixerChannel)route).ID, slot, 0);
+                    if (slot < 0 && slot >= AudioDevice.MaxRoutes)
+                        throw new ArgumentOutOfRangeException("slot", "Slot must be between 0 and MaxRoutes.");
+
+                    for (int i = 0; i < IDs.Count; i++)
+                    {
+                        if (route == null)
+                            AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], 0, slot, 0);
+                        else
+                            AudioDeviceInternal.Efx.BindSourceToAuxiliarySlot(IDs[i], ((MixerChannel)route).ID, slot, 0);
+                    }
+                    DotGame.OpenAL.AudioDevice.CheckALError();
                 }
-                DotGame.OpenAL.AudioDevice.CheckALError();
             }
         }
 
@@ -392,8 +398,11 @@ namespace DotGame.OpenAL
                     buffer.Dispose();
             }
 
-            AudioDeviceInternal.Efx.DeleteFilter(directFilter);
-            OpenAL.AudioDevice.CheckALError();
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                AudioDeviceInternal.Efx.DeleteFilter(directFilter);
+                OpenAL.AudioDevice.CheckALError();
+            }
 
             base.Dispose(isDisposing);
         }

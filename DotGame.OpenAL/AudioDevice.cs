@@ -18,6 +18,8 @@ namespace DotGame.OpenAL
         public static string DefaultDevice { get { return AudioContext.DefaultDevice; } }
 
         public bool IsDisposed { get; private set; }
+        public AudioCapabilities Capabilities { get { return capabilities; } }
+        private AudioCapabilities capabilities;
         public IAudioFactory Factory { get; private set; }
         public string DeviceName { get; private set; }
         public string VendorName { get; private set; }
@@ -57,10 +59,11 @@ namespace DotGame.OpenAL
 
             Context = new OpenTK.Audio.AudioContext(deviceName, 0, 15, true, true, AudioContext.MaxAuxiliarySends.UseDriverDefault);
             CheckAlcError();
+            deviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
+            CheckAlcError();
             Efx = new EffectsExtension();
             CheckAlcError();
 
-            deviceHandle = Alc.GetContextsDevice(Alc.GetCurrentContext());
             int[] val = new int[4];
             DeviceName = Context.CurrentDevice;
             VendorName = AL.Get(ALGetString.Vendor);
@@ -80,11 +83,10 @@ namespace DotGame.OpenAL
             Alc.GetInteger(deviceHandle, AlcGetInteger.EfxMaxAuxiliarySends, 1, val);
             MaxRoutes = val[0];
             Extensions = new List<string>(AL.Get(ALGetString.Extensions).Split(' ')).AsReadOnly();
-
-            MaxRoutes = val[0];
-
+            
             AL.DistanceModel(ALDistanceModel.ExponentDistance);
 
+            CheckAudioCapabilities(LogLevel.Verbose);
             LogDiagnostics(LogLevel.Verbose);
 
             Factory = new AudioFactory(this);
@@ -101,6 +103,13 @@ namespace DotGame.OpenAL
             GC.SuppressFinalize(this);
         }
 
+        private void CheckAudioCapabilities(LogLevel logLevel)
+        {
+            capabilities = new AudioCapabilities();
+
+            capabilities.SupportsEfx = Efx.IsInitialized;
+        }
+
         public void LogDiagnostics(LogLevel logLevel)
         {
             Log.Write(logLevel, "OpenAL Diagnostics:");
@@ -115,6 +124,8 @@ namespace DotGame.OpenAL
             {
                 Log.Write(logLevel, "\t\t" + Extensions[i] + ((i < Extensions.Count - 1) ? "," : ""));
             }
+
+            Log.WriteFields(logLevel, capabilities);
         }
 
         public T Cast<T>(IAudioObject obj, string parameterName) where T : class, IAudioObject

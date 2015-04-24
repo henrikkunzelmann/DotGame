@@ -45,6 +45,7 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="Audio\AudioCapabilities.cs" />
     <Compile Include="Audio\AudioFormat.cs" />
     <Compile Include="Audio\IAudioCapture.cs" />
     <Compile Include="Audio\IAudioListener.cs" />

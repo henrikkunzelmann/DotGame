@@ -19,6 +19,11 @@ namespace DotGame.Audio
         bool IsDisposed { get; }
 
         /// <summary>
+        /// Ruft die AudioCapabilities ab, welche Informationen über unterstützte Funktionen geben.
+        /// </summary>
+        AudioCapabilities Capabilities { get; }
+
+        /// <summary>
         /// Ruft die IAudioFactory ab, die zur Erzeugung neuer AudioObjekte benutzt wird.
         /// </summary>
         IAudioFactory Factory { get; }

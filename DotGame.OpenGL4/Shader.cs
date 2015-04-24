@@ -59,34 +59,28 @@ namespace DotGame.OpenGL4
             }
             graphicsDevice.CheckGLError();
 
-            //Validate program
-            GL.ValidateProgram(ProgramID);
-            int validateStatus;
-            GL.GetProgram(ProgramID, GetProgramParameterName.ValidateStatus, out validateStatus);
-            if (validateStatus == 0)
+            if (graphicsDevice.Capabilities.SupportsBinaryShaders)
             {
-                throw new Exception(GL.GetProgramInfoLog(ProgramID));
+                int binaryLength;
+                GL.GetProgram(ProgramID, (GetProgramParameterName)0x8741, out binaryLength); // GL_PROGRAM_BINARY_LENGTH
+                graphicsDevice.CheckGLError();
+
+                BinaryFormat format;
+                int length;
+                byte[] array = new byte[binaryLength];
+                GL.GetProgramBinary(ProgramID, binaryLength, out length, out format, array);
+                graphicsDevice.CheckGLError();
+
+                using (MemoryStream stream = new MemoryStream())
+                using (BinaryWriter writer = new BinaryWriter(stream))
+                {
+                    writer.Write("OPENGL4");
+                    writer.Write((int)format);
+                    writer.Write(array.Length);
+                    writer.Write(array);
+                    binaryCode = stream.GetBuffer();
+                }
             }
-            graphicsDevice.CheckGLError();
-
-            int binaryLength;
-            GL.GetProgram(ProgramID, (GetProgramParameterName)0x8741, out binaryLength); // GL_PROGRAM_BINARY_LENGTH
-
-            BinaryFormat format;
-            int length;
-            byte[] array = new byte[binaryLength];
-            GL.GetProgramBinary(ProgramID, binaryLength, out length, out format, array);
-
-            using (MemoryStream stream = new MemoryStream())
-            using (BinaryWriter writer = new BinaryWriter(stream))
-            {
-                writer.Write("OPENGL4");
-                writer.Write((int)format);
-                writer.Write(array.Length);
-                writer.Write(array);
-                binaryCode = stream.GetBuffer();
-            }
-
 
             FindUniforms();
             FindUniformBlocks();

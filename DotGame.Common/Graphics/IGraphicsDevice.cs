@@ -17,7 +17,7 @@ namespace DotGame.Graphics
         bool IsDisposed { get; }
 
         /// <summary>
-        /// Ruft die GraphicsCapabilities ab, welche angeben was das IGraphicsDevice unterstützt.
+        /// Ruft die GraphicsCapabilities ab, welche Informationen über unterstützte Funktionen geben.
         /// </summary>
         GraphicsCapabilities Capabilities { get; }
 

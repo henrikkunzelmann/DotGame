@@ -23,30 +23,34 @@ namespace DotGame.Test
         private ISoundInstance streamInstance;
         private ISound threedee; // LOOL
         private ISoundInstance threedeeInstance;
-        
-        public Form1()
+        private IMixerChannel channel;
+        private IEffectReverb reverb;
+
+        public Form1(Engine engine)
         {
             InitializeComponent();
 
-            Engine = new Engine(new EngineSettings()
-            {
-                GraphicsAPI = GraphicsAPI.DirectX11,
-                AudioAPI = AudioAPI.OpenAL,
-                Width = 800,
-                Height = 450,
-            }, null);
-            // splitContainer1.Panel1
-
+            this.Engine = engine;
             Engine.AddComponent(component = new Test2Component(Engine));
 
             Engine.AudioDevice.Listener.Gain = 0.1f;
 
+            channel = Engine.AudioDevice.Factory.CreateMixerChannel("test");
+            reverb = Engine.AudioDevice.Factory.CreateReverb();
+            //reverb.Density = 0.1f;
+            //reverb.= 1.0f;
+            reverb.DecayTime = 7;
+            channel.Effect = reverb;
+
             stream = Engine.AudioDevice.Factory.CreateSound("test.ogg", SoundFlags.Streamed | SoundFlags.AllowRead);
             streamInstance = stream.CreateInstance();
+            streamInstance.Route(0, channel);
             //component.Visualize = streamInstance;
 
             threedee = Engine.AudioDevice.Factory.CreateSound("16-44100.wav", SoundFlags.Support3D);
             threedeeInstance = threedee.CreateInstance();
+            threedeeInstance.Route(0, channel);
+            channel.Effect = reverb;
         }
 
         protected override void OnFormClosing(FormClosingEventArgs e)

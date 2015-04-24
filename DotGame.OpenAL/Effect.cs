@@ -14,64 +14,91 @@ namespace DotGame.OpenAL
 
         public Effect(AudioDevice audioDevice, EfxEffectType type) : base(audioDevice)
         {
-            ID = AudioDeviceInternal.Efx.GenEffect();
-            AudioDeviceInternal.Efx.BindEffect(ID, type);
-            OpenAL.AudioDevice.CheckALError();
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                ID = AudioDeviceInternal.Efx.GenEffect();
+                AudioDeviceInternal.Efx.BindEffect(ID, type);
+                OpenAL.AudioDevice.CheckALError();
+            }
         }
 
         protected void Set(EfxEffecti param, int value)
         {
             AssertNotDisposed();
-            AudioDeviceInternal.Efx.Effect(ID, param, value);
-            OpenAL.AudioDevice.CheckALError();
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                AudioDeviceInternal.Efx.Effect(ID, param, value);
+                OpenAL.AudioDevice.CheckALError();
+            }
         }
 
         protected void Set(EfxEffectf param, float value)
         {
             AssertNotDisposed();
-            AudioDeviceInternal.Efx.Effect(ID, param, value);
-            OpenAL.AudioDevice.CheckALError();
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                AudioDeviceInternal.Efx.Effect(ID, param, value);
+                OpenAL.AudioDevice.CheckALError();
+            }
         }
 
         protected void Set(EfxEffect3f param, Vector3 value)
         {
             AssertNotDisposed();
-            OpenTK.Vector3 v = new OpenTK.Vector3(value.X, value.Y, value.Z);
-            AudioDeviceInternal.Efx.Effect(ID, param, ref v);
-            OpenAL.AudioDevice.CheckALError();
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                OpenTK.Vector3 v = new OpenTK.Vector3(value.X, value.Y, value.Z);
+                AudioDeviceInternal.Efx.Effect(ID, param, ref v);
+                OpenAL.AudioDevice.CheckALError();
+            }
         }
 
         protected int Get(EfxEffecti param)
         {
             AssertNotDisposed();
-            int value;
-            AudioDeviceInternal.Efx.GetEffect(ID, param, out value);
-            OpenAL.AudioDevice.CheckALError();
-            return value;
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                int value;
+                AudioDeviceInternal.Efx.GetEffect(ID, param, out value);
+                OpenAL.AudioDevice.CheckALError();
+                return value;
+            }
+            return 0;
         }
 
         protected float Get(EfxEffectf param)
         {
             AssertNotDisposed();
-            float value;
-            AudioDeviceInternal.Efx.GetEffect(ID, param, out value);
-            OpenAL.AudioDevice.CheckALError();
-            return value;
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                float value;
+                AudioDeviceInternal.Efx.GetEffect(ID, param, out value);
+                OpenAL.AudioDevice.CheckALError();
+                return value;
+            }
+            return 0;
         }
 
         protected Vector3 Get(EfxEffect3f param)
         {
             AssertNotDisposed();
-            OpenTK.Vector3 value;
-            AudioDeviceInternal.Efx.GetEffect(ID, param, out value);
-            OpenAL.AudioDevice.CheckALError();
-            return new Vector3(value.X, value.Y, value.Z);
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                OpenTK.Vector3 value;
+                AudioDeviceInternal.Efx.GetEffect(ID, param, out value);
+                OpenAL.AudioDevice.CheckALError();
+                return new Vector3(value.X, value.Y, value.Z);
+            }
+            return Vector3.Zero;
         }
 
         protected override void Dispose(bool isDisposing)
         {
-            if (!AudioDeviceInternal.IsDisposed)
-                AudioDeviceInternal.Efx.DeleteEffect(ID);
+            if (AudioDevice.Capabilities.SupportsEfx)
+            {
+                if (!AudioDeviceInternal.IsDisposed)
+                    AudioDeviceInternal.Efx.DeleteEffect(ID);
+            }
 
             base.Dispose(isDisposing);
         }

@@ -20,8 +20,6 @@ namespace DotGame.OpenGL4
         internal ConstantBuffer(GraphicsDevice graphicsDevice, int sizeBytes, BufferUsage usage)
             : base(graphicsDevice, new System.Diagnostics.StackTrace())
         {
-            if (sizeBytes < 0)
-                throw new ArgumentException("Size must be bigger or equal to 0.", "sizeBytes");
             this.Size = sizeBytes;
             this.Usage = usage;
 
@@ -32,8 +30,13 @@ namespace DotGame.OpenGL4
         internal void SetData<T>(T data) where T : struct
         {
             // TODO (henrik1235) Format und SizeBytes supporten
-            if (this.Size == Marshal.SizeOf(data))
-                throw new ArgumentException("data size exceeds constant buffer size");
+            var dataSize = Marshal.SizeOf(data);
+
+            if (this.Size < 0)
+                this.Size = dataSize;
+
+            if (this.Size < dataSize)
+                throw new ArgumentException("Data size exceeds constant buffer size.");
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {

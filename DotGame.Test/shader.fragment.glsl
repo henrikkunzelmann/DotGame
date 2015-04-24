@@ -15,5 +15,5 @@ uniform sampler2D picture;
 
 void main(void) {
 	//fragmentColor = vec4(abs(pixelShaderData.position.xyz), 1.0f);
-	fragmentColor = texture(picture, vec2(pixelShaderData.texCoord.x, 1f - pixelShaderData.texCoord.y));
+	fragmentColor = texture(picture, vec2(pixelShaderData.texCoord.x, 1.0f - pixelShaderData.texCoord.y));
 }
