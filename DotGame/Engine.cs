@@ -11,11 +11,70 @@ using DotGame.Graphics;
 using DotGame.Rendering;
 using DotGame.Utils;
 using DotGame.Assets;
+using System.Runtime.InteropServices;
 
 namespace DotGame
 {
     public class Engine : IDisposable
     {
+        public static IReadOnlyCollection<GraphicsAPI> SupportedGraphicsAPIs { get { if (supportedGraphicsAPIs == null) InitGraphicsAPIs(); return supportedGraphicsAPIs.AsReadOnly(); } }
+        public static IReadOnlyCollection<AudioAPI> SupportedAudioAPIs { get { if (supportedAudioAPIs == null) InitAudioAPIs(); return supportedAudioAPIs.AsReadOnly(); } }
+        private static List<GraphicsAPI> supportedGraphicsAPIs;
+        private static List<AudioAPI> supportedAudioAPIs;
+
+        [DllImport("kernel32", SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string lpFileName);
+        private static bool CheckLibrary(string fileName)
+        {
+            return LoadLibrary(fileName) != IntPtr.Zero;
+        }
+
+        /// <summary>
+        /// Prüft, ob die gegebene Grafik-API zur Verfügung steht.
+        /// </summary>
+        /// <param name="GraphicsAPI">Die Grafik-API.</param>
+        /// <returns>True, wenn die Grafik-API zur Verfügung steht, ansonsten false.</returns>
+        public static bool IsAPISupported(GraphicsAPI GraphicsAPI)
+        {
+            if (supportedGraphicsAPIs == null)
+                InitGraphicsAPIs();
+
+            return supportedGraphicsAPIs.Contains(GraphicsAPI);
+        }
+
+        private static void InitGraphicsAPIs()
+        {
+            supportedGraphicsAPIs = new List<GraphicsAPI>();
+            // TODO (Joex3): Besseres Überprüfen?
+            try
+            {
+                if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 6 && CheckLibrary("d3d11.dll"))
+                    supportedGraphicsAPIs.Add(GraphicsAPI.DirectX11);
+            }
+            catch (DllNotFoundException) { }
+
+            supportedGraphicsAPIs.Add(GraphicsAPI.OpenGL4);
+        }
+
+        /// <summary>
+        /// Prüft, ob die gegebene Audio-API zur Verfügung steht.
+        /// </summary>
+        /// <param name="AudioAPI">Die Audio-API.</param>
+        /// <returns>True, wenn die Audio-API zur Verfügung steht, ansonsten false.</returns>
+        public static bool IsAPISupported(AudioAPI AudioAPI)
+        {
+            if (supportedAudioAPIs == null)
+                InitAudioAPIs();
+
+            return supportedAudioAPIs.Contains(AudioAPI);
+        }
+
+        private static void InitAudioAPIs()
+        {
+            supportedAudioAPIs = new List<AudioAPI>();
+            supportedAudioAPIs.Add(AudioAPI.OpenAL);
+        }
+
         /// <summary>
         /// Das GraphicsDevice welches die Engine nutzt.
         /// </summary>
@@ -83,13 +142,30 @@ namespace DotGame
         {
             if (container != null && container.IsDisposed)
                 throw new ArgumentException("Container is disposed.", "container");
-            this.Settings = settings;
 
             Log.Info("");
             Log.Info("===========");
             Log.Info("DotGame {0}", Version);
             Log.Info("===========");
             Log.Info("Engine starting...");
+
+            if (!IsAPISupported(settings.GraphicsAPI))
+            {
+                if (supportedGraphicsAPIs.Count == 0)
+                    throw new PlatformNotSupportedException("No supported GraphicsAPIs found.");
+                settings.GraphicsAPI = supportedGraphicsAPIs[0];
+                Log.Info("Falling back to {0}-rendering backend...", settings.GraphicsAPI);
+            }
+
+            if (!IsAPISupported(settings.AudioAPI))
+            {
+                if (supportedAudioAPIs.Count == 0)
+                    throw new PlatformNotSupportedException("No supported AudioAPIs found.");
+                settings.AudioAPI = supportedAudioAPIs[0];
+                Log.Info("Falling back to {0}-audio backend...", settings.AudioAPI);
+            }
+
+            this.Settings = settings;
 
             switch (Settings.GraphicsAPI)
             {

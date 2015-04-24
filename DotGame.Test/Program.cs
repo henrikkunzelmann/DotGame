@@ -17,9 +17,9 @@ namespace DotGame.Test
             Application.EnableVisualStyles();
             Application.SetCompatibleTextRenderingDefault(false);
 
-            GraphicsAPI graphicsApi = GraphicsAPI.OpenGL4;
-            if (Environment.OSVersion.Platform == PlatformID.Win32NT)
-                graphicsApi = GraphicsAPI.DirectX11;
+            GraphicsAPI graphicsApi = GraphicsAPI.DirectX11;
+            /*if (Environment.OSVersion.Platform == PlatformID.Win32NT)
+                graphicsApi = GraphicsAPI.DirectX11;*/
 
             var engine = new Engine(new EngineSettings()
             {
