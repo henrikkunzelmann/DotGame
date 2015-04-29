@@ -7,6 +7,7 @@ using DotGame.Assets;
 using DotGame.Graphics;
 using DotGame.Rendering;
 using DotGame.Cameras;
+using System.Numerics;
 
 namespace DotGame.Test
 {
@@ -31,7 +32,7 @@ namespace DotGame.Test
                 });
         }
 
-        public override void Apply(Pass pass, IRenderContext context, Material material, Matrix world)
+        public override void Apply(Pass pass, IRenderContext context, Material material, Matrix4x4 world)
         {
             context.SetState(Engine.RenderStatePool.GetRenderState(new RenderStateInfo()
                 {
@@ -44,7 +45,7 @@ namespace DotGame.Test
                 context.SetSampler(shader, "pictureSampler", sampler);
             else
                 context.SetSampler(shader, "picture", sampler);
-            context.Update(constantBuffer, Matrix.Transpose(world * pass.Scene.Camera.View * pass.Scene.Camera.Projection));
+            context.Update(constantBuffer, Matrix4x4.Transpose(world * pass.Scene.Camera.View * pass.Scene.Camera.Projection));
             context.SetConstantBuffer(shader, constantBuffer);
         }
 

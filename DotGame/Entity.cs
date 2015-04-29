@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace DotGame
 {
@@ -14,7 +15,7 @@ namespace DotGame
         private Quaternion rotation;
         private Vector3 scale = Vector3.One;
 
-        private Matrix matrix;
+        private Matrix4x4 matrix;
 
         public Vector3 Position
         {
@@ -74,12 +75,12 @@ namespace DotGame
 
         }
 
-        public Matrix GetMatrix()
+        public Matrix4x4 GetMatrix()
         {
             if (propertiesDirty)
             {
                 // TODO (henrik1235) Andere Transformationen unterstützen
-                matrix = Matrix.CreateTranslation(position);
+                matrix = Matrix4x4.CreateTranslation(position);
                 propertiesDirty = false;
             }
             return matrix;

@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
+using System.Numerics;
 
 namespace DotGame.Utils
 {

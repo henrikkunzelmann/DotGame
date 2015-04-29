@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Numerics;
 
 namespace DotGame.Rendering
 {
@@ -57,7 +58,7 @@ namespace DotGame.Rendering
         private List<int> indices;
 
         private IShader shader;
-        private Matrix mvp;
+        private Matrix4x4 mvp;
         private SpriteSortMode sortMode;
 
         public SpriteBatch(IGraphicsDevice graphicsDevice)
@@ -70,7 +71,7 @@ namespace DotGame.Rendering
             this.indices = new List<int>();
         }
 
-        public void Begin(IShader shader, Matrix world, Matrix projection, SpriteSortMode sortMode = SpriteSortMode.BackToFront)
+        public void Begin(IShader shader, Matrix4x4 world, Matrix4x4 projection, SpriteSortMode sortMode = SpriteSortMode.BackToFront)
         {
             this.shader = shader;
             this.mvp = world * projection;

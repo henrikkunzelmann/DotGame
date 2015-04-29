@@ -7,6 +7,7 @@ using System.IO;
 using DotGame.Graphics;
 using DotGame.Utils;
 using DotGame.Audio;
+using System.Numerics;
 
 namespace DotGame.Test
 {
@@ -144,14 +145,14 @@ namespace DotGame.Test
         {
 
             float time = (float)gameTime.TotalTime.TotalSeconds;
-            var view = Matrix.CreateLookAt(new Vector3(0, 0, 5f), new Vector3(0, 0, 0), Vector3.UnitY);
-            var proj = Matrix.CreatePerspectiveFieldOfView(MathHelper.PI / 4f, GraphicsDevice.DefaultWindow.Width / (float)GraphicsDevice.DefaultWindow.Height, 0.1f, 100.0f);
-            var worldViewProj =
-                  Matrix.CreateScale(Visualize != null ? Visualize.Peak : 1.0f)
-                * Matrix.CreateRotationX(time)
-                * Matrix.CreateRotationY(time * 2)
-                * Matrix.CreateRotationZ(time * .7f) * view * proj;
-            worldViewProj.Transpose();
+            var view = Matrix4x4.CreateLookAt(new Vector3(0, 0, 5f), new Vector3(0, 0, 0), Vector3.UnitY);
+            var proj = Matrix4x4.CreatePerspectiveFieldOfView(MathHelper.PI / 4f, GraphicsDevice.DefaultWindow.Width / (float)GraphicsDevice.DefaultWindow.Height, 0.1f, 100.0f);
+            var worldViewProj = Matrix4x4.Transpose(
+                  Matrix4x4.CreateScale(Visualize != null ? Visualize.Peak : 1.0f)
+                * Matrix4x4.CreateRotationX(time)
+                * Matrix4x4.CreateRotationY(time * 2)
+                * Matrix4x4.CreateRotationZ(time * .7f) * view * proj);
+            
 
             //GraphicsDevice.RenderContext.SetRenderTargetsBackBuffer();
             GraphicsDevice.RenderContext.SetRenderTargetsColor(colorTarget);
@@ -176,7 +177,7 @@ namespace DotGame.Test
             GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.Beige, 1f, 0);
             GraphicsDevice.RenderContext.SetState(state);
             GraphicsDevice.RenderContext.SetVertexBuffer(quad);
-            GraphicsDevice.RenderContext.Update(constantBuffer, Matrix.Identity);
+            GraphicsDevice.RenderContext.Update(constantBuffer, Matrix4x4.Identity);
             GraphicsDevice.RenderContext.SetTexture(shader, "picture", colorTarget);
             GraphicsDevice.RenderContext.Draw();
 

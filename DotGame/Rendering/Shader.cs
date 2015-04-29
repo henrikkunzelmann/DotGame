@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
 using DotGame.Assets;
+using System.Numerics;
 
 namespace DotGame.Rendering
 {
@@ -23,6 +24,6 @@ namespace DotGame.Rendering
             engine.ShaderManager.RegisterShader(this);
         }
 
-        public abstract void Apply(Pass pass, IRenderContext context, Material material, Matrix worldViewProj);
+        public abstract void Apply(Pass pass, IRenderContext context, Material material, Matrix4x4 worldViewProj);
     }
 }

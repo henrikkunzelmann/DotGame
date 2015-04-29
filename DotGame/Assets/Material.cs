@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotGame.Utils;
 using DotGame.Rendering;
 using DotGame.Graphics;
+using System.Numerics;
 
 namespace DotGame.Assets
 {
@@ -48,7 +49,7 @@ namespace DotGame.Assets
 
         }
 
-        public void Apply(Pass pass, IRenderContext context, Matrix world)
+        public void Apply(Pass pass, IRenderContext context, Matrix4x4 world)
         {
             if (shader == null)
                 pass.DefaultShader.Apply(pass, context, this, world);

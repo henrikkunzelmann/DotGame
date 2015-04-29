@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotGame.Geometry;
 using DotGame.Assets;
 using DotGame.Graphics;
+using System.Numerics;
 
 namespace DotGame
 {
@@ -13,7 +14,7 @@ namespace DotGame
     {
        private Material material;
        private Mesh mesh;
-       private Matrix matrix;
+       private Matrix4x4 matrix;
 
         public TestCube(Engine engine)
             : base(engine, "TestCube")
@@ -70,9 +71,9 @@ namespace DotGame
         protected override void Update(GameTime gameTime)
         {
             float time = (float)gameTime.TotalTime.TotalSeconds;
-            matrix = Matrix.CreateRotationX(time)
-                * Matrix.CreateRotationY(time * 2)
-                * Matrix.CreateRotationZ(time * .7f);
+            matrix = Matrix4x4.CreateRotationX(time)
+                * Matrix4x4.CreateRotationY(time * 2)
+                * Matrix4x4.CreateRotationZ(time * .7f);
         }
 
         public override void Draw(GameTime gameTime, Rendering.Pass pass, IRenderContext context)

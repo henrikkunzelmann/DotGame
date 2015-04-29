@@ -9,6 +9,7 @@ using OpenTK.Audio;
 using OpenTK.Audio.OpenAL;
 using System.Collections.ObjectModel;
 using System.Threading;
+using System.Numerics;
 
 namespace DotGame.OpenAL
 {
