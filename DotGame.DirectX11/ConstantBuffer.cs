@@ -13,7 +13,7 @@ namespace DotGame.DirectX11
 {
     public class ConstantBuffer : GraphicsObject, IConstantBuffer
     {
-        public int Size { get; private set; }
+        public int SizeBytes { get; private set; }
         public BufferUsage Usage { get; private set; }
 
         internal Buffer Handle { get; private set; }
@@ -23,7 +23,7 @@ namespace DotGame.DirectX11
         {
             if (sizeBytes < 0)
                 throw new ArgumentException("Size must be bigger or equal to 0.", "sizeBytes");
-            this.Size = sizeBytes;
+            this.SizeBytes = sizeBytes;
 
             Handle = new Buffer(graphicsDevice.Device, sizeBytes, EnumConverter.Convert(usage), BindFlags.ConstantBuffer, Usage == BufferUsage.Static ? CpuAccessFlags.None : CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
         }

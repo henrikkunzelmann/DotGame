@@ -64,6 +64,9 @@
     <Compile Include="Audio\SampleSources\VorbisSampleSource.cs" />
     <Compile Include="Audio\SoundFlags.cs" />
     <Compile Include="Audio\SampleSources\WaveSampleSource.cs" />
+    <Compile Include="DataArray.cs" />
+    <Compile Include="DataBox.cs" />
+    <Compile Include="DataRectangle.cs" />
     <Compile Include="Graphics\Blend.cs" />
     <Compile Include="Graphics\BlendOp.cs" />
     <Compile Include="Graphics\BlendStateInfo.cs" />

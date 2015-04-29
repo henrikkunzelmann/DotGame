@@ -11,7 +11,7 @@ namespace DotGame.Graphics
         /// <summary>
         /// Die Größe des ConstantBuffers in Bytes.
         /// </summary>
-        int Size { get; }
+        int SizeBytes { get; }
 
         /// <summary>
         /// Gibt an wie der ConstantBuffer benutzt wird.

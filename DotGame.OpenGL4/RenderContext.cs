@@ -600,5 +600,41 @@ namespace DotGame.OpenGL4
         {
 
         }
+
+        // TODO (henrik1235) Data* Update einbauen
+        public void Update(IConstantBuffer buffer, DataArray data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2D texture, DataRectangle data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2D texture, int mipLevel, DataRectangle data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(IVertexBuffer vertexBuffer, DataArray data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(IIndexBuffer indexBuffer, DataArray data)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

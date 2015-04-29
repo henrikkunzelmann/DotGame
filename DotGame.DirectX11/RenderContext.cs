@@ -90,7 +90,7 @@ namespace DotGame.DirectX11
         {
             var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
 
-            if (SharpDX.Utilities.SizeOf<T>() != buffer.Size)
+            if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
                 throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
 
             if (dxBuffer.Handle.Description.Usage == ResourceUsage.Default)
@@ -132,6 +132,89 @@ namespace DotGame.DirectX11
                 throw new ArgumentOutOfRangeException("mipLevel");
 
             context.UpdateSubresource<T>(data, dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels), textureArray.Width * graphicsDevice.GetSizeOf(textureArray.Format), textureArray.Width * textureArray.Height * graphicsDevice.GetSizeOf(textureArray.Format));
+        }
+
+        public void Update(IVertexBuffer buffer, DataArray data) 
+        {
+            var dxBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
+
+            if (data.Size != buffer.SizeBytes)
+                throw new ArgumentException("Data does not match VertexBuffer size.", "data");
+
+
+            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
+                context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, 0, 0), dxBuffer.Buffer);
+            else
+            {
+                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+                SharpDX.Utilities.CopyMemory(box.DataPointer, data.Pointer, data.Size);
+                context.UnmapSubresource(dxBuffer.Buffer, 0);
+            }
+        }
+
+        public void Update(IIndexBuffer buffer, DataArray data)
+        {
+            var dxBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
+
+            if (data.Size != buffer.SizeBytes)
+                throw new ArgumentException("Data does not match IndexBuffer size.", "data");
+
+            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
+                context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, 0, 0), dxBuffer.Buffer);
+            else
+            {
+                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
+                SharpDX.Utilities.CopyMemory(box.DataPointer, data.Pointer, data.Size);
+                context.UnmapSubresource(dxBuffer.Buffer, 0);
+            }
+        }
+
+        public void Update(IConstantBuffer buffer,  DataArray data)
+        {
+            var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
+
+            if (data.Size != buffer.SizeBytes)
+                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
+
+            if (dxBuffer.Handle.Description.Usage == ResourceUsage.Default)
+                context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, 0, 0), dxBuffer.Handle);
+            else
+            {
+                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Handle, 0, MapMode.WriteDiscard, MapFlags.None);
+                SharpDX.Utilities.CopyMemory(box.DataPointer, data.Pointer, data.Size);
+                context.UnmapSubresource(dxBuffer.Handle, 0);
+            }
+        }
+
+
+        public void Update(ITexture2D texture, DataRectangle data)
+        {
+            Update(texture, 0, data);
+        }
+
+        public void Update(ITexture2D texture, int mipLevel, DataRectangle data) 
+        {
+            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+
+            var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
+            context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, data.Pitch, 0), dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, 0, texture.MipLevels));
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data) 
+        {
+            Update(textureArray, arrayIndex, 0, data);
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data) 
+        {
+            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "texture");
+            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
+                throw new ArgumentOutOfRangeException("arrayIndex");
+            if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
+                throw new ArgumentOutOfRangeException("mipLevel");
+
+            context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, data.Pitch, 0), dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels));
         }
 
         public void GenerateMips(ITexture2D texture)
