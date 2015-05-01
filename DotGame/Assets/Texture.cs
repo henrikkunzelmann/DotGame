@@ -16,11 +16,18 @@ namespace DotGame.Assets
         private TextureHeader header;
         private ITexture2D handle;
 
-        public ITexture2D Handle { get { MarkForUsage(); return handle; } }
         public TextureFormat Format { get { return header.Format; } }
         public int Width { get { return header.Width; } }
         public int Height { get { return header.Height; } }
 
+        public ITexture2D Handle
+        {
+            get
+            {
+                MarkForUsage();
+                return handle;
+            }
+        }
 
         internal Texture(AssetManager manager, string name, string file, TextureLoadSettings loadSettings, TextureImporterBase importer)
             : base(manager, name, file)
