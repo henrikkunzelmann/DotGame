@@ -7,36 +7,12 @@ using DotGame.Graphics;
 
 namespace DotGame.Rendering
 {
-    public class ShaderManager : EngineObject, IDisposable
+    public class ShaderManager : EngineObject
     {
-        private Dictionary<string, Shader> shaders = new Dictionary<string, Shader>();
-
         public ShaderManager(Engine engine)
             : base(engine)
         {
 
-        }
-
-        public void RegisterShader(Shader shader)
-        {
-            lock (shaders)
-            {
-                if (shader == null)
-                    throw new ArgumentNullException("shader");
-
-                shaders.Add(shader.Name, shader);
-            }
-        }
-
-        public Shader GetShaderByName(string name)
-        {
-            lock (shaders)
-            {
-                foreach (KeyValuePair<string, Shader> shader in shaders)
-                    if (shader.Key == name)
-                        return shader.Value;
-            }
-            return null;
         }
 
         public IShader CompileShader(string name)
@@ -54,8 +30,6 @@ namespace DotGame.Rendering
 
         protected override void Dispose(bool isDisposing)
         {
-            foreach (KeyValuePair<string, Shader> shader in shaders)
-                shader.Value.Dispose();
         }
     }
 }

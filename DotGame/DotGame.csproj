@@ -83,12 +83,15 @@
     <Compile Include="GraphicsAPI.cs" />
     <Compile Include="Assets\Mesh.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Rendering\Passes\DeferredPass.cs" />
     <Compile Include="Rendering\Pass.cs" />
+    <Compile Include="Rendering\Passes\ForwardPass.cs" />
+    <Compile Include="Rendering\Passes\ParticlePass.cs" />
+    <Compile Include="Rendering\Passes\PostProcessPass.cs" />
+    <Compile Include="Rendering\Passes\UIPass.cs" />
     <Compile Include="Rendering\PassPipeline.cs" />
     <Compile Include="Rendering\RenderItem.cs" />
-    <Compile Include="Rendering\RenderItemCollection.cs" />
     <Compile Include="Rendering\RenderStatePool.cs" />
-    <Compile Include="Rendering\Shader.cs" />
     <Compile Include="Rendering\ShaderManager.cs" />
     <Compile Include="Scene.cs" />
     <Compile Include="SceneNode.cs" />

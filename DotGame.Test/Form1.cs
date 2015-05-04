@@ -18,7 +18,7 @@ namespace DotGame.Test
     {
         public Engine Engine { get; private set; }
 
-        private readonly Test2Component component;
+        private readonly TestComponent component;
         private ISound stream;
         private ISoundInstance streamInstance;
         private ISound threedee; // LOOL
@@ -31,7 +31,7 @@ namespace DotGame.Test
             InitializeComponent();
 
             this.Engine = engine;
-            Engine.AddComponent(component = new Test2Component(Engine));
+            Engine.AddComponent(component = new TestComponent(Engine));
 
             Engine.AudioDevice.Listener.Gain = 0.1f;
 

@@ -13,21 +13,7 @@ namespace DotGame.Assets
     public class Material : Asset
     {
         private bool dirty = true;
-        private Shader shader;
         private Texture texture;
-
-        public Shader Shader
-        {
-            get { return shader; }
-            set
-            {
-                if (value != shader)
-                {
-                    shader = value;
-                    dirty = true;
-                }
-            }
-        }
 
 
         public Texture Texture
@@ -47,14 +33,6 @@ namespace DotGame.Assets
             : base(manager, name, null)
         {
 
-        }
-
-        public void Apply(Pass pass, IRenderContext context, Matrix4x4 world)
-        {
-            if (shader == null)
-                pass.DefaultShader.Apply(pass, context, this, world);
-            else
-                shader.Apply(pass, context, this, world);
         }
 
         protected override void Load()

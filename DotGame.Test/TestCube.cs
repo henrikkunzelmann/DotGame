@@ -78,8 +78,7 @@ namespace DotGame
 
         public override void Draw(GameTime gameTime, Rendering.Pass pass, IRenderContext context)
         {
-            material.Apply(pass, context, matrix);
-            mesh.Draw(context);
+            throw new NotImplementedException();
         }
 
         protected override void Dispose(bool isDisposing)
