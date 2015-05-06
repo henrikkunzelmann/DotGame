@@ -8,16 +8,19 @@ namespace DotGame
 {
     public static class MathHelper
     {
-        public static readonly float PI = (float)Math.PI;
+        public const float PI = (float)Math.PI;
+
+        public const float DEGREES_TO_RADIANS = 1 / (180.0f * PI);
+        public const float RADIANS_TO_DEGREES = 1 / (PI * 180f);
 
         public static float DegressToRadians(float degress)
         {
-            return degress / 180f * PI;
+            return degress * DEGREES_TO_RADIANS;
         }
 
         public static float RadiansToDegress(float radians)
         {
-            return radians / PI * 180f;
+            return radians * RADIANS_TO_DEGREES;
         }
 
         public static int Lerp(int a, int b, float value)

@@ -38,6 +38,10 @@
     <StartupObject />
   </PropertyGroup>
   <ItemGroup>
+    <Reference Include="Newtonsoft.Json, Version=7.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\Newtonsoft.Json.7.0.1-beta3\lib\net45\Newtonsoft.Json.dll</HintPath>
+    </Reference>
     <Reference Include="OpenTK">
       <HintPath>..\packages\OpenTK.1.1.1589.5942\lib\NET40\OpenTK.dll</HintPath>
     </Reference>
@@ -72,7 +76,14 @@
     <Compile Include="Engine.cs" />
     <Compile Include="EngineObject.cs" />
     <Compile Include="EngineSettings.cs" />
-    <Compile Include="Entity.cs" />
+    <Compile Include="EntitySystem\Component.cs" />
+    <Compile Include="EntitySystem\Components\Camera.cs" />
+    <Compile Include="EntitySystem\Entity.cs" />
+    <Compile Include="EntitySystem\EventAttribute.cs" />
+    <Compile Include="EntitySystem\EventHandler.cs" />
+    <Compile Include="EntitySystem\Prefab.cs" />
+    <Compile Include="EntitySystem\Scene.cs" />
+    <Compile Include="EntitySystem\Components\Transform.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="GameTime.cs" />
     <Compile Include="Geometry\VertexPositionTextureNormal.cs" />
@@ -93,9 +104,8 @@
     <Compile Include="Rendering\RenderItem.cs" />
     <Compile Include="Rendering\RenderStatePool.cs" />
     <Compile Include="Rendering\ShaderManager.cs" />
-    <Compile Include="Scene.cs" />
-    <Compile Include="SceneNode.cs" />
     <Compile Include="Rendering\SpriteBatch.cs" />
+    <Compile Include="TimerUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

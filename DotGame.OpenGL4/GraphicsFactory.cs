@@ -327,7 +327,6 @@ namespace DotGame.OpenGL4
         {
             AssertNotDisposed();
 
-            // TODO (Joex3): Eigene Exception.
             if (!graphicsDevice.IsCurrent)
                 throw new GraphicsDeviceNotCurrentException(graphicsDevice);
         }
