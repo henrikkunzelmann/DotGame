@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using DotGame.Assets;
 using DotGame.Graphics;
 
 namespace DotGame.Rendering
@@ -23,9 +24,15 @@ namespace DotGame.Rendering
             } 
         }
 
-        public Pass(Engine engine)
+        /// <summary>
+        /// Gibt den Standard-Shader für diesen Pass zurück.
+        /// </summary>
+        public Shader Shader { get; private set; }
+
+        public Pass(Engine engine, Shader shader)
             : base(engine)
         {
+            this.Shader = shader;
         }
 
         /// <summary>

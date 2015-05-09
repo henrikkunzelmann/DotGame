@@ -12,7 +12,7 @@ namespace DotGame.Rendering.Passes
     public class ParticlePass : Pass
     {
         public ParticlePass(Engine engine)
-            : base(engine)
+            : base(engine, null)
         {
 
         }

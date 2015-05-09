@@ -49,7 +49,7 @@ namespace DotGame
             try
             {
                 if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 6 && CheckLibrary("d3d11.dll"))
-                    supportedGraphicsAPIs.Add(GraphicsAPI.DirectX11);
+                    supportedGraphicsAPIs.Add(GraphicsAPI.Direct3D11);
             }
             catch (DllNotFoundException) { }
 
@@ -176,7 +176,7 @@ namespace DotGame
                         window = new DotGame.OpenGL4.Windows.GameControl(container);
                     break;
 
-                case GraphicsAPI.DirectX11:
+                case GraphicsAPI.Direct3D11:
                     if (container == null)
                         window = new DotGame.DirectX11.Windows.GameWindow(Settings.Width, Settings.Height);
                     else

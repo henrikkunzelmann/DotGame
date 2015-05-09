@@ -12,7 +12,7 @@ namespace DotGame.Rendering.Passes
     public class DeferredPass : Pass
     {
         public DeferredPass(Engine engine)
-            : base(engine)
+            : base(engine, null)
         {
 
         }

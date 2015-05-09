@@ -9,6 +9,7 @@ using SharpDX.Direct3D11;
 using SharpDX.Windows;
 using SharpDX.Direct3D;
 using Device = SharpDX.Direct3D11.Device;
+using System.Windows.Forms;
 
 namespace DotGame.DirectX11.Windows
 {

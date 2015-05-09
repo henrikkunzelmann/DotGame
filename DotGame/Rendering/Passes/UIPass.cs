@@ -12,7 +12,7 @@ namespace DotGame.Rendering.Passes
     public class UIPass : Pass
     {
         public UIPass(Engine engine)
-            : base(engine)
+            : base(engine, null)
         {
 
         }

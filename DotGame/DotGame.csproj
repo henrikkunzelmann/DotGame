@@ -63,6 +63,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Assets\Asset.cs" />
+    <Compile Include="Assets\AssetType.cs" />
     <Compile Include="Assets\Importers\ImporterBase.cs" />
     <Compile Include="Assets\AssetManager.cs" />
     <Compile Include="Assets\Importers\SimpleTextureImporter.cs" />
@@ -101,8 +102,9 @@
     <Compile Include="Rendering\Passes\PostProcessPass.cs" />
     <Compile Include="Rendering\Passes\UIPass.cs" />
     <Compile Include="Rendering\PassPipeline.cs" />
-    <Compile Include="Rendering\RenderItem.cs" />
+    <Compile Include="Rendering\IRenderItem.cs" />
     <Compile Include="Rendering\RenderStatePool.cs" />
+    <Compile Include="Rendering\Shader.cs" />
     <Compile Include="Rendering\ShaderManager.cs" />
     <Compile Include="Rendering\SpriteBatch.cs" />
     <Compile Include="TimerUtils.cs" />

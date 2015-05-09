@@ -12,7 +12,7 @@ namespace DotGame
         OpenGLES2,
         OpenGLES3,
         Vulkan,
-        DirectX11,
-        DirectX12,
+        Direct3D11,
+        Direct3D12,
     }
 }

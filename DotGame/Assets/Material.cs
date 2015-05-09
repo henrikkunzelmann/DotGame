@@ -30,7 +30,7 @@ namespace DotGame.Assets
         }
 
         public Material(AssetManager manager, string name)
-            : base(manager, name, null)
+            : base(manager, AssetType.User, name, null)
         {
 
         }

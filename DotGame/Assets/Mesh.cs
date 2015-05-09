@@ -36,7 +36,7 @@ namespace DotGame.Assets
 
 
         internal Mesh(AssetManager manager, string name, IVertexBuffer vertexBuffer)
-            : base(manager, name, null)
+            : base(manager, AssetType.Wrapper, name, null)
         {
             if (vertexBuffer == null)
                 throw new ArgumentNullException("vertexBuffer");
@@ -50,7 +50,7 @@ namespace DotGame.Assets
         }
 
         internal Mesh(AssetManager manager, string name, IVertexBuffer vertexBuffer, IIndexBuffer indexBuffer)
-            : base(manager, name, null)
+            : base(manager, AssetType.Wrapper, name, null)
         {
             if (vertexBuffer == null)
                 throw new ArgumentNullException("vertexBuffer");
@@ -70,7 +70,7 @@ namespace DotGame.Assets
         {
             IVertexBuffer vertexBuffer = VertexBufferHandle;
             IIndexBuffer indexBuffer = IndexBufferHandle;
-            if (vertexBuffer == null || indexBuffer == null) // Buffer noch nicht geladen, nichts zeichnen
+            if (vertexBuffer == null || (HasIndices && indexBuffer == null)) // Buffer noch nicht geladen, nichts zeichnen
                 return;
 
             context.SetVertexBuffer(vertexBuffer);
@@ -91,6 +91,8 @@ namespace DotGame.Assets
         {
             if (vertexBuffer != null)
                 vertexBuffer.Dispose();
+            if (indexBuffer != null)
+                indexBuffer.Dispose();
         }
     }
 }

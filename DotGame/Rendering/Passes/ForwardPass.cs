@@ -12,7 +12,7 @@ namespace DotGame.Rendering.Passes
     public class ForwardPass : Pass
     {
         public ForwardPass(Engine engine)
-            : base(engine)
+            : base(engine, null)
         {
 
         }

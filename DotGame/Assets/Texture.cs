@@ -30,7 +30,7 @@ namespace DotGame.Assets
         }
 
         internal Texture(AssetManager manager, string name, string file, TextureLoadSettings loadSettings, TextureImporterBase importer)
-            : base(manager, name, file)
+            : base(manager, AssetType.File, name, file)
         {
             if (importer == null)
                 throw new ArgumentNullException("importer");
@@ -42,7 +42,7 @@ namespace DotGame.Assets
         }
 
         internal Texture(AssetManager manager, string name, ITexture2D handle)
-            : base(manager, name, null)
+            : base(manager, AssetType.Wrapper, name, null)
         {
             if (handle == null)
                 throw new ArgumentNullException("handle");

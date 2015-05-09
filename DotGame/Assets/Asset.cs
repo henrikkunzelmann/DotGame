@@ -11,6 +11,11 @@ namespace DotGame.Assets
         public AssetManager Manager { get; private set; }
 
         /// <summary>
+        /// Gibt den AssetType an.
+        /// </summary>
+        public AssetType Type { get; private set; }
+
+        /// <summary>
         /// Gibt den Namen an.
         /// </summary>
         public string Name { get; private set; }
@@ -50,13 +55,14 @@ namespace DotGame.Assets
         /// </summary>
         public GameTime LastUnloaded { get; private set; }
 
-        internal Asset(AssetManager manager, string name, string file)
+        internal Asset(AssetManager manager, AssetType type, string name, string file)
             : base(manager.Engine)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name must not be null, empty or white-space.", "name");
 
             this.Name = name;
+            this.Type = type;
             this.File = file;
         }
 
