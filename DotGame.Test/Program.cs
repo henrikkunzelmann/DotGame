@@ -10,6 +10,11 @@ using DotGame;
 using DotGame.Utils;
 using DotGame.Rendering;
 using DotGame.SceneGraph;
+using DotGame.EntitySystem;
+using DotGame.EntitySystem.Components;
+using DotGame.Geometry;
+using DotGame.Assets;
+using DotGame.Graphics;
 
 namespace DotGame.Test
 {
@@ -29,7 +34,77 @@ namespace DotGame.Test
                 AudioAPI = AudioAPI.OpenAL
             });
 
-            engine.AddComponent(new GraphTest(engine));
+            var component = new EntitySystemComponent(engine);
+            engine.AddComponent(component);
+
+            var mesh = engine.AssetManager.LoadMesh("Cube", new VertexPositionTexture[] 
+            {
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,  1.0f, -1.0f),   new Vector2(0.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f, -1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f, -1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, -1.0f, -1.0f),   new Vector2(1.0f, 1.0f)),
+
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f,  1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f,  1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,  1.0f,  1.0f),   new Vector2(1.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f,  1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, -1.0f,  1.0f),   new Vector2(0.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f,  1.0f),   new Vector2(0.0f, 1.0f)),
+
+                new VertexPositionTexture(new Vector3(-1.0f, 1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f, 1.0f,  1.0f),   new Vector2(0.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, 1.0f,  1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f, 1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, 1.0f,  1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, 1.0f, -1.0f),   new Vector2(1.0f, 1.0f)),
+
+                new VertexPositionTexture(new Vector3(-1.0f,-1.0f, -1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,-1.0f,  1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,-1.0f,  1.0f),   new Vector2(1.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,-1.0f, -1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,-1.0f, -1.0f),   new Vector2(0.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,-1.0f,  1.0f),   new Vector2(0.0f, 1.0f)),
+
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f,  1.0f),   new Vector2(0.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,  1.0f,  1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f, -1.0f, -1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,  1.0f,  1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3(-1.0f,  1.0f, -1.0f),   new Vector2(1.0f, 1.0f)),
+
+                new VertexPositionTexture(new Vector3( 1.0f, -1.0f, -1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f,  1.0f),   new Vector2(0.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, -1.0f,  1.0f),   new Vector2(1.0f, 1.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f, -1.0f, -1.0f),   new Vector2(1.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f, -1.0f),   new Vector2(0.0f, 0.0f)),
+                new VertexPositionTexture(new Vector3( 1.0f,  1.0f,  1.0f),   new Vector2(0.0f, 1.0f)),
+            });
+
+            var material = new Material(engine.AssetManager, "TestMaterial");
+            material.Texture = engine.AssetManager.LoadTexture("CubeTexture", "GeneticaMortarlessBlocks.jpg");
+
+            Transform last = null;
+            for (int i = 0; i < 333; i++)
+            {
+                var entityCube = component.Scene.CreateChild("Cube" + i);
+                entityCube.AddComponent<MeshRenderer>().Material = material;
+                entityCube.GetComponent<MeshInstance>().Mesh = mesh;
+                entityCube.AddComponent<RotateComponent>();
+                entityCube.Transform.LocalPosition = new Vector3(1, 0, 0);
+
+                if (last != null)
+                    entityCube.Transform.Parent = last;
+                last = entityCube.Transform;
+            }
+
+            var entityCamera = component.Scene.CreateChild("Camera");
+            var camera = entityCamera.AddComponent<Camera>();
+            camera.IsEnabled = true;
+            camera.ClearColor = Color.SkyBlue;
+            entityCamera.Transform.LocalPosition = new Vector3(0, 0, -32);
+            //entityCamera.Transform.Parent = entityCube.Transform;
 
             float deg = 60;
             float rad = deg / 180f * MathHelper.PI;

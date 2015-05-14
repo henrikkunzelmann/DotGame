@@ -1,4 +1,5 @@
 ﻿using DotGame.Cameras;
+using DotGame.Graphics;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -37,6 +38,22 @@ namespace DotGame.EntitySystem.Components
         /// </summary>
         [JsonIgnore]
         public Matrix4x4 Projection { get { return Matrix4x4.CreatePerspectiveFieldOfView(Fov, AspectRatio, ZNear, ZFar); } }
+
+        [JsonIgnore]
+        public Matrix4x4 ViewProjection { get { return View * Projection; } }
+
+        /// <summary>
+        /// Gibt an, ob die Kamera zum Rendern benutzt werden soll.
+        /// </summary>
+        public bool IsEnabled = false;
+
+        /// <summary>
+        /// Gibt an, wie das Bild beim rendern geleert werden soll.
+        /// </summary>
+        public CameraClearMode ClearMode = CameraClearMode.Color;
+
+        public Color ClearColor = Color.Black;
+        public float ClearDepth = 1;
 
         /// <summary>
         /// Der Up-Vektor dieser Kamera.

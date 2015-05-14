@@ -91,48 +91,13 @@ namespace DotGame.EntitySystem
         /// Wenn mehrere Komponenten des Typs existieren, wird der erste Treffer zurückgegeben.
         /// </summary>
         /// <param name="type">Der Typ der Komponente.</param>
-        /// <param name="component">Bei erfolgreicher Suche die Komponente, ansonsten null.</param>
-        /// <returns>True, wenn eine Komponente gefunden wurde, ansonsten false.</returns>
-        public bool TryGetComponent(Type type, out Component component)
-        {
-            lock (components)
-            {
-                component = components.Find(c => c.GetType() == type);
-                return component != null;
-            }
-        }
-
-        /// <summary>
-        /// Ruft eine Komponente vom gegebenen Typen ab.
-        /// Wenn mehrere Komponenten des Typs existieren, wird der erste Treffer zurückgegeben.
-        /// </summary>
-        /// <typeparam name="T">Der Typ der Komponente.</typeparam>
-        /// <param name="component">Bei erfolgreicher Suche die Komponente, ansonsten null.</param>
-        /// <returns>True, wenn eine Komponente gefunden wurde, ansonsten false.</returns>
-        public bool TryGetComponent<T>(out T component) where T : Component
-        {
-            var type = typeof(T);
-            lock (components)
-            {
-                component = (T)components.Find(c => c.GetType() == type);
-                return component != null;
-            }
-        }
-
-        /// <summary>
-        /// Ruft eine Komponente vom gegebenen Typen ab.
-        /// Wenn mehrere Komponenten des Typs existieren, wird der erste Treffer zurückgegeben.
-        /// </summary>
-        /// <param name="type">Der Typ der Komponente.</param>
         /// <returns>Bei erfolgreicher Suche die Komponente, ansonsten null.</returns>
         public Component GetComponent(Type type)
         {
-            Component c;
-            if (TryGetComponent(type, out c))
-                return c;
-
-            return null;
+            lock (components)
+                return components.Find(c => c.GetType() == type);
         }
+
         /// <summary>
         /// Ruft eine Komponente vom gegebenen Typen ab.
         /// Wenn mehrere Komponenten des Typs existieren, wird der erste Treffer zurückgegeben.
@@ -145,6 +110,29 @@ namespace DotGame.EntitySystem
                 return (T)GetComponent(typeof(T));
         }
 
+        public Component AddComponent(Type type)
+        {
+            if (type.GetCustomAttributes(typeof(SingleComponentAttribute), true).Length > 0 && GetComponent(type) != null)
+                throw new InvalidOperationException(string.Format("Component of type {0} can only be added once.", type.FullName));
+
+            var component = (Component)Activator.CreateInstance(type);
+
+            component.Entity = this;
+            lock (components)
+                components.Add(component);
+
+            foreach (var attrib in type.GetCustomAttributes(typeof(RequiresComponentAttribute), true))
+            {
+                var a = (RequiresComponentAttribute)attrib;
+                if (GetComponent(a.ComponentType) == null)
+                    AddComponent(a.ComponentType);
+            }
+
+            component.Invoke("Init", false);
+
+            return component;
+        }
+
         /// <summary>
         /// Fügt eine neue Komponente vom gegebenen Typen hinzu und gibt diese zurück.
         /// </summary>
@@ -152,52 +140,67 @@ namespace DotGame.EntitySystem
         /// <returns>Die neue Komponente.</returns>
         public T AddComponent<T>() where T : Component
         {
-            var type = typeof(T);
-            var component = (T)Activator.CreateInstance(type);
-            component.Entity = this;
-            component.Invoke("Init", false);
-            lock (components)
-                components.Add(component);
-
-            return component;
+            return (T)AddComponent(typeof(T));
         }
 
         /// <summary>
         /// Gibt alle Komponenten des Entities zurück.
-        /// Die Referenzen der Komponenten werden in einem neuen Array gespeichert, weshalb es ratsam wäre, den zurückgegebenen Array zu cachen.
         /// </summary>
+        /// <param name="deep">Gibt an, ob auch Komponenten von Kind-Entities zurückgegeben werden sollen.</param>
         /// <returns>Die Komponenten.</returns>
-        public Component[] GetComponents()
+        public Component[] GetComponents(bool deep)
         {
-            lock (components)
-                return components.ToArray();
+            return GetComponents(true, null);
         }
 
         /// <summary>
         /// Gibt alle Komponenten des Entities zurück, die den gegebenen Typen übereinstimmen.
-        /// Die Referenzen der Komponenten werden in einem neuen Array gespeichert, weshalb es ratsam wäre, den zurückgegebenen Array zu cachen.
         /// </summary>
+        /// <param name="deep">Gibt an, ob auch Komponenten von Kind-Entities zurückgegeben werden sollen.</param>
         /// <param name="types">Die akzeptierten Komponent-Typen. Wenn null werden alle Komponenten zurückgegeben.</param>
         /// <returns>Die Komponenten.</returns>
-        public Component[] GetComponents(params Type[] types)
+        public Component[] GetComponents(bool deep, params Type[] types)
         {
-            if (types == null)
+            // TODO (Joex3): Wah.
+            if (types == null && !deep)
             {
                 lock (components)
                     return components.ToArray();
             }
             else
             {
-                lock (components)
-                    return components.Where(c => types.Contains(c.GetType())).ToArray();
+                if (deep)
+                {
+                    var list = new List<Component>();
+                    if (types == null)
+                    {
+                        lock (components)
+                            list.AddRange(components);
+                    }
+                    else
+                    {
+                        lock (components)
+                            list.AddRange(components.Where(c => types.Contains(c.GetType())));
+                    }
+                    foreach (var child in Transform.GetChildren())
+                        list.AddRange(child.Entity.GetComponents(false, types));
+
+                    return list.ToArray();
+                }
+                else
+                {
+                    lock (components)
+                        return components.Where(c => types.Contains(c.GetType())).ToArray();
+                }
             }
         }
         #endregion
 
         #region EventHandler
-        protected override EventHandler[] GetChildHandlers()
+        protected override void GetChildHandlers(List<EventHandler> handlers)
         {
-            return GetComponents();
+            lock (components)
+                handlers.AddRange(components);
         }
         #endregion
 

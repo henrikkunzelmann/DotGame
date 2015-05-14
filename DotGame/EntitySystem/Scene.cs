@@ -5,12 +5,18 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.EntitySystem.Components;
 using DotGame.Graphics;
+using DotGame.Rendering;
 
 namespace DotGame.EntitySystem
 {
     public sealed class Scene : EventHandler
     {
         private List<Entity> rootNodes = new List<Entity>();
+
+        /// <summary>
+        /// Ruft die aktuelle Kamera ab, die zum Rendern benutzt wird.
+        /// </summary>
+        public Camera CurrentCamera { get; internal set; }
 
         /// <summary>
         /// Erstellt ein neues Entity im Root-Knoten.
@@ -24,7 +30,23 @@ namespace DotGame.EntitySystem
                 rootNodes.Add(node);
             return node;
         }
-        
+
+        public T[] GetComponents<T>() where T : Component
+        {
+            return GetComponents(typeof(T)).Cast<T>().ToArray();
+        }
+
+        public Component[] GetComponents(params Type[] types)
+        {
+            var list = new List<Component>();
+            lock (rootNodes)
+            {
+                foreach (var node in rootNodes)
+                    list.AddRange(node.GetComponents(true, types));
+            }
+            return list.ToArray();
+        }
+
         internal void AddChild(Entity node)
         {
             if (node == null)
@@ -49,9 +71,10 @@ namespace DotGame.EntitySystem
                 return rootNodes.ToArray();
         }
 
-        protected override EventHandler[] GetChildHandlers()
+        protected override void GetChildHandlers(List<EventHandler> list)
         {
-            return GetRootChildren();
+            lock (rootNodes)
+                list.AddRange(rootNodes);
         }
     }
 }

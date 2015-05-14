@@ -1,4 +1,6 @@
-﻿using Newtonsoft.Json;
+﻿using DotGame.Graphics;
+using DotGame.Rendering;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -39,6 +41,12 @@ namespace DotGame.EntitySystem
         /// </summary>
         [Event]
         protected virtual void Draw(GameTime gameTime) { }
+
+        /// <summary>
+        /// Wird aufgerufen, wenn ein Pass sich auf das Rendern vorbereitet.
+        /// </summary>
+        [Event]
+        protected virtual void PrepareDraw(GameTime gameTime, List<IRenderItem> renderList) { }
 
         /// <summary>
         /// Wird nach dem Deserialisieren aufgerufen.

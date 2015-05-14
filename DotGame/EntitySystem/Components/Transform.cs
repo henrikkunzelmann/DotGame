@@ -12,6 +12,7 @@ namespace DotGame.EntitySystem.Components
     /// <summary>
     /// Stellt die Transformation und die Verkettung untereinander eines Entities dar.
     /// </summary>
+    [SingleComponent]
     public class Transform : Component
     {
         /// <summary>
@@ -51,17 +52,17 @@ namespace DotGame.EntitySystem.Components
         /// <summary>
         /// Ruft die lokale Postion dieser Transformation ab, oder legt diese fest.
         /// </summary>
-        public Vector3 LocalPosition { get { return localPosition; } set { localPosition = value; isDirty = true; } }
+        public Vector3 LocalPosition { get { return localPosition; } set { localPosition = value; MarkDirty(); } }
 
         /// <summary>
         /// Ruft die lokale Rotation dieser Transformation ab, oder legt diese fest.
         /// </summary>
-        public Quaternion LocalRotation { get { return localRotation; } set { localRotation = value; isDirty = true; } }
+        public Quaternion LocalRotation { get { return localRotation; } set { localRotation = value; MarkDirty(); } }
 
         /// <summary>
         /// Ruft die lokale Skalierung dieser Transformation ab, oder legt diese fest.
         /// </summary>
-        public Vector3 LocalScale { get { return localScale; } set { localScale = value; isDirty = true; } }
+        public Vector3 LocalScale { get { return localScale; } set { localScale = value; MarkDirty(); } }
 
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private Vector3 localPosition = Vector3.Zero;
@@ -110,9 +111,13 @@ namespace DotGame.EntitySystem.Components
                 c.AfterDeserialize(entity);
         }
 
-        protected override EventHandler[] GetChildHandlers()
+        protected override void GetChildHandlers(List<EventHandler> handlers)
         {
-            return GetChildren(1);
+            lock (children)
+            {
+                foreach (var child in children)
+                    handlers.Add(child.Entity);
+            }
         }
 
         /// <summary>
@@ -164,9 +169,7 @@ namespace DotGame.EntitySystem.Components
             lock (children)
             {
                 foreach (var child in children)
-                {
                     child.GetChildren(list, depth - 1);
-                }
             }
         }
 
@@ -213,6 +216,16 @@ namespace DotGame.EntitySystem.Components
             }
 
             isDirty = true;
+        }
+
+        protected void MarkDirty()
+        {
+            isDirty = true;
+            lock (children)
+            {
+                foreach (var child in children)
+                    child.MarkDirty();
+            }
         }
 
         private void EnsureNotDirty()

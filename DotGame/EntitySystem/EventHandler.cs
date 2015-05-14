@@ -1,4 +1,5 @@
-﻿using System;
+﻿using DotGame.Utils;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
@@ -34,9 +35,16 @@ namespace DotGame.EntitySystem
         /// <param name="args">Die Parameterliste.</param>
         public void Invoke(string @event, bool isRequired, params object[] args)
         {
-            foreach (var child in GetChildHandlers())
-                child.Invoke(@event, isRequired, args);
+            var list = new List<EventHandler>();
+            CollectChildHandlers(new List<EventHandler>(), list);
+            foreach (var child in list)
+                child.InvokeInternal(@event, isRequired, args);
 
+            InvokeInternal(@event, isRequired, args);
+        }
+
+        private void InvokeInternal(string @event, bool isRequired, params object[] args)
+        {
             MethodInfo method;
             if (eventCache.TryGetValue(@event, out method))
             {
@@ -62,9 +70,19 @@ namespace DotGame.EntitySystem
             }
         }
 
-        protected virtual EventHandler[] GetChildHandlers()
+        protected virtual void GetChildHandlers(List<EventHandler> handlers)
         {
-            return new EventHandler[0];
+        }
+
+        private void CollectChildHandlers(List<EventHandler> tmplist, List<EventHandler> result)
+        {
+            int start = result.Count;
+            tmplist.Clear();
+            GetChildHandlers(tmplist);
+            result.AddRange(tmplist);
+            int end = result.Count;
+            for (int i = start; i < end; i++)
+                result[i].CollectChildHandlers(tmplist, result);
         }
 
         private bool IsEvent(MethodInfo method)
