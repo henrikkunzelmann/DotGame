@@ -204,16 +204,12 @@ namespace DotGame.EntitySystem
         }
         #endregion
 
-        internal void AfterDeserialize(Transform transform)
+        /// <summary>
+        /// Zerstört das Entity.
+        /// </summary>
+        public void Destroy()
         {
-            lock (components)
-            {
-                // Die Referenz zur Transform-Komponente geht beim Serialisieren verloren.
-                components.Insert(0, transform);
-
-                foreach (var c in components)
-                    c._AfterDeserialize(this);
-            }
+            Invoke("Destroy", false);
         }
 
         private void SetScene(Scene scene)

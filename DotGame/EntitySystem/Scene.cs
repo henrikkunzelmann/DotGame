@@ -11,12 +11,22 @@ namespace DotGame.EntitySystem
 {
     public sealed class Scene : EventHandler
     {
+        public readonly Engine Engine;
+
         private List<Entity> rootNodes = new List<Entity>();
 
         /// <summary>
         /// Ruft die aktuelle Kamera ab, die zum Rendern benutzt wird.
         /// </summary>
         public Camera CurrentCamera { get; internal set; }
+
+        public Scene(Engine engine)
+        {
+            if (engine == null)
+                throw new ArgumentNullException("engine");
+
+            this.Engine = engine;
+        }
 
         /// <summary>
         /// Erstellt ein neues Entity im Root-Knoten.

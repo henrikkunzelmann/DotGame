@@ -1,4 +1,5 @@
 ﻿using DotGame.Assets;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -16,6 +17,7 @@ namespace DotGame.EntitySystem.Components
         /// Das Mesh, das dieser MeshInstance zugeordnet ist.
         /// </summary>
         // TODO (Joex3): Mesh über Json/Bson serialisierbar machen.
+        [JsonIgnore]
         public Mesh Mesh;
     }
 }

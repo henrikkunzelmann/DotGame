@@ -24,9 +24,9 @@ namespace DotGame.EntitySystem
         static Prefab()
         {
             serializer = new JsonSerializer();
-            serializer.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Full;
+            serializer.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
             serializer.TypeNameHandling = TypeNameHandling.Objects;
-            serializer.ReferenceLoopHandling = ReferenceLoopHandling.Ignore;
+            serializer.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
         }
 
         /// <summary>
@@ -53,7 +53,7 @@ namespace DotGame.EntitySystem
             {
                 TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple,
                 TypeNameHandling = TypeNameHandling.Objects,
-                ReferenceLoopHandling = ReferenceLoopHandling.Ignore
+                PreserveReferencesHandling = PreserveReferencesHandling.Objects
             });
 
             return prefab;
@@ -70,6 +70,9 @@ namespace DotGame.EntitySystem
         /// <returns>Das Entity.</returns>
         public Entity CreateInstance(Scene scene)
         {
+            if (scene == null)
+                throw new ArgumentNullException("scene");
+
             Transform instance;
             using (var stream = new MemoryStream(data))
             using (var reader = new BsonReader(stream))
@@ -78,11 +81,11 @@ namespace DotGame.EntitySystem
             if (instance == null)
                 throw new InvalidOperationException("Given prefab could not be deserialized.");
             instance.Entity.Name += " Clone";
-            instance.Entity.AfterDeserialize(instance);
-            foreach (var child in instance.GetChildren())
-                child.Entity.AfterDeserialize(child);
             instance.Entity.Scene = scene;
+            foreach (var child in instance.GetChildren())
+                child.Entity.Scene = scene;
             scene.AddChild(instance.Entity);
+            instance.Invoke("AfterDeserialize", false);
 
             return instance.Entity;
         }

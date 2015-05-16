@@ -16,7 +16,7 @@ namespace DotGame.EntitySystem
 
         public EntitySystemComponent(Engine engine) : base(engine)
         {
-            Scene = new Scene();
+            Scene = new Scene(engine);
             PassPipeline = new PassPipeline(Engine, new ForwardPass(engine, Scene));
         }
 

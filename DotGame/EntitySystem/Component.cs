@@ -49,19 +49,15 @@ namespace DotGame.EntitySystem
         protected virtual void PrepareDraw(GameTime gameTime, List<IRenderItem> renderList) { }
 
         /// <summary>
+        /// Wird aufgerufen, wenn das Entity zerstört wird.
+        /// </summary>
+        [Event]
+        protected virtual void Destroy() { }
+
+        /// <summary>
         /// Wird nach dem Deserialisieren aufgerufen.
         /// </summary>
-        protected virtual void AfterDeserialize(Entity entity)
-        {
-            if (entity == null)
-                throw new ArgumentNullException("entity");
-            if (this.Entity == null)
-                this.Entity = entity;
-        }
-
-        internal void _AfterDeserialize(Entity entity)
-        {
-            AfterDeserialize(entity);
-        }
+        [Event]
+        protected virtual void AfterDeserialize() { }
     }
 }

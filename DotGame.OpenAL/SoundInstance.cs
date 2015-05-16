@@ -123,6 +123,8 @@ namespace DotGame.OpenAL
                     Stop();
                 manualPause = false;
 
+                Refill(1);
+
                 DotGame.OpenAL.AudioDevice.CheckALError();
 
                 for (int i = 0; i < IDs.Count; i++)
@@ -169,10 +171,7 @@ namespace DotGame.OpenAL
                 }
 
                 if (Sound.IsStreamed)
-                {
                     source.Position = 0;
-                    Refill(1);
-                }
             }
         }
 

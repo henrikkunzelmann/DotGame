@@ -15,7 +15,7 @@ namespace DotGame.EntitySystem.Components
     /// </summary>
     public class Camera : Component, ICamera
     {
-        private static Vector3 lookat = new Vector3(0, 0, 1);
+        public static readonly Vector3 Lookat = new Vector3(0, 0, 1);
 
         /// <summary>
         /// Ruft die View-Matrix dieser Kamera ab.
@@ -28,7 +28,7 @@ namespace DotGame.EntitySystem.Components
                 var mat = Matrix4x4.CreateFromQuaternion(Entity.Transform.Rotation);
 
                 return Matrix4x4.CreateLookAt(Entity.Transform.Position, Entity.Transform.Position
-                    + Vector3.TransformNormal(lookat, mat),
+                    + Vector3.TransformNormal(Lookat, mat),
                     Vector3.TransformNormal(Up, mat));
             }
         }

@@ -90,25 +90,27 @@ namespace DotGame.EntitySystem.Components
         [JsonRequired]
         private List<Transform> children = new List<Transform>();
 
-        protected override void Init()
+        protected override void Destroy()
         {
-            base.Init();
+            base.Destroy();
+
+            if (parent == null)
+                Entity.Scene.RemoveChild(Entity);
+            else
+                parent.RemoveChild(this);
+        }
+
+        protected override void AfterDeserialize()
+        {
+            base.AfterDeserialize();
 
             lock (children)
             {
-                foreach (var child in children)
+                foreach (var c in children)
                 {
-                    child.Init();
+                    c.parent = this;
                 }
             }
-        }
-
-        protected override void AfterDeserialize(Entity entity)
-        {
-            base.AfterDeserialize(entity);
-
-            foreach (var c in GetChildren(1))
-                c.AfterDeserialize(entity);
         }
 
         protected override void GetChildHandlers(List<EventHandler> handlers)
@@ -151,7 +153,7 @@ namespace DotGame.EntitySystem.Components
         /// <returns>Die Liste aller gefundenen Kind-Elemente.</returns>
         public Transform[] GetChildren(int depth = -1)
         {
-            if (depth < 0)
+            if (depth == 0)
                 lock (children)
                     return children.ToArray();
 
@@ -169,7 +171,10 @@ namespace DotGame.EntitySystem.Components
             lock (children)
             {
                 foreach (var child in children)
+                {
+                    list.Add(child);
                     child.GetChildren(list, depth - 1);
+                }
             }
         }
 
@@ -237,7 +242,7 @@ namespace DotGame.EntitySystem.Components
                     * Matrix4x4.CreateFromQuaternion(localRotation)
                     * Matrix4x4.CreateScale(localScale);
             if (parent != null)
-                matrix = parent.Matrix * matrix;
+                matrix = matrix * parent.Matrix;
 
             Matrix4x4.Decompose(matrix, out scale, out rotation, out position);
             isDirty = false;

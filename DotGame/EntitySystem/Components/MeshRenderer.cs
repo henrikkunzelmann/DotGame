@@ -2,6 +2,7 @@
 using DotGame.EntitySystem.Rendering;
 using DotGame.Graphics;
 using DotGame.Rendering;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +14,8 @@ namespace DotGame.EntitySystem.Components
     [RequiresComponent(typeof(MeshInstance))]
     public class MeshRenderer : Component, IRenderItem
     {
+        [JsonIgnore]
+        // TODO (Joex3): Material über Json/Bson serialisierbar machen.
         public Material Material;
 
         public void Draw(GameTime gameTime, Pass pass, IRenderContext context)

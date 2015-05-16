@@ -78,6 +78,8 @@
     <Compile Include="EngineObject.cs" />
     <Compile Include="EngineSettings.cs" />
     <Compile Include="EntitySystem\Component.cs" />
+    <Compile Include="EntitySystem\Components\AudioListener.cs" />
+    <Compile Include="EntitySystem\Components\AudioSource.cs" />
     <Compile Include="EntitySystem\Components\Camera.cs" />
     <Compile Include="EntitySystem\Components\CameraClearMode.cs" />
     <Compile Include="EntitySystem\Components\MeshInstance.cs" />

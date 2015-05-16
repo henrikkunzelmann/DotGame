@@ -13,7 +13,7 @@ namespace DotGame.Test
         protected override void Update(GameTime gameTime)
         {
             float t = (float)gameTime.TotalTime.TotalMilliseconds / 1000f;
-            Entity.Transform.LocalRotation = Quaternion.CreateFromYawPitchRoll((float)Math.Sin(t * 0.7f) * 0.1f, (float)Math.Cos(t * 0.1f) * 0.1f, (float)Math.Sin(t * 0.5) * 0.1f);
+            Entity.Transform.LocalRotation = Quaternion.CreateFromYawPitchRoll(50 * (float)Math.Sin(t * 0.01f) * (float)Math.Sin(t), 0, 0.2f * (float)Math.Sin(t));
         }
     }
 }
