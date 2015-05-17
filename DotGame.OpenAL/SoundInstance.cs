@@ -123,7 +123,8 @@ namespace DotGame.OpenAL
                     Stop();
                 manualPause = false;
 
-                Refill(1);
+                if (Sound.IsStreamed)
+                    Refill(1);
 
                 DotGame.OpenAL.AudioDevice.CheckALError();
 

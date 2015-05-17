@@ -77,6 +77,7 @@
     <Compile Include="Engine.cs" />
     <Compile Include="EngineObject.cs" />
     <Compile Include="EngineSettings.cs" />
+    <Compile Include="EntitySystem\CachedActivator.cs" />
     <Compile Include="EntitySystem\Component.cs" />
     <Compile Include="EntitySystem\Components\AudioListener.cs" />
     <Compile Include="EntitySystem\Components\AudioSource.cs" />

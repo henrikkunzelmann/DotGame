@@ -49,7 +49,9 @@ namespace DotGame.EntitySystem
         /// Gibt die Transformations-Komponente des Entites zurück.
         /// </summary>
         [JsonIgnore]
-        public Transform Transform { get { return GetComponent<Transform>(); } }
+        public Transform Transform { get { if (transform == null) transform = GetComponent<Transform>(); return transform; } }
+        [JsonIgnore]
+        private Transform transform;
 
         [JsonRequired]
         private List<Component> components = new List<Component>();
@@ -112,16 +114,21 @@ namespace DotGame.EntitySystem
 
         public Component AddComponent(Type type)
         {
-            if (type.GetCustomAttributes(typeof(SingleComponentAttribute), true).Length > 0 && GetComponent(type) != null)
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (!typeof(Component).IsAssignableFrom(type))
+                throw new ArgumentException("Given type is no component.", "type");
+
+            if (Component.IsSingle(type) && GetComponent(type) != null)
                 throw new InvalidOperationException(string.Format("Component of type {0} can only be added once.", type.FullName));
 
-            var component = (Component)Activator.CreateInstance(type);
+            var component = (Component)CachedActivator.CreateInstance(type);
 
             component.Entity = this;
             lock (components)
                 components.Add(component);
 
-            foreach (var attrib in type.GetCustomAttributes(typeof(RequiresComponentAttribute), true))
+            foreach (var attrib in Component.GetRequired(type))
             {
                 var a = (RequiresComponentAttribute)attrib;
                 if (GetComponent(a.ComponentType) == null)

@@ -113,7 +113,7 @@ namespace DotGame.Test
             channel.Effect = reverb;
             
             var source = last.Entity.AddComponent<AudioSource>();
-            source.Sound = engine.AudioDevice.Factory.CreateSound("test.ogg", SoundFlags.Support3D | SoundFlags.Streamed).CreateInstance();
+            source.Sound = engine.AudioDevice.Factory.CreateSound("test.ogg", SoundFlags.Support3D).CreateInstance();
             source.Sound.IsLooping = true;
             engine.AudioDevice.Listener.Gain = 0.1f;
             source.Sound.Play();

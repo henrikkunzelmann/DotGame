@@ -13,8 +13,7 @@ namespace DotGame.EntitySystem
     /// </summary>
     public class EventHandler
     {
-        /// TODO(Joex3): Cache global machen.
-        private Dictionary<string, MethodInfo> eventCache = new Dictionary<string, MethodInfo>();
+        private static Dictionary<Type, Dictionary<string, EventCache>> cache = new Dictionary<Type, Dictionary<string, EventCache>>();
 
         /// <summary>
         /// Prüft, ob ein Event mit dem gegebenen Namen existiert.
@@ -45,29 +44,32 @@ namespace DotGame.EntitySystem
 
         private void InvokeInternal(string @event, bool isRequired, params object[] args)
         {
-            MethodInfo method;
-            if (eventCache.TryGetValue(@event, out method))
+            var e = GetEvent(GetType(), @event);
+            if (e == null && isRequired)
+                throw new InvalidOperationException(string.Format("EventHandler doesn not define an event called \"{0}\".", @event));
+            if (e != null)
+                e.Method.Invoke(this, args);
+        }
+
+        private EventCache GetEvent(Type type, string @event)
+        {
+            Dictionary<string, EventCache> d;
+            if (!cache.TryGetValue(type, out d))
             {
-                if (method == null)
-                {
-                    if (isRequired)
-                        throw new InvalidOperationException(string.Format("EventHandler doesn not define an event called \"{0}\".", @event));
-                }
-                else
-                {
-                    // TODO(Joex3): Parameterprüfung.
-                    method.Invoke(this, args);
-                }
+                d = new Dictionary<string, EventCache>();
+                cache[type] = d;
             }
-            else
+
+            EventCache e;
+            if (!d.TryGetValue(@event, out e))
             {
-                method = GetType().GetMethod(@event, BindingFlags.Instance | BindingFlags.NonPublic);
-                eventCache.Add(@event, method);
-                if (IsEvent(method))
-                    method.Invoke(this, args);
-                else if (isRequired)
-                    throw new InvalidOperationException(string.Format("EventHandler doesn not define an event called \"{0}\".", @event));
+                var method = GetType().GetMethod(@event, BindingFlags.Instance | BindingFlags.NonPublic);
+                if (method == null || !IsEvent(method))
+                    return null;
+                e = new EventCache(method);
+                d[@event] = e;
             }
+            return e;
         }
 
         protected virtual void GetChildHandlers(List<EventHandler> handlers)
@@ -92,6 +94,21 @@ namespace DotGame.EntitySystem
 
             var attributes = method.GetCustomAttributes(typeof(EventAttribute), true);
             return attributes.Length > 0;
+        }
+
+        private class EventCache
+        {
+            public readonly MethodInfo Method;
+
+            public EventCache(MethodInfo method)
+            {
+                if (method == null)
+                    throw new ArgumentNullException("method");
+                if (method.GetCustomAttributes(typeof(EventAttribute), true).Length == 0)
+                    throw new InvalidOperationException("Given method is no event.");
+
+                this.Method = method;
+            }
         }
     }
 }
