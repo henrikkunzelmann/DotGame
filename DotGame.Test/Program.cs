@@ -33,14 +33,6 @@ namespace DotGame.Test
 
             engine.AddComponent(new GraphTest(engine));
 
-            float deg = 60;
-            float rad = deg / 180f * MathHelper.PI;
-
-            Console.WriteLine("deg:" + deg);
-            Console.WriteLine("rad: " + rad);
-            Console.WriteLine("rad2: " + MathHelper.DegressToRadians(deg));
-            Console.WriteLine("volvo pls fix?");
-
             Application.Run();
         }
     }

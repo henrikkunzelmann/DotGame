@@ -69,7 +69,16 @@ namespace DotGame.EntitySystem.Components
         /// Das Sichtfeld der Kamera in Grad.
         /// </summary>
         [JsonIgnore]
-        public float FovDegrees { get { return Fov * MathHelper.RADIANS_TO_DEGREES; } set { Fov = value * MathHelper.DEGREES_TO_RADIANS; } }
+        public float FovDegrees 
+        { 
+            get 
+            { 
+                return MathHelper.RadiansToDegress(Fov); 
+            } set 
+            { 
+                Fov = MathHelper.DegressToRadians(Fov);
+            } 
+        }
 
         /// <summary>
         /// Das Seitenverhältnis der Kamera (Breite / Höhe).
