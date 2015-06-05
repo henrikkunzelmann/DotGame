@@ -102,7 +102,7 @@ namespace DotGame.OpenGL4
                 GL.StencilOpSeparate(StencilFace.Back, EnumConverter.Convert(Info.BackFace.FailOperation), EnumConverter.Convert(Info.BackFace.DepthFailOperation), EnumConverter.Convert(Info.BackFace.PassOperation));
             }
 
-            depthStencilReference = depthStencilReference;
+            this.depthStencilReference = depthStencilReference;
         }
 
         protected override void Dispose(bool isDisposing)
