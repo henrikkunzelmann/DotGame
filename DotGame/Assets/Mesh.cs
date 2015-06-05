@@ -34,9 +34,8 @@ namespace DotGame.Assets
         public int TriangleCount { get; private set; }
         public int IndexCount { get; private set; }
 
-
-        internal Mesh(AssetManager manager, string name, IVertexBuffer vertexBuffer)
-            : base(manager, AssetType.Wrapper, name, null)
+        internal Mesh(AssetManager manager, string name, AssetType type, IVertexBuffer vertexBuffer)
+            : base(manager, type, name, null)
         {
             if (vertexBuffer == null)
                 throw new ArgumentNullException("vertexBuffer");
@@ -49,8 +48,8 @@ namespace DotGame.Assets
             this.IndexCount = 0;
         }
 
-        internal Mesh(AssetManager manager, string name, IVertexBuffer vertexBuffer, IIndexBuffer indexBuffer)
-            : base(manager, AssetType.Wrapper, name, null)
+        internal Mesh(AssetManager manager, string name, AssetType type, IVertexBuffer vertexBuffer, IIndexBuffer indexBuffer)
+            : base(manager, type, name, null)
         {
             if (vertexBuffer == null)
                 throw new ArgumentNullException("vertexBuffer");

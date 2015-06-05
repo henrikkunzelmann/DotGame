@@ -98,6 +98,7 @@
     <Compile Include="EntitySystem\Components\Transform.cs" />
     <Compile Include="GameComponent.cs" />
     <Compile Include="GameTime.cs" />
+    <Compile Include="Geometry\MeshBuilder.cs" />
     <Compile Include="Geometry\VertexPositionTextureNormal.cs" />
     <Compile Include="Geometry\VertexPositionTextureColor.cs" />
     <Compile Include="Geometry\VertexPositionTexture.cs" />

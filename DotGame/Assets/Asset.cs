@@ -64,6 +64,8 @@ namespace DotGame.Assets
             this.Name = name;
             this.Type = type;
             this.File = file;
+
+            manager.Register(this);
         }
 
         /// <summary>

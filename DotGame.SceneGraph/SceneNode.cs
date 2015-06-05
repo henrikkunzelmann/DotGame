@@ -215,7 +215,5 @@ namespace DotGame.SceneGraph
                     children[i].PrepareDraw(gameTime, renderList);
             }
         }
-
-        
     }
 }

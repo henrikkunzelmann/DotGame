@@ -85,7 +85,7 @@ namespace DotGame.Assets
         /// <typeparam name="T"></typeparam>
         /// <param name="asset"></param>
         /// <returns></returns>
-        private T Register<T>(T asset) where T : Asset
+        internal T Register<T>(T asset) where T : Asset
         {
             lock(assets)
                 assets.Add(asset);
@@ -111,23 +111,43 @@ namespace DotGame.Assets
                 Log.Debug("Removed {0} with name \"{1}\" from file \"{2}\"", asset.GetType().Name, asset.Name, asset.File);
         }
 
-        /// <summary>
-        /// Erstellt ein Mesh.
-        /// </summary>
-        /// <typeparam name="T"></typeparam>
-        /// <param name="name"></param>
-        /// <param name="vertices"></param>
-        /// <returns></returns>
-        public Mesh LoadMesh<T>(string name, T[] vertices) where T : struct, IVertexType
+        public Mesh LoadMesh<TVertex>(string name, TVertex[] vertices) where TVertex : struct, IVertexType
         {
-            if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name must be not null, empty or white-space.", "name");
             if (vertices == null)
                 throw new ArgumentNullException("vertices");
             if (vertices.Length == 0)
-                throw new ArgumentException("Vertices must not be empty.", "vertices");
+                throw new ArgumentException("Vertices is empty.", "vertices");
+            return LoadMesh(name, vertices, vertices[0].VertexDescription);
+        }
 
-            return Register(new Mesh(this, name, Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertices[0].VertexDescription, BufferUsage.Static)));
+        public Mesh LoadMesh<TVertex>(string name, TVertex[] vertices, VertexDescription vertexDescription) where TVertex : struct
+        {
+            if (vertices == null)
+                throw new ArgumentNullException("vertices");
+            if (vertices.Length == 0)
+                throw new ArgumentException("Vertices is empty.", "vertices");
+
+            IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, BufferUsage.Static);
+            return new Mesh(this, name, AssetType.User, vertexBuffer);
+        }
+
+
+        public Mesh LoadMesh<TVertex, TIndex>(string name, TVertex[] vertices, VertexDescription vertexDescription, TIndex[] indices, IndexFormat indexFormat) 
+            where TVertex : struct 
+            where TIndex : struct
+        {
+            if (vertices == null)
+                throw new ArgumentNullException("vertices");
+            if (vertices.Length == 0)
+                throw new ArgumentException("Vertices is empty.", "vertices");
+            if (indices == null)
+                throw new ArgumentNullException("indices");
+            if (indices.Length == 0)
+                throw new ArgumentException("Indices is empty.", "indices");
+
+            IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, BufferUsage.Static);
+            IIndexBuffer indexBuffer = Engine.GraphicsDevice.Factory.CreateIndexBuffer(indices, indexFormat, BufferUsage.Static);
+            return new Mesh(this, name, AssetType.User, vertexBuffer, indexBuffer);
         }
 
         /// <summary>
@@ -148,7 +168,7 @@ namespace DotGame.Assets
         /// <returns></returns>
         public Texture LoadTexture(string name, string file, TextureLoadSettings settings)
         {
-            return Register(new Texture(this, name, file, settings, GetImporter<TextureImporterBase>(Path.GetExtension(file))));
+            return new Texture(this, name, file, settings, GetImporter<TextureImporterBase>(Path.GetExtension(file)));
         }
 
         protected override void Dispose(bool isDisposing)
