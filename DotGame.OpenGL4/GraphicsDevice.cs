@@ -141,7 +141,7 @@ namespace DotGame.OpenGL4
                 string glslVersionStringMinor = glslVersionString.Substring(glslVersionString.IndexOf('.') + 1, 1);
 
                 if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
-                    throw new Exception("Could not determine supported GLSL version");
+                    throw new DotGame.Graphics.GraphicsException("Could not determine supported GLSL version");
             }
             CheckGLError("Init Version");
 
@@ -264,8 +264,6 @@ namespace DotGame.OpenGL4
 
             string messageString = string.Format("(OpenGL) ({0}) ({1}) ({2}) {3}", severityString, sourceString, typeString, Marshal.PtrToStringAnsi(message, length));
 
-            if (severityString != "Notification")
-                throw new Exception(messageString);
 
             Log.Debug(messageString);
             Log.FlushBuffer();

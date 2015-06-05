@@ -25,7 +25,7 @@ namespace DotGame.OpenGL4
         private void Attach(FrameBufferDescription description)
         {
             if (!description.HasAttachments)
-                throw new Exception("Can't create a framebuffer object without attachments.");
+                throw new ArgumentException("Can't create a framebuffer object without attachments.", "description");
 
             Description = description;
 
@@ -95,7 +95,7 @@ namespace DotGame.OpenGL4
                 error = (FramebufferErrorCode)Ext.CheckNamedFramebufferStatus(FboID, OpenTK.Graphics.OpenGL.FramebufferTarget.Framebuffer);
 
             if (error != FramebufferErrorCode.FramebufferComplete)
-                throw new Exception(error.ToString());
+                throw new GraphicsException(error.ToString());
         }
 
         protected override void Dispose(bool isDisposing)

@@ -23,7 +23,7 @@ namespace DotGame.OpenGL4
                 throw new PlatformNotSupportedException("Anisotropic filtering is not supported at that level or at all.");
 
             if (Info.MaximumAnisotropy == 0 && (Info.MagFilter == TextureFilter.Anisotropic || Info.MinFilter == TextureFilter.Anisotropic))
-                throw new Exception("MaximumAnisotropy must not be 0");
+                throw new ArgumentException("MaximumAnisotropy must not be 0");
 
             if (Info.MipLodBias > graphicsDevice.OpenGLCapabilities.MaxTextureLoDBias)
                 throw new PlatformNotSupportedException("MipLoDBias is higher than max lod bias.");

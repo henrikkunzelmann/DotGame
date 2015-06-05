@@ -85,6 +85,7 @@
     <Compile Include="Graphics\FillMode.cs" />
     <Compile Include="Graphics\GraphicsCapabilities.cs" />
     <Compile Include="Graphics\GraphicsDeviceNotCurrentException.cs" />
+    <Compile Include="Graphics\GraphicsException.cs" />
     <Compile Include="Graphics\IConstantBuffer.cs" />
     <Compile Include="Graphics\IGraphicsDevice.cs" />
     <Compile Include="Graphics\IGraphicsFactory.cs" />

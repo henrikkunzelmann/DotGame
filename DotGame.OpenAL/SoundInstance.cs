@@ -351,7 +351,7 @@ namespace DotGame.OpenAL
                 {
                     sample -= b.Data.Count / b.Channels;
                     if (bufferIndex + 1 == ringBufferIndex)
-                        throw new Exception();
+                        throw new Exception(); // TODO (henrik1235): Exception durch bessere Klasse + Fehlermeldung ersetzen
                     bufferIndex = (bufferIndex + 1) % RINGBUFFER_COUNT;
                     b = ringbuffers[0, bufferIndex];
                 }

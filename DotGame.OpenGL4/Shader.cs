@@ -54,9 +54,8 @@ namespace DotGame.OpenGL4
             GL.ProgramParameter(ProgramID, ProgramParameterName.ProgramBinaryRetrievableHint, 1);
             GL.GetProgram(ProgramID, GetProgramParameterName.LinkStatus, out linkStatus);
             if (linkStatus == 0)
-            {
-                throw new Exception(GL.GetProgramInfoLog(ProgramID));
-            }
+                throw new GraphicsException(GL.GetProgramInfoLog(ProgramID));
+
             graphicsDevice.CheckGLError();
 
             if (graphicsDevice.Capabilities.SupportsBinaryShaders)
@@ -110,7 +109,7 @@ namespace DotGame.OpenGL4
                 int linkStatus;
                 GL.GetProgram(ProgramID, GetProgramParameterName.LinkStatus, out linkStatus);
                 if (linkStatus == 0)
-                    throw new Exception(GL.GetProgramInfoLog(ProgramID));
+                    throw new GraphicsException(GL.GetProgramInfoLog(ProgramID));
                 graphicsDevice.CheckGLError();
             }
 
@@ -169,8 +168,10 @@ namespace DotGame.OpenGL4
         /// <returns></returns>
         internal int GetUniformLocation(string name)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
             if (!uniformLocations.ContainsKey(name))
-                throw new Exception(string.Format("Uniform {0} not found"));
+                throw new ArgumentException(string.Format("Uniform {0} not found.", name), "name");
 
             return uniformLocations[name];
         }
@@ -182,18 +183,21 @@ namespace DotGame.OpenGL4
         /// <returns></returns>
         internal int GetUniformBlockBindingPoint(string name)
         {
+            if (name == null)
+                throw new ArgumentNullException("name");
+
             int bindingPoint;
             if (uniformBindingPoints.TryGetValue(name, out bindingPoint))
                 return bindingPoint;
 
-            if (!uniformBlockLocations.ContainsKey(name))
-                throw new Exception(string.Format("Uniform block {0} not found"));
+            int unifomBlock;
+            if (!uniformBlockLocations.TryGetValue(name, out unifomBlock))
+                throw new ArgumentException(string.Format("Uniform block {0} not found.", name), "name");
 
             graphicsDevice.BindManager.Shader = this;
 
-            int blockIndex = uniformBlockLocations[name];
             bindingPoint = uniformBindingPoints.Count;
-            GL.UniformBlockBinding(ProgramID, blockIndex, bindingPoint);
+            GL.UniformBlockBinding(ProgramID, unifomBlock, bindingPoint);
 
             uniformBindingPoints[name] = bindingPoint;
 

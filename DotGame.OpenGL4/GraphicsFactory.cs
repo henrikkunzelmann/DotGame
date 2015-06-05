@@ -190,7 +190,7 @@ namespace DotGame.OpenGL4
                 //GLSL Version string auslesen
                 string glslVersionString = shaderVersion[1];
                 if (string.IsNullOrWhiteSpace(glslVersionString) || glslVersionString.Length < 2)
-                    throw new Exception("Could not determine GLSL version for shader " + shaderName);
+                    throw new GraphicsException("Could not determine GLSL version for shader " + shaderName);
 
                 string glslVersionStringMajor = glslVersionString.Substring(0, 1);
                 string glslVersionStringMinor = glslVersionString.Substring(1, 1);
@@ -198,7 +198,7 @@ namespace DotGame.OpenGL4
                 int glslVersionMajor;
                 int glslVersionMinor;
                 if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
-                    throw new Exception("Could not determine GLSL version for shader " + shaderName);
+                    throw new GraphicsException("Could not determine GLSL version for shader " + shaderName);
 
                 Version shaderGLSLVersion = new Version(glslVersionMajor, glslVersionMinor);
 
@@ -272,7 +272,7 @@ namespace DotGame.OpenGL4
         {
             // TODO (Joex3): Wieder eigene Exception? 
             if (!graphicsDevice.IsDisposed && !graphicsDevice.IsCurrent)
-                throw new Exception("DisposeUnused must be called in the render thread, or after the GraphicsDevice has been disposed.");
+                throw new InvalidOperationException("DisposeUnused must be called in the render thread, or after the GraphicsDevice has been disposed.");
 
             if (DeferredDispose.Count > 0)
             {
@@ -297,7 +297,7 @@ namespace DotGame.OpenGL4
         {
             // TODO (Robin): Auch hier wieder eigene Exception? 
             if (!graphicsDevice.IsDisposed && !graphicsDevice.IsCurrent)
-                throw new Exception("DisposeAll must be called in the render thread, or after the GraphicsDevice has been disposed.");
+                throw new InvalidOperationException("DisposeAll must be called in the render thread, or after the GraphicsDevice has been disposed.");
 
             if (objects.Count > 0)
             {
