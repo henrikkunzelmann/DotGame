@@ -46,7 +46,7 @@ namespace DotGame.Test
             Random r = new Random();
             for (int i = 0; i < 1000; i++)
             {
-                Vector3 pos = r.NextVector3() * new Vector3(100, 100, 100) - new Vector3(50, 50, 50);
+                Vector3 pos = r.NextVector3(new Vector3(-50, -50, -50), new Vector3(50, 50, 50));
                 builder.PushCube(pos - Vector3.One, pos + Vector3.One, Vector2.Zero, Vector2.One);
             }
 

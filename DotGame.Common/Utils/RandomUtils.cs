@@ -19,6 +19,11 @@ namespace DotGame.Utils
             return (float)rand.NextDouble();
         }
 
+        public static float NextFloat(this Random rand, float min, float max)
+        {
+            return MathHelper.Lerp(min, max, rand.NextFloat());
+        }
+
         /// <summary>
         /// Gibt einen Vektor mit Zufallswerten zwischen 0.0f und 1.0f zurück.
         /// </summary>
@@ -26,6 +31,11 @@ namespace DotGame.Utils
         public static Vector2 NextVector2(this Random rand)
         {
             return new Vector2(rand.NextFloat(), rand.NextFloat());
+        }
+
+        public static Vector2 NextVector2(this Random rand, Vector2 min, Vector2 max)
+        {
+            return new Vector2(rand.NextFloat(min.X, max.X), rand.NextFloat(min.Y, max.Y));
         }
         
         /// <summary>
@@ -35,6 +45,11 @@ namespace DotGame.Utils
         public static Vector3 NextVector3(this Random rand)
         {
             return new Vector3(rand.NextFloat(), rand.NextFloat(), rand.NextFloat());
+        }
+
+        public static Vector3 NextVector3(this Random rand, Vector3 min, Vector3 max)
+        {
+            return new Vector3(rand.NextFloat(min.X, max.X), rand.NextFloat(min.Y, max.Y), rand.NextFloat(min.Z, max.Z));
         }
 
         /// <summary>
@@ -47,17 +62,17 @@ namespace DotGame.Utils
         }
 
         /// <summary>
-        /// Gibt eine zufällige Farbe zurück mit dem angegebenen Alphawert.
+        /// Gibt eine zufällige Farbe zurück mit dem angegebenen Alpha-Wert.
         /// </summary>
-        /// <param name="AlphaValue">Der zu nutzende Alphawert.</param>
+        /// <param name="alphaValue">Der zu nutzende Alphawert.</param>
         /// <returns>Die zufällige Farbe.</returns>
-        public static Color NextColorRGB(this Random rand, float AlphaValue)
+        public static Color NextColorRGB(this Random rand, float alphaValue)
         {
-            return Color.FromArgb(AlphaValue, rand.NextFloat(), rand.NextFloat(), rand.NextFloat());
+            return Color.FromArgb(alphaValue, rand.NextFloat(), rand.NextFloat(), rand.NextFloat());
         }
 
         /// <summary>
-        /// Gibt eine zufällige Farbe mit einem zufälligen Alphawert zurück.
+        /// Gibt eine zufällige Farbe mit einem zufälligen Alpha-Wert zurück.
         /// </summary>
         /// <returns>Die zufällige Farbe.</returns>
         public static Color NextColorARGB(this Random random)
