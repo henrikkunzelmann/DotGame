@@ -27,12 +27,12 @@ namespace DotGame.OpenGL4.Windows
                 {
                     WindowState = OpenTK.WindowState.Normal;
                 }
-            } 
+            }
         }
 
-        public GameWindow() : base(800, 600, GraphicsMode.Default, "DotGame", GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.Default) { }
-        public GameWindow(int width, int height) : base(width, height, GraphicsMode.Default, "DotGame", GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.Default) { }
-        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title, GameWindowFlags.Default, DisplayDevice.Default, 4, 0, GraphicsContextFlags.Default) { }
+        public GameWindow() : base(800, 600, GraphicsMode.Default, "DotGame", GameWindowFlags.Default, DisplayDevice.Default, 4, 5, GraphicsContextFlags.Default) { }
+        public GameWindow(int width, int height) : base(width, height, GraphicsMode.Default, "DotGame", GameWindowFlags.Default, DisplayDevice.Default, 4, 5, GraphicsContextFlags.Default) { }
+        public GameWindow(int width, int height, string title) : base(width, height, GraphicsMode.Default, title, GameWindowFlags.Default, DisplayDevice.Default, 4, 5, GraphicsContextFlags.Default) { }
 
 
         public IGraphicsDevice CreateDevice(DeviceCreationFlags flags)

@@ -25,7 +25,7 @@ namespace DotGame.Test
 
             rasterizerState = engine.GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
             {
-                CullMode = CullMode.None,
+                CullMode = CullMode.Front,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
             });
@@ -53,7 +53,10 @@ namespace DotGame.Test
                 DepthStencil = depthStencil
             }));
             context.SetTexture(shader, "picture", material.Texture.Handle);
-            context.SetSampler(shader, "pictureSampler", sampler);
+            if (Engine.Settings.GraphicsAPI == GraphicsAPI.Direct3D11)
+                context.SetSampler(shader, "pictureSampler", sampler);
+            else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
+                context.SetSampler(shader, "picture", sampler);
 
             context.Update(constantBuffer, Matrix4x4.Transpose(world * viewProjection));
             context.SetConstantBuffer(shader, constantBuffer);

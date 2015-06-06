@@ -61,7 +61,11 @@ namespace DotGame.Assets
             if (handle != null)
                 throw new InvalidOperationException("Texture is already loaded.");
 
-            handle = Engine.GraphicsDevice.Factory.CreateTexture2D(header.Width, header.Height, header.Format, loadSettings.GenerateMipMaps);
+            if(header.MipLevels > 0)
+                handle = Engine.GraphicsDevice.Factory.CreateTexture2D(header.Width, header.Height, header.Format, header.MipLevels);
+            else
+                handle = Engine.GraphicsDevice.Factory.CreateTexture2D(header.Width, header.Height, header.Format, loadSettings.GenerateMipMaps);
+
             importer.LoadData(handle, File, loadSettings);
         }
 

@@ -9,25 +9,25 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace DotGame.OpenGL4
 {
-    public class DepthStencilState : GraphicsObject, IDepthStencilState
+    internal class DepthStencilState : GraphicsObject, IDepthStencilState
     {
         public DepthStencilStateInfo Info { get; private set; }
-        private int depthStencilReference;
+        private int stencilReference;
 
-        public DepthStencilState(GraphicsDevice graphicsDevice, DepthStencilStateInfo info)
+        internal DepthStencilState(GraphicsDevice graphicsDevice, DepthStencilStateInfo info)
             : base(graphicsDevice, new StackTrace(1))
         {
             this.Info = info;
         }
 
-        internal void Apply(int depthStencilReference)
+        internal void Apply(int stencilReference)
         {
-            Apply(null, depthStencilReference);
+            Apply(null, stencilReference);
         }
 
-        internal void Apply(IDepthStencilState compareTo, int depthStencilReference)
+        internal void Apply(IDepthStencilState compareTo, int stencilReference)
         {
-            if (compareTo != null || this.depthStencilReference != depthStencilReference)
+            if (compareTo != null || this.stencilReference != stencilReference)
             {
                 //Depth
                 if (compareTo.Info.IsDepthEnabled != Info.IsDepthEnabled)
@@ -60,7 +60,7 @@ namespace DotGame.OpenGL4
 
                 if (compareTo.Info.FrontFace.Comparsion != Info.FrontFace.Comparsion)
                 {
-                    GL.StencilFuncSeparate(StencilFace.Front, (StencilFunction)EnumConverter.Convert(Info.FrontFace.Comparsion), depthStencilReference, Info.StencilWriteMask);
+                    GL.StencilFuncSeparate(StencilFace.Front, (StencilFunction)EnumConverter.Convert(Info.FrontFace.Comparsion), stencilReference, Info.StencilWriteMask);
                 }
                 if (compareTo.Info.FrontFace.DepthFailOperation != Info.FrontFace.DepthFailOperation || compareTo.Info.FrontFace.FailOperation != Info.FrontFace.FailOperation || compareTo.Info.FrontFace.PassOperation != Info.FrontFace.PassOperation)
                 {
@@ -69,7 +69,7 @@ namespace DotGame.OpenGL4
 
                 if (compareTo.Info.BackFace.Comparsion != Info.BackFace.Comparsion)
                 {
-                    GL.StencilFuncSeparate(StencilFace.Back, (StencilFunction)EnumConverter.Convert(Info.BackFace.Comparsion), depthStencilReference, Info.StencilWriteMask);
+                    GL.StencilFuncSeparate(StencilFace.Back, (StencilFunction)EnumConverter.Convert(Info.BackFace.Comparsion), stencilReference, Info.StencilWriteMask);
                 }
                 if (compareTo.Info.BackFace.DepthFailOperation != Info.BackFace.DepthFailOperation || compareTo.Info.BackFace.FailOperation != Info.BackFace.FailOperation || compareTo.Info.BackFace.PassOperation != Info.BackFace.PassOperation)
                 {
@@ -96,13 +96,13 @@ namespace DotGame.OpenGL4
 
                 GL.StencilMask(Info.StencilWriteMask);
 
-                GL.StencilFuncSeparate(StencilFace.Front, (StencilFunction)EnumConverter.Convert(Info.FrontFace.Comparsion), depthStencilReference, Info.StencilWriteMask);
+                GL.StencilFuncSeparate(StencilFace.Front, (StencilFunction)EnumConverter.Convert(Info.FrontFace.Comparsion), stencilReference, Info.StencilWriteMask);
                 GL.StencilOpSeparate(StencilFace.Front, EnumConverter.Convert(Info.FrontFace.FailOperation), EnumConverter.Convert(Info.FrontFace.DepthFailOperation), EnumConverter.Convert(Info.FrontFace.PassOperation));
-                GL.StencilFuncSeparate(StencilFace.Back, (StencilFunction)EnumConverter.Convert(Info.BackFace.Comparsion), depthStencilReference, Info.StencilWriteMask);
+                GL.StencilFuncSeparate(StencilFace.Back, (StencilFunction)EnumConverter.Convert(Info.BackFace.Comparsion), stencilReference, Info.StencilWriteMask);
                 GL.StencilOpSeparate(StencilFace.Back, EnumConverter.Convert(Info.BackFace.FailOperation), EnumConverter.Convert(Info.BackFace.DepthFailOperation), EnumConverter.Convert(Info.BackFace.PassOperation));
             }
 
-            this.depthStencilReference = depthStencilReference;
+            this.stencilReference = stencilReference;
         }
 
         protected override void Dispose(bool isDisposing)

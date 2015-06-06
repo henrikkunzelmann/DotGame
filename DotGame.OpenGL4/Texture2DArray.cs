@@ -106,6 +106,7 @@ namespace DotGame.OpenGL4
             {
                 arrayHandle.Free();
             }
+            graphicsDevice.CheckGLError("Texture2DArray GenerateMipMaps");
         }
 
         internal void SetData(IntPtr data, int mipLevel, int imageSize)
@@ -137,7 +138,7 @@ namespace DotGame.OpenGL4
                 //OpenGL 4.5
             }
 
-            graphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError("Texture2DArray SetData");
         }
 
         internal void GenerateMipMaps()
@@ -154,6 +155,8 @@ namespace DotGame.OpenGL4
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
             {
             }
+
+            graphicsDevice.CheckGLError("Texture2DArray GenerateMipMaps");
         }
 
         protected override void Dispose(bool isDisposing)

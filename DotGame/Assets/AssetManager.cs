@@ -34,6 +34,7 @@ namespace DotGame.Assets
             : base(engine)
         {
             RegisterImporter(new SimpleTextureImporter(this), ".bmp", ".jpeg", ".jpg", ".png");
+            RegisterImporter(new Importers.DDSTextureImporter.DDSTextureImporter(this), ".dds");
         }
 
         private void CheckExtension(string extension, string parameterName)

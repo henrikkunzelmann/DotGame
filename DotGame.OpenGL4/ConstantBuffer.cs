@@ -71,6 +71,26 @@ namespace DotGame.OpenGL4
             }
             graphicsDevice.CheckGLError();
         }
+        internal void SetData(IntPtr data, int size)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+            if (size <= 0)
+                throw new ArgumentException("Data must not be empty.", "data");
+
+            SizeBytes = size;
+
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.ConstantBuffer = this;
+                GL.BufferData(BufferTarget.UniformBuffer, new IntPtr(SizeBytes), data, EnumConverter.Convert(Usage));
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(UboId, new IntPtr(SizeBytes), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
+            }
+            graphicsDevice.CheckGLError();
+        }
 
         protected override void Dispose(bool isDisposing)
         {

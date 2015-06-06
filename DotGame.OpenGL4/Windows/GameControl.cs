@@ -57,9 +57,13 @@ namespace DotGame.OpenGL4.Windows
                 WindowInfo = Utilities.CreateWindowsWindowInfo(control.Handle);
             else if (OpenTK.Configuration.RunningOnMacOS)
                 WindowInfo = Utilities.CreateMacOSWindowInfo(control.Handle);
+            
 
+            GraphicsContextFlags contextFlags = GraphicsContextFlags.Default;
+            if (flags.HasFlag(DeviceCreationFlags.Debug))
+                contextFlags = GraphicsContextFlags.Debug;
 
-            GraphicsContext context = new GraphicsContext(GraphicsMode.Default, WindowInfo);
+            GraphicsContext context = new GraphicsContext(GraphicsMode.Default, WindowInfo, 4, 5, contextFlags);
             context.LoadAll();
             return new GraphicsDevice(this, this, context, flags);
         }

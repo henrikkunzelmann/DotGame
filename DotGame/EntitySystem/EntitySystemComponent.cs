@@ -11,17 +11,17 @@ namespace DotGame.EntitySystem
 {
     public class EntitySystemComponent : GameComponent
     {
-        public readonly Scene Scene;
-        public readonly PassPipeline PassPipeline;
+        public Scene Scene {get; private set;}
+        public PassPipeline PassPipeline {get; private set;}
 
         public EntitySystemComponent(Engine engine) : base(engine)
         {
-            Scene = new Scene(engine);
-            PassPipeline = new PassPipeline(Engine, new ForwardPass(engine, Scene));
         }
 
         public override void Init()
         {
+            Scene = new Scene(Engine);
+            PassPipeline = new PassPipeline(Engine, new ForwardPass(Engine, Scene));
             Scene.Invoke("Init", false);
         }
 

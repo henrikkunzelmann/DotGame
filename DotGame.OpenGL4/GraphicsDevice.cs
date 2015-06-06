@@ -59,6 +59,20 @@ namespace DotGame.OpenGL4
         
         private DebugProc onDebugMessage;
 
+        private Dictionary<Version, Version> glslVersions = new Dictionary<Version, Version>()
+        {
+            {new Version(2,0), new Version(1,1)},
+            {new Version(2,1), new Version(1,2)},
+            {new Version(3,0), new Version(1,3)},
+            {new Version(3,1), new Version(1,4)},
+            {new Version(3,2), new Version(1,5)},
+            {new Version(3,3), new Version(3,3)},
+            {new Version(4,0), new Version(4,0)},
+            {new Version(4,1), new Version(4,1)},
+            {new Version(4,2), new Version(4,2)},
+            //OpenGL Version > 4.2 unterstützt auslesen von GLSL Version
+        };
+
         internal static int MipLevels(int width, int height, int depth = 0)
         {
             var max = Math.Max(width, Math.Max(height, depth));
@@ -127,26 +141,26 @@ namespace DotGame.OpenGL4
             Log.Write(logLevel, "\tOpenGL Version: {0}", openGLCapabilities.OpenGLVersion.ToString());
 
             //GLSL Version string auslesen
-            string glslVersionString = GL.GetString(StringName.ShadingLanguageVersion);
-            int glslVersionMajor;
-            int glslVersionMinor;
-            if (GL.GetError() != ErrorCode.NoError || string.IsNullOrWhiteSpace(glslVersionString))
-            {
-                glslVersionMajor = 3;
-                glslVersionMinor = 3;
-            }
-            else
+            string glslVersionString ="";
+            if (openGLCapabilities.OpenGLVersion >= new Version(4, 3) && !string.IsNullOrWhiteSpace(glslVersionString = GL.GetString(StringName.ShadingLanguageVersion)))
             {
                 string glslVersionStringMajor = glslVersionString.Substring(0, glslVersionString.IndexOf('.'));
                 string glslVersionStringMinor = glslVersionString.Substring(glslVersionString.IndexOf('.') + 1, 1);
 
+                int glslVersionMajor;
+                int glslVersionMinor;
                 if (!int.TryParse(glslVersionStringMajor, out glslVersionMajor) || !int.TryParse(glslVersionStringMinor, out glslVersionMinor))
                     throw new DotGame.Graphics.GraphicsException("Could not determine supported GLSL version");
-            }
-            CheckGLError("Init Version");
 
-            //Nicht Version mit String initialisieren da 4.40 als Major 4 und Minor 40 aufgefasst wird
-            openGLCapabilities.GLSLVersion = new Version(glslVersionMajor, glslVersionMinor);
+                //Nicht Version mit String initialisieren da 4.40 als Major 4 und Minor 40 aufgefasst wird
+                openGLCapabilities.GLSLVersion = new Version(glslVersionMajor, glslVersionMinor);
+            }
+            else if(glslVersions.ContainsKey(openGLCapabilities.OpenGLVersion))
+                openGLCapabilities.GLSLVersion = glslVersions[openGLCapabilities.OpenGLVersion];
+            else
+                throw new Exception("Could not determine supported GLSL version");
+
+            CheckGLError("Init Version");
 
             Log.Write(logLevel, "\tGLSL Version: {0}", openGLCapabilities.GLSLVersion.ToString());
             Log.Write(logLevel, "\tExtensions supported:");
@@ -232,6 +246,7 @@ namespace DotGame.OpenGL4
                         openGLCapabilities.VertexAttribBinding = true;
                         openGLCapabilities.MaxVertexAttribBindings = GL.GetInteger((GetPName)All.MaxVertexAttribBindings);
                         openGLCapabilities.MaxVertexAttribBindingOffset = GL.GetInteger((GetPName)All.MaxVertexAttribRelativeOffset);
+                        openGLCapabilities.MaxVertexAttribStride = GL.GetInteger((GetPName)All.MaxVertexAttribStride);
                         Log.Write(logLevel, "\t\t" + "GL_ARB_vertex_attrib_binding");
                         CheckGLError("Init GL_ARB_vertex_attrib_binding");
                         break;
@@ -250,7 +265,15 @@ namespace DotGame.OpenGL4
 
         private void OnDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr user)
         {
-            string sourceString = source.ToString();
+            // Ignores
+            if (id == 0x00020071) return; // memory usage
+            if (id == 0x00020084) return; // Texture state usage warning: Texture 0 is base level inconsistent. Check texture size.
+            if (id == 0x00020061) return; // Framebuffer detailed info: The driver allocated storage for renderbuffer 1.
+            if (id == 0x00020004) return; // Usage warning: Generic vertex attribute array ... uses a pointer with a small value (...). Is this intended to be used as an offset into a buffer object?
+            if (id == 0x00020072) return; // Buffer performance warning: Buffer object ... (bound to ..., usage hint is GL_STATIC_DRAW) is being copied/moved from VIDEO memory to HOST memory.
+            if (id == 0x00020074) return; // Buffer usage warning: Analysis of buffer object ... (bound to ...) usage indicates that the GPU is the primary producer and consumer of data for this buffer object.  The usage hint s upplied with this buffer object, GL_STATIC_DRAW, is inconsistent with this usage pattern.  Try using GL_STREAM_COPY_ARB, GL_STATIC_COPY_ARB, or GL_DYNAMIC_COPY_ARB instead.
+
+           string sourceString = source.ToString();
             if (sourceString.StartsWith("DebugSource"))
                 sourceString = sourceString.Remove(0, "DebugSource".Length);
 

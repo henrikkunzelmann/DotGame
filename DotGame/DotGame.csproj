@@ -64,6 +64,18 @@
   <ItemGroup>
     <Compile Include="Assets\Asset.cs" />
     <Compile Include="Assets\AssetType.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\Caps.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\Caps2.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\DDSTextureImporter.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\DXT10MiscFlag.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\DXT10MiscFlags2.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\Flags.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\Format.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\Header.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\HeaderDXT10.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\PixelFormat.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\PixelFormatFlags.cs" />
+    <Compile Include="Assets\Importers\DDSTextureImporter\ResourceDimension.cs" />
     <Compile Include="Assets\Importers\ImporterBase.cs" />
     <Compile Include="Assets\AssetManager.cs" />
     <Compile Include="Assets\Importers\SimpleTextureImporter.cs" />

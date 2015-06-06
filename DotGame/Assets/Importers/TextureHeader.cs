@@ -12,5 +12,7 @@ namespace DotGame.Assets.Importers
         public TextureFormat Format;
         public int Width;
         public int Height;
+        public int Depth;
+        public int MipLevels;
     }
 }

@@ -32,28 +32,19 @@ namespace DotGame.OpenGL4
             objects = new List<WeakReference<GraphicsObject>>();
             this.graphicsDevice = graphicsDevice;
         }
-        
-        public ITexture2D LoadTexture2D(string file, bool generateMipMaps)
-        {
-            AssertCurrent();
-
-            Bitmap bitmap = new Bitmap(file);
-            BitmapData bmpData = bitmap.LockBits(new System.Drawing.Rectangle(0, 0, bitmap.Width, bitmap.Height), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format32bppRgb);
-            Texture2D texture = Register(new Texture2D(graphicsDevice, bitmap.Width, bitmap.Height, 1, generateMipMaps, TextureFormat.RGBA8_UIntNorm));
-            texture.SetData(bmpData.Scan0, 0, bmpData.Stride * bmpData.Width * bmpData.Height);
-            bitmap.UnlockBits(bmpData);
-            bitmap.Dispose();
-
-            return texture;
-        }
 
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            Texture2D texture = Register(new Texture2D(graphicsDevice, width, height, generateMipMaps, format));
-            texture.SetData(IntPtr.Zero, 0, 0);
+            Texture2D texture = Register(new Texture2D(graphicsDevice, width, height, format, generateMipMaps));
 
             return texture;
+        }
+
+        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, int mipLevels)
+        {
+            AssertCurrent();
+            return Register(new Texture2D(graphicsDevice, width, height, format, mipLevels));
         }
 
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)

@@ -32,7 +32,7 @@ namespace DotGame.OpenGL4
         private RasterizerState currentRasterizer;
         private Color currentBlendFactor;
         private BlendState currentBlend;
-        private int currentDepthStencilReference = 0;
+        private int currentStencilReference = 0;
         private DepthStencilState currentDepthStencil;
 
         //BlendState
@@ -105,55 +105,94 @@ namespace DotGame.OpenGL4
 
             graphicsDevice.Cast<BlendState>(defaultBlend, "defaultBlend").Apply();
             graphicsDevice.Cast<RasterizerState>(defaultRasterizer, "defaultRasterizer").Apply();
-            graphicsDevice.Cast<DepthStencilState>(defaultDepthStencil, "depthStencil").Apply(currentDepthStencilReference);
+            graphicsDevice.Cast<DepthStencilState>(defaultDepthStencil, "depthStencil").Apply(currentStencilReference);
         }
 
-        public void Update<T>(IVertexBuffer buffer, T[] data) where T : struct
-        {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (buffer.IsDisposed)
-                throw new ObjectDisposedException("buffer");
+        #region Update
+        // TODO (henrik1235) Data* Update einbauen
 
-            var internalBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
+        #region Update IVertexBuffer
+        public void Update<T>(IVertexBuffer vertexBuffer, T[] data) where T : struct
+        {
+            if (vertexBuffer == null)
+                throw new ArgumentNullException("vertexBuffer");
+            if (vertexBuffer.IsDisposed)
+                throw new ObjectDisposedException("vertexBuffer");
+
+            var internalBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer");
 
             internalBuffer.SetData<T>(data);
         }
 
-        public void Update<T>(IIndexBuffer buffer, T[] data) where T : struct
+        public void Update(IVertexBuffer vertexBuffer, DataArray data)
         {
-            if (buffer == null)
-                throw new ArgumentNullException("buffer");
-            if (buffer.IsDisposed)
-                throw new ObjectDisposedException("buffer");
+            if (vertexBuffer == null)
+                throw new ArgumentNullException("vertexBuffer");
+            if (vertexBuffer.IsDisposed)
+                throw new ObjectDisposedException("vertexBuffer");
 
-            var internalBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
+            var internalBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer");
+
+            internalBuffer.SetData(data.Pointer, data.Size);
+        }
+        #endregion
+
+        #region Update IIndexBuffer
+        public void Update<T>(IIndexBuffer indexBuffer, T[] data) where T : struct
+        {
+            if (indexBuffer == null)
+                throw new ArgumentNullException("indexBuffer");
+            if (indexBuffer.IsDisposed)
+                throw new ObjectDisposedException("indexBuffer");
+
+            var internalBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "indexBuffer");
 
             internalBuffer.SetData<T>(data);
         }
 
-        public void Update<T>(IConstantBuffer buffer, T data) where T : struct
+        public void Update(IIndexBuffer indexBuffer, DataArray data)
         {
-            if (buffer == null)
+            if (indexBuffer == null)
                 throw new ArgumentNullException("buffer");
-            if (buffer.IsDisposed)
+            if (indexBuffer.IsDisposed)
                 throw new ObjectDisposedException("buffer");
 
-            var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
+            var internalBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "buffer");
+
+            internalBuffer.SetData(data.Pointer, data.Size, data.Size/4);
+        }
+        #endregion
+
+        #region Update IConstantBuffer
+        public void Update<T>(IConstantBuffer constantBuffer, T data) where T : struct
+        {
+            if (constantBuffer == null)
+                throw new ArgumentNullException("constantBuffer");
+            if (constantBuffer.IsDisposed)
+                throw new ObjectDisposedException("constantBuffer");
+
+            var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(constantBuffer, "constantBuffer");
 
             internalBuffer.SetData<T>(data);
         }
 
+        public void Update(IConstantBuffer constantBuffer, DataArray data)
+        {
+            if (constantBuffer == null)
+                throw new ArgumentNullException("constantBuffer");
+            if (constantBuffer.IsDisposed)
+                throw new ObjectDisposedException("constantBuffer");
+
+            var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(constantBuffer, "constantBuffer");
+
+            internalBuffer.SetData(data.Pointer, data.Size);
+        }
+        #endregion
+
+        #region Update ITexture2D
         public void Update<T>(ITexture2D texture, T[] data) where T : struct
         {
-            if (texture == null)
-                throw new ArgumentNullException("texture");
-            if (texture.IsDisposed)
-                throw new ObjectDisposedException("texture");
-
-            var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
-
-            internalTexture.SetData<T>(data, 0);
+            Update<T>(texture, 0, data);
         }
 
         public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
@@ -167,9 +206,44 @@ namespace DotGame.OpenGL4
 
             var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
 
-            internalTexture.SetData<T>(data, mipLevel);
+            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+            try
+            {
+                internalTexture.SetData(handle.AddrOfPinnedObject(), mipLevel, data.Length * Marshal.SizeOf(typeof(T)));
+            }
+            finally
+            {
+                handle.Free();
+            }
+        }       
+
+        public void Update(ITexture2D texture, DataRectangle data)
+        {
+            Update(texture, 0, data);
+        }
+        public void Update(ITexture2D texture, DataRectangle[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+
+            Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "data");
+
+            for (int i = 0; i < data.Length; i++)
+                if (data[i] != null && !data[i].IsNull)
+                    internalTexture.SetData(data[i].Pointer, i, data[i].Size);
         }
 
+        public void Update(ITexture2D texture, int mipLevel, DataRectangle data)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+
+            Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "data");
+            internalTexture.SetData(data.Pointer, mipLevel, data.Size);
+        }
+        #endregion
+
+        #region Update ITexture2DArray
         public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
         {
             if (textureArray == null)
@@ -195,6 +269,27 @@ namespace DotGame.OpenGL4
 
             internalTexture.SetData<T>(data, mipLevel);
         }
+        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void Update(ITexture2DArray textureArray, DataRectangle[] data)
+        {
+            throw new NotImplementedException();
+        }
+        #endregion
+        #endregion
 
         public void GenerateMips(ITexture2D texture)
         {
@@ -344,7 +439,7 @@ namespace DotGame.OpenGL4
 
         public void SetStencilReference(byte stencilReference)
         {
-            currentDepthStencilReference = stencilReference;
+            currentStencilReference = stencilReference;
         }
 
         public void SetState(IRenderState state)
@@ -505,7 +600,7 @@ namespace DotGame.OpenGL4
             {
                 DepthStencilState depthStencil = graphicsDevice.Cast<DepthStencilState>(currentState.DepthStencil, "currentState.DepthStencil");
 
-                depthStencil.Apply(currentDepthStencil, currentDepthStencilReference);
+                depthStencil.Apply(currentDepthStencil, currentStencilReference);
                 currentDepthStencil = depthStencil;
             }
             
@@ -599,42 +694,6 @@ namespace DotGame.OpenGL4
         protected override void Dispose(bool isDisposing)
         {
 
-        }
-
-        // TODO (henrik1235) Data* Update einbauen
-        public void Update(IConstantBuffer buffer, DataArray data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2D texture, DataRectangle data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2D texture, int mipLevel, DataRectangle data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(IVertexBuffer vertexBuffer, DataArray data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(IIndexBuffer indexBuffer, DataArray data)
-        {
-            throw new NotImplementedException();
         }
     }
 }

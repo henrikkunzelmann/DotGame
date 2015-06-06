@@ -9,11 +9,11 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace DotGame.OpenGL4
 {
-    public class BlendState : GraphicsObject, IBlendState
+    internal class BlendState : GraphicsObject, IBlendState
     {
         public BlendStateInfo Info { get; private set; }
 
-        public BlendState(GraphicsDevice graphicsDevice, BlendStateInfo info)
+        internal BlendState(GraphicsDevice graphicsDevice, BlendStateInfo info)
             : base(graphicsDevice, new StackTrace(1))
         {
             this.Info = info;

@@ -265,7 +265,10 @@ namespace DotGame.OpenGL4
                         currentVertexBuffer = null;
 
                     VertexBuffer internalVertexBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
-                    GL.BindVertexBuffer(0, internalVertexBuffer.VboID, (IntPtr)0, graphicsDevice.GetSizeOf(internalVertexBuffer.Description));
+                    int stride = graphicsDevice.GetSizeOf(internalVertexBuffer.Description);
+                    if(stride > graphicsDevice.OpenGLCapabilities.MaxVertexAttribStride)
+                        throw new GraphicsException(string.Format("The vertex size exceeds the maximum of {0}.",graphicsDevice.OpenGLCapabilities.MaxVertexAttribStride));
+                    GL.BindVertexBuffer(0, internalVertexBuffer.VboID, (IntPtr)0, stride);
                 }
                 currentVertexBuffers[bindingPoint] = buffer;
             }

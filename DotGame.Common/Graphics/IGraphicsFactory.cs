@@ -11,8 +11,8 @@ namespace DotGame.Graphics
     /// </summary>
     public interface IGraphicsFactory : IDisposable
     {
-        ITexture2D LoadTexture2D(string file, bool generateMipMaps);
         ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps);
+        ITexture2D CreateTexture2D(int width, int height, TextureFormat format, int mipLevels);
         ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps);
         ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize);
         ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize);

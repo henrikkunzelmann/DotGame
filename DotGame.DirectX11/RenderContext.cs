@@ -103,7 +103,6 @@ namespace DotGame.DirectX11
             }
         }
 
-
         public void Update<T>(ITexture2D texture, T[] data) where T : struct
         {
             Update(texture, 0, data);
@@ -192,6 +191,24 @@ namespace DotGame.DirectX11
             Update(texture, 0, data);
         }
 
+        public void Update(ITexture2D texture, DataRectangle[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+
+            for (int i = 0; i < data.Length; i++)
+                Update(texture,i, data[i]);
+        }
+
+        public void Update(ITexture2DArray textureArray, DataRectangle[] data)
+        {
+            if (data == null)
+                throw new ArgumentNullException("data");
+
+            for (int i = 0; i < data.Length; i++)
+                Update(textureArray, i, data[i]);
+        }
+
         public void Update(ITexture2D texture, int mipLevel, DataRectangle data) 
         {
             if (mipLevel < 0 || mipLevel >= texture.MipLevels)
@@ -215,6 +232,11 @@ namespace DotGame.DirectX11
                 throw new ArgumentOutOfRangeException("mipLevel");
 
             context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, data.Pitch, 0), dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels));
+        }
+
+        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle[] data)
+        {
+            throw new NotImplementedException();
         }
 
         public void GenerateMips(ITexture2D texture)

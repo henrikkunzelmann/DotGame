@@ -26,7 +26,8 @@ namespace DotGame.Assets.Importers
                 {
                     Width = image.Width,
                     Height = image.Height,
-                    Format = TextureFormat.RGBA32_Float
+                    Format = TextureFormat.RGBA32_Float,
+                    MipLevels = 1
                 };
             }
         }

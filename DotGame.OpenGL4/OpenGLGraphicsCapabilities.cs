@@ -87,6 +87,11 @@ namespace DotGame.Graphics
         internal int MaxVertexAttribBindingOffset;
 
         /// <summary>
+        /// Gibt die maximale Größe eines Vertex an
+        /// </summary>
+        internal int MaxVertexAttribStride;
+
+        /// <summary>
         /// Gibt an, ob der Treiber das Validieren von Texturen, Buffern und FrameBuffern beherrscht. (ARB_invalidate_subdata, core ab 4.3)
         /// </summary>
         internal bool SupportsResourceValidation;

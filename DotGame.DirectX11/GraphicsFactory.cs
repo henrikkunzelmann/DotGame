@@ -22,35 +22,13 @@ namespace DotGame.DirectX11
             this.graphicsDevice = graphicsDevice;
         }
 
-        public ITexture2D LoadTexture2D(string file, bool generateMipMaps)
-        {
-            if (file == null)
-                throw new ArgumentNullException("file");
-            if (!File.Exists(file))
-                throw new ArgumentException("File does not exist.", "file");
-
-            // TODO (Robin): Texture2D.FromFile ist deprecated. Texturen mit Inhalt über ResourceManager laden
-            return new Texture2D(graphicsDevice, (SharpDX.Direct3D11.Texture2D)SharpDX.Direct3D11.Texture2D.FromFile(graphicsDevice.Device, file, new SharpDX.Direct3D11.ImageLoadInformation()
-                {
-                    Width = SharpDX.Direct3D11.ImageLoadInformation.FileDefaultValue,
-                    Height = SharpDX.Direct3D11.ImageLoadInformation.FileDefaultValue,
-                    Depth = SharpDX.Direct3D11.ImageLoadInformation.FileDefaultValue,
-                    FirstMipLevel = 0,
-                    MipLevels = generateMipMaps ? 0 : 1,
-                    Usage = SharpDX.Direct3D11.ResourceUsage.Default,
-                    BindFlags = SharpDX.Direct3D11.BindFlags.ShaderResource | (generateMipMaps ? SharpDX.Direct3D11.BindFlags.RenderTarget : 0),
-                    CpuAccessFlags = SharpDX.Direct3D11.CpuAccessFlags.None,
-                    OptionFlags = generateMipMaps ? SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps : SharpDX.Direct3D11.ResourceOptionFlags.None,
-                    Format = (SharpDX.DXGI.Format)(-3),
-                    Filter = SharpDX.Direct3D11.FilterFlags.None,
-                    MipFilter = SharpDX.Direct3D11.FilterFlags.Linear,
-                    PSrcInfo = IntPtr.Zero
-                }));
-        }
-
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
-            return new Texture2D(graphicsDevice, width, height, 0, format, 1, false, generateMipMaps);
+            return new Texture2D(graphicsDevice, width, height, format, 1, false, generateMipMaps);
+        }
+        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, int mipLevels)
+        {
+            return new Texture2D(graphicsDevice, width, height, format, mipLevels, mipLevels);
         }
 
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
@@ -60,7 +38,7 @@ namespace DotGame.DirectX11
 
         public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
-            return new Texture2D(graphicsDevice, width, height, 0, format, arraySize, false, generateMipMaps);
+            return new Texture2D(graphicsDevice, width, height, format, arraySize, false, generateMipMaps);
         }
 
         public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -70,7 +48,7 @@ namespace DotGame.DirectX11
 
         public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
-            return new Texture2D(graphicsDevice, width, height, 0, format, 1, true, generateMipMaps);
+            return new Texture2D(graphicsDevice, width, height, format, 1, true, generateMipMaps);
         }
 
         public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
@@ -80,7 +58,7 @@ namespace DotGame.DirectX11
 
         public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
-            return new Texture2D(graphicsDevice, width, height, 0, format, arraySize, true, generateMipMaps);
+            return new Texture2D(graphicsDevice, width, height, format, arraySize, true, generateMipMaps);
         }
 
         public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)

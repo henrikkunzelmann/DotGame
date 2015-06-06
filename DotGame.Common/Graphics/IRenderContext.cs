@@ -22,8 +22,11 @@ namespace DotGame.Graphics
 
         void Update(IConstantBuffer buffer, DataArray data);
         void Update(ITexture2D texture, DataRectangle data);
+        void Update(ITexture2D texture, DataRectangle[] data);
         void Update(ITexture2D texture, int mipLevel, DataRectangle data);
-        void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data); 
+        void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data);
+        void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle[] data);
+        void Update(ITexture2DArray textureArray, DataRectangle[] data);
         void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data); 
 
         void Update(IVertexBuffer vertexBuffer, DataArray data); 

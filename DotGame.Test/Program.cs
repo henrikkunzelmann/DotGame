@@ -11,6 +11,10 @@ using DotGame.Utils;
 using DotGame.Rendering;
 using DotGame.SceneGraph;
 using DotGame.Geometry;
+using DotGame.EntitySystem;
+using DotGame.Assets;
+using DotGame.EntitySystem.Components;
+using DotGame.Graphics;
 
 namespace DotGame.Test
 {
@@ -29,9 +33,12 @@ namespace DotGame.Test
                 Height = 720,
                 AudioAPI = AudioAPI.OpenAL
             });
-            
 
-            engine.AddComponent(new GraphTest(engine));
+            var component = new EntitySystemComponent(engine);
+            engine.AddComponent(component);
+
+            //engine.AddComponent(new GraphTest(engine));
+            engine.AddComponent(new MipMapTest(engine));
 
             Application.Run();
         }

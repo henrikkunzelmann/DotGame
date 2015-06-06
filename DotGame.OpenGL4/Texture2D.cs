@@ -19,7 +19,7 @@ namespace DotGame.OpenGL4
 
         internal int TextureID { get; private set; }
 
-        internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, bool generateMipMaps, TextureFormat format)
+        internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, TextureFormat format, bool generateMipMaps)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -40,10 +40,20 @@ namespace DotGame.OpenGL4
             this.MipLevels = generateMipMaps ? OpenGL4.GraphicsDevice.MipLevels(width, height) : 1;
             this.Format = format;
 
-            this.TextureID = GL.GenTexture();       
+            this.TextureID = GL.GenTexture();
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
+            {
+            }   
         }
 
-        internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, int mipLevels, bool generateMipMaps, TextureFormat format)
+        internal Texture2D(GraphicsDevice graphicsDevice, int width, int height, TextureFormat format, int mipLevels)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -61,64 +71,60 @@ namespace DotGame.OpenGL4
 
             this.Width = width;
             this.Height = height;
-            this.MipLevels = mipLevels == 0 ? OpenGL4.GraphicsDevice.MipLevels(width, height) : mipLevels;
             this.Format = format;
 
+            this.MipLevels = mipLevels == 0 ? OpenGL4.GraphicsDevice.MipLevels(width, height) : mipLevels;
+
             this.TextureID = GL.GenTexture();
-
-            graphicsDevice.CheckGLError();
-        }
-
-        internal void SetData<T>(T[] data, int mipLevel)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (data.Length == 0)
-                throw new ArgumentException("Data must not be empty.", "data");
-
-            GCHandle arrayHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
-                IntPtr ptr = arrayHandle.AddrOfPinnedObject();
-                SetData(ptr, mipLevel, data.Length * Marshal.SizeOf(typeof(T)));
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
             }
-            finally
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
             {
-                arrayHandle.Free();
             }
-        }
 
+            graphicsDevice.CheckGLError("Texture2D Constructor");
+        }
+                
         internal void SetData(IntPtr data, int mipLevel, int imageSize)
         {
-            var format = EnumConverter.Convert(Format);
+            if (mipLevel >= this.MipLevels)
+                throw new ArgumentOutOfRangeException("MipLevel exceeds the amount of mip levels.");
+            if (mipLevel < 0)
+                throw new ArgumentOutOfRangeException("MipLevel must not be smaller than zero.");
+            if (imageSize <= 0)
+                throw new ArgumentOutOfRangeException("ImageSize must not be smaller than zero.");
 
-            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            var format = EnumConverter.Convert(Format);
+            int width = Width / (int)Math.Pow(2, mipLevel);
+            int height = Height / (int)Math.Pow(2, mipLevel);
+
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None || true)
             {
                 graphicsDevice.BindManager.SetTexture(this, 0);
                 
                 if (!TextureFormatHelper.IsCompressed(Format))
-                    GL.TexImage2D(TextureTarget.Texture2D, mipLevel, format.Item1, Width, Height, 0, format.Item2, format.Item3, data);
+                    GL.TexImage2D(TextureTarget.Texture2D, mipLevel, format.Item1, width, height, 0, format.Item2, format.Item3, data);
                 else
-                    GL.CompressedTexImage2D(TextureTarget.Texture2D, mipLevel, format.Item1, Width, Height, 0, imageSize, data);
-
-                GL.TexParameter(TextureTarget.Texture2D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+                    GL.CompressedTexImage2D(TextureTarget.Texture2D, mipLevel, format.Item1, width, height, 0, imageSize, data);
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-
                 if (!TextureFormatHelper.IsCompressed(Format))
-                    Ext.TextureImage2D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, mipLevel, (int)format.Item1, Width, Height, 0, (OpenTK.Graphics.OpenGL.PixelFormat)format.Item2, (OpenTK.Graphics.OpenGL.PixelType)format.Item3, data);
+                    Ext.TextureImage2D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, mipLevel, (int)format.Item1, width, height, 0, (OpenTK.Graphics.OpenGL.PixelFormat)format.Item2, (OpenTK.Graphics.OpenGL.PixelType)format.Item3, data);
                 else
-                    Ext.CompressedTextureImage2D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, mipLevel, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Format).Item1, Width, Height, 0, Marshal.SizeOf(data), data);
-                
-                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+                    Ext.CompressedTextureImage2D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture2D, mipLevel, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Format).Item1, width, height, 0, imageSize, data);
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
             { 
                 //OpenGL 4.5
             }
 
-            graphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError("Texture2D SetData");
         }
 
         internal void GenerateMipMaps()
@@ -135,6 +141,7 @@ namespace DotGame.OpenGL4
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
             {
             }
+            graphicsDevice.CheckGLError("Texture2D GenerateMipMaps");
         }
 
         protected override void Dispose(bool isDisposing)

@@ -18,6 +18,9 @@ namespace DotGame.DirectX11
             { TextureFormat.RGB32_Float, Format.R32G32B32_Float },
             { TextureFormat.RGBA32_Float, Format.R32G32B32A32_Float },
             { TextureFormat.RGBA8_UIntNorm, Format.R8G8B8A8_UNorm },
+            {TextureFormat.DXT1, Format.BC1_UNorm},
+            {TextureFormat.DXT3, Format.BC2_UNorm},
+            {TextureFormat.DXT5, Format.BC3_UNorm},
             { TextureFormat.Depth16, Format.R16_Typeless },
             { TextureFormat.Depth24Stencil8, Format.R24G8_Typeless },
             { TextureFormat.Depth32, Format.R32_Typeless }

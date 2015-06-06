@@ -9,11 +9,11 @@ using OpenTK.Graphics.OpenGL4;
 
 namespace DotGame.OpenGL4
 {
-    public class RasterizerState : GraphicsObject, IRasterizerState
+    internal class RasterizerState : GraphicsObject, IRasterizerState
     {
         public RasterizerStateInfo Info { get; private set; }
 
-        public RasterizerState(GraphicsDevice graphicsdevice, RasterizerStateInfo info)
+        internal RasterizerState(GraphicsDevice graphicsdevice, RasterizerStateInfo info)
             :base(graphicsdevice, new StackTrace(1))
         {
             this.Info = info;

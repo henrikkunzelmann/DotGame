@@ -67,13 +67,15 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
+    <Compile Include="MipMapTest.cs" />
     <Compile Include="GraphTest.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="MoveComponent.cs" />
     <Compile Include="RotateComponent.cs" />
     <Compile Include="TestPass.cs" />
     <Compile Include="TestShader.cs" />
-    <None Include="forward.pixel.glsl">
+    <None Include="forward.fragment.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
     <None Include="forward.vertex.glsl">
