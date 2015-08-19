@@ -35,10 +35,12 @@ namespace DotGame.Rendering
             this.Shader = shader;
         }
 
+        //public void AddShader<T>(Shader shader) where T : Material
+
         /// <summary>
         /// Wendet den Pass an.
         /// </summary>
         /// <param name="gameTime"></param>
-        public abstract void Apply(GameTime gameTime);
+        public abstract void Render(GameTime gameTime);
     }
 }

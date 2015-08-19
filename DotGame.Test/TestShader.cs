@@ -7,6 +7,7 @@ using System.Numerics;
 using DotGame.Utils;
 using DotGame.Rendering;
 using DotGame.Graphics;
+using DotGame.EntitySystem.Components;
 
 namespace DotGame.Test
 {
@@ -41,6 +42,25 @@ namespace DotGame.Test
         public override void Apply(IRenderContext context)
         {
             throw new NotImplementedException();
+        }
+
+        public override void Apply(IRenderContext context, Camera camera, Assets.Material material, Matrix4x4 world)
+        {
+            context.SetState(Engine.RenderStatePool.GetRenderState(new RenderStateInfo()
+            {
+                PrimitiveType = Graphics.PrimitiveType.TriangleList,
+                Shader = shader,
+                Rasterizer = rasterizerState,
+                DepthStencil = depthStencil
+            }));
+            context.SetTexture(shader, "picture", material.Texture.Handle);
+            if (Engine.Settings.GraphicsAPI == GraphicsAPI.Direct3D11)
+                context.SetSampler(shader, "pictureSampler", sampler);
+            else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
+                context.SetSampler(shader, "picture", sampler);
+
+            context.Update(constantBuffer, Matrix4x4.Transpose(world * camera.View * camera.Projection));
+            context.SetConstantBuffer(shader, constantBuffer);
         }
 
         public override void Apply(IRenderContext context, Matrix4x4 viewProjection, Assets.Material material, Matrix4x4 world)

@@ -13,5 +13,6 @@ namespace DotGame
         public string AudioDevice;
         public int Width;
         public int Height;
+        public bool Debug;
     }
 }

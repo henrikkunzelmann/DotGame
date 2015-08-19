@@ -82,6 +82,7 @@
     <Compile Include="Graphics\ClearOptions.cs" />
     <Compile Include="Graphics\Color.cs" />
     <Compile Include="Graphics\Comparison.cs" />
+    <Compile Include="Graphics\FeatureLevel.cs" />
     <Compile Include="Graphics\FillMode.cs" />
     <Compile Include="Graphics\GraphicsCapabilities.cs" />
     <Compile Include="Graphics\GraphicsDeviceNotCurrentException.cs" />

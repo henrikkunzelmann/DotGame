@@ -15,12 +15,12 @@ namespace DotGame.EntitySystem.Components
         public ISoundInstance Sound { get { return sound; } set { sound = value; ApplySettings(); } }
         private ISoundInstance sound;
 
-        protected override void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             ApplySettings();
         }
 
-        protected override void Destroy()
+        public override void Destroy()
         {
             base.Destroy();
 

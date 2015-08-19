@@ -9,9 +9,9 @@ namespace DotGame.EntitySystem.Components
 {
     public class AudioListener : Component
     {
-        protected override void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
-            var listener = Entity.Scene.Engine.AudioDevice.Listener;
+            /*var listener = Entity.Scene.Engine.AudioDevice.Listener;
             var position = listener.Position;
             listener.Position = Entity.Transform.Position;
             listener.Velocity = listener.Position - position;
@@ -21,6 +21,7 @@ namespace DotGame.EntitySystem.Components
                 listener.Up = Vector3.UnitY;
             else
                 listener.Up = camera.Up;
+                */
         }
     }
 }

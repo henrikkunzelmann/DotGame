@@ -13,7 +13,7 @@ namespace DotGame.EntitySystem.Rendering
     {
         public Scene Scene { get; private set; }
 
-        private List<IRenderItem> items = new List<IRenderItem>();
+        private List<Renderer> items = new List<Renderer>();
 
         public ForwardPass(Engine engine, Scene scene) : base(engine, new ForwardShader(engine))
         {
@@ -23,15 +23,16 @@ namespace DotGame.EntitySystem.Rendering
             this.Scene = scene;
         }
 
-        public override void Apply(GameTime gameTime)
+        public override void Render(GameTime gameTime)
         {
-            var cameras = Scene.GetComponents<Camera>();
-            foreach (var camera in Scene.GetComponents<Camera>())
+            var cameras = Scene.Root.GetComponents(true, typeof(Camera)).Select(c => (Camera)c);
+            foreach (var camera in cameras)
             {
-                if (!camera.IsEnabled)
+                if (camera == null || !camera.IsEnabled)
                     continue;
 
-                Scene.CurrentCamera = camera;
+
+                //Scene.CurrentCamera = camera;
                 switch (camera.ClearMode)
                 {
                     case CameraClearMode.Nothing:
@@ -47,11 +48,12 @@ namespace DotGame.EntitySystem.Rendering
                 }
 
                 items.Clear();
-                Scene.Invoke("PrepareDraw", false, gameTime, items);
+                foreach (Renderer item in Scene.Root.GetComponents(true, typeof(Renderer)))
+                    items.Add(item);
 
                 for (int i = 0; i < items.Count; i++)
                     items[i].Draw(gameTime, this, Engine.GraphicsDevice.RenderContext);
-            }
+            }            
         }
 
         protected override void Dispose(bool isDisposing)

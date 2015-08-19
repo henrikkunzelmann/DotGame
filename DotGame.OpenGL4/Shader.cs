@@ -168,10 +168,12 @@ namespace DotGame.OpenGL4
         {
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (!uniformLocations.ContainsKey(name))
+
+            int location;
+            if (!uniformLocations.TryGetValue(name, out location))
                 throw new ArgumentException(string.Format("Uniform {0} not found.", name), "name");
 
-            return uniformLocations[name];
+            return location;
         }
 
         /// <summary>

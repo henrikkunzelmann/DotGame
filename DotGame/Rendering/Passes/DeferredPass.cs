@@ -17,7 +17,7 @@ namespace DotGame.Rendering.Passes
 
         }
 
-        public override void Apply(GameTime gameTime)
+        public override void Render(GameTime gameTime)
         {
             throw new NotImplementedException();
         }

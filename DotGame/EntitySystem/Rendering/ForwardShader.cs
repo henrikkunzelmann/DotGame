@@ -6,6 +6,8 @@ using System.Linq;
 using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
+using DotGame.Assets;
+using DotGame.EntitySystem.Components;
 
 namespace DotGame.EntitySystem.Rendering
 {
@@ -63,6 +65,11 @@ namespace DotGame.EntitySystem.Rendering
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
+        }
+
+        public override void Apply(IRenderContext context, Camera camera, Material material, Matrix4x4 world)
+        {
+            Apply(context, camera.ViewProjection, material, world);
         }
     }
 }

@@ -3,88 +3,75 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using DotGame.EntitySystem.Components;
-using DotGame.Graphics;
+using DotGame;
+using DotGame.Utils;
 using DotGame.Rendering;
+using DotGame.Graphics;
+using DotGame.EntitySystem;
+using DotGame.EntitySystem.Components;
+using Newtonsoft.Json;
+using System.IO;
 
-namespace DotGame.EntitySystem
+namespace DotGame
 {
-    public sealed class Scene : EventHandler
+    /// <summary>
+    /// Stellt die komplette Welt dar, d.h. SceneNodes und Camera.
+    /// </summary>
+    public class Scene : EngineComponent
     {
-        public readonly Engine Engine;
-
-        private List<Entity> rootNodes = new List<Entity>();
-
         /// <summary>
-        /// Ruft die aktuelle Kamera ab, die zum Rendern benutzt wird.
+        /// Gibt die Root-SceneNode an.
         /// </summary>
-        public Camera CurrentCamera { get; internal set; }
+        public Entity Root {
+            get;
+            set;
+        }
+
+        [JsonIgnore]
+        private Camera camera;
+        
+        public Camera CurrentCamera
+        {
+            get
+            {
+                if (camera == null)
+                    camera = (Camera)Root.GetComponents(true, typeof(Camera)).First();
+                return camera;
+            }
+            private set
+            {
+                camera = value;
+            }
+        }
 
         public Scene(Engine engine)
+            : base(engine)
         {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
-
-            this.Engine = engine;
+            Root = new Entity("root", this, engine);
         }
 
-        /// <summary>
-        /// Erstellt ein neues Entity im Root-Knoten.
-        /// </summary>
-        /// <param name="name">Der Name des Entities.</param>
-        /// <returns>Das Entity.</returns>
-        public Entity CreateChild(string name)
+        public void SerializeScene()
         {
-            var node = new Entity(this, name);
-            lock (rootNodes)
-                rootNodes.Add(node);
-            return node;
+            JsonSerializer serializer = new JsonSerializer();
+            serializer.TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple;
+            serializer.TypeNameHandling = TypeNameHandling.Objects;
+            serializer.PreserveReferencesHandling = PreserveReferencesHandling.Objects;
+
+            StringWriter writer = new StringWriter();
+            serializer.Serialize(writer, this);
+            File.WriteAllText("scene.dot",writer.ToString());
         }
 
-        public T[] GetComponents<T>() where T : Component
+        protected override void Dispose(bool isDisposing)
         {
-            return GetComponents(typeof(T)).Cast<T>().ToArray();
+            Root.Destroy();
         }
 
-        public Component[] GetComponents(params Type[] types)
+        public override void Unload()
         {
-            var list = new List<Component>();
-            lock (rootNodes)
-            {
-                foreach (var node in rootNodes)
-                    list.AddRange(node.GetComponents(true, types));
-            }
-            return list.ToArray();
-        }
+            base.Unload();
 
-        internal void AddChild(Entity node)
-        {
-            if (node == null)
-                throw new ArgumentNullException("node");
-
-            lock (rootNodes)
-                rootNodes.Add(node);
-        }
-
-        internal bool RemoveChild(Entity node)
-        {
-            if (node == null)
-                throw new ArgumentNullException("node");
-
-            lock (rootNodes)
-                return rootNodes.Remove(node);
-        }
-
-        public Entity[] GetRootChildren()
-        {
-            lock (rootNodes)
-                return rootNodes.ToArray();
-        }
-
-        protected override void GetChildHandlers(List<EventHandler> list)
-        {
-            lock (rootNodes)
-                list.AddRange(rootNodes);
+            Root.Destroy();
         }
     }
 }

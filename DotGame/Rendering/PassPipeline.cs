@@ -10,7 +10,7 @@ namespace DotGame.Rendering
     /// <summary>
     /// Speichert die Passes und deren Reihenfolge die für das Rendering benutzt werden soll.
     /// </summary>
-    public class PassPipeline : EngineObject
+    public class PassPipeline : EngineComponent
     {
         private object locker = new object();
         private Pass[] passes;
@@ -45,11 +45,10 @@ namespace DotGame.Rendering
         public PassPipeline(Engine engine)
             : base(engine)
         {
-            
         }
 
         public PassPipeline(Engine engine, params Pass[] passes)
-            : base(engine)
+            : this(engine)
         {
             if (passes == null)
                 throw new ArgumentNullException("passes");
@@ -104,7 +103,7 @@ namespace DotGame.Rendering
             }
         }
 
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             lock (locker)
             {
@@ -116,7 +115,7 @@ namespace DotGame.Rendering
             }
 
             for (int i = 0; i < passes.Length; i++)
-                passes[i].Apply(gameTime);
+                passes[i].Render(gameTime);
         }
 
         protected override void Dispose(bool isDisposing)

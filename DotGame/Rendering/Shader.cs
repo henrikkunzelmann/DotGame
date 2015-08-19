@@ -6,6 +6,7 @@ using System.Threading.Tasks;
 using DotGame.Assets;
 using DotGame.Graphics;
 using System.Numerics;
+using DotGame.EntitySystem.Components;
 
 namespace DotGame.Rendering
 {
@@ -32,5 +33,6 @@ namespace DotGame.Rendering
 
         public abstract void Apply(IRenderContext context);
         public abstract void Apply(IRenderContext context, Matrix4x4 viewProjection, Material material, Matrix4x4 world);
+        public abstract void Apply(IRenderContext context, Camera camera, Material material, Matrix4x4 world);
     }
 }

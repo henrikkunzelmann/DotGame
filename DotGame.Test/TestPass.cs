@@ -5,8 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Utils;
 using DotGame.Rendering;
-using DotGame.SceneGraph;
 using DotGame.Graphics;
+using DotGame.EntitySystem.Components;
 
 namespace DotGame.Test
 {
@@ -14,7 +14,7 @@ namespace DotGame.Test
     {
         public Scene Scene { get; private set; }
 
-        private List<IRenderItem> items = new List<IRenderItem>();
+        private List<Renderer> items = new List<Renderer>();
 
         public TestPass(Engine engine, Scene scene)
             : base(engine, new TestShader(engine))
@@ -25,12 +25,12 @@ namespace DotGame.Test
             this.Scene = scene;
         }
 
-        public override void Apply(GameTime gameTime)
+        public override void Render(GameTime gameTime)
         {
             Engine.GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Color.LightSkyBlue, 1, 0);
 
             items.Clear();
-            Scene.PrepareDraw(gameTime, items);
+            //Scene.PrepareDraw(gameTime, items);
 
             for (int i = 0; i < items.Count; i++)
                 items[i].Draw(gameTime, this, Engine.GraphicsDevice.RenderContext);

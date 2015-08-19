@@ -9,7 +9,6 @@ using System.Threading;
 using DotGame;
 using DotGame.Utils;
 using DotGame.Rendering;
-using DotGame.SceneGraph;
 using DotGame.Geometry;
 using DotGame.EntitySystem;
 using DotGame.Assets;
@@ -34,11 +33,17 @@ namespace DotGame.Test
                 AudioAPI = AudioAPI.OpenAL
             });
 
-            var component = new EntitySystemComponent(engine);
-            engine.AddComponent(component);
+            var scene = new Scene(engine);
+            engine.AddComponent(scene);
+
+            engine.AddComponent(new SceneGraphTest(engine));
+
+
+            var renderer = new DotGamePipeline(engine, scene);
+            engine.AddComponent(renderer);
 
             //engine.AddComponent(new GraphTest(engine));
-            engine.AddComponent(new MipMapTest(engine));
+            //engine.AddComponent(new MipMapTest(engine));
 
             Application.Run();
         }
