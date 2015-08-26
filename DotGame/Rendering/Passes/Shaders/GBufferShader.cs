@@ -8,20 +8,30 @@ using System.Text;
 using System.Threading.Tasks;
 using DotGame.Assets;
 using DotGame.EntitySystem.Components;
+using System.Runtime.InteropServices;
 
 namespace DotGame.EntitySystem.Rendering
 {
-    public class ForwardShader : Shader
+    public class GBufferShader : SceneShader
     {
         private ISampler sampler;
         private IConstantBuffer constantBuffer;
         private IRasterizerState rasterizerState;
         private IDepthStencilState depthStencil;
 
-        public ForwardShader(Engine engine) : base(engine, "forward")
+        private MaterialDescription materialDescription = new MaterialDescription() { HasDiffuseTexture = true };
+        public override MaterialDescription MaterialDescription
+        {
+            get
+            {
+                return materialDescription;
+            }
+        }
+
+        public GBufferShader(Engine engine) : base(engine, "gbuffer")
         {
             sampler = engine.GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
-            constantBuffer = shader.CreateConstantBuffer(BufferUsage.Dynamic);
+            constantBuffer = shader.CreateConstantBuffer(ResourceUsage.Dynamic);
 
             rasterizerState = engine.GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
             {
@@ -36,11 +46,6 @@ namespace DotGame.EntitySystem.Rendering
                 DepthComparsion = Comparison.LessEqual,
                 DepthWriteMask = DepthWriteMask.All
             });
-        }
-
-        public override void Apply(Graphics.IRenderContext context)
-        {
-            throw new NotImplementedException();
         }
 
         public override void Apply(Graphics.IRenderContext context, System.Numerics.Matrix4x4 viewProjection, Assets.Material material, System.Numerics.Matrix4x4 world)
@@ -58,18 +63,22 @@ namespace DotGame.EntitySystem.Rendering
             else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
                 context.SetSampler(shader, "picture", sampler);
 
-            context.Update(constantBuffer, Matrix4x4.Transpose(world * viewProjection));
+            GCHandle handle;
+            DataArray dataArray = DataArray.FromObject<Matrix4x4>(Matrix4x4.Transpose(world * viewProjection), out handle);
+            try
+            {
+                context.UpdateContext.Update(constantBuffer, dataArray);
+            }
+            finally
+            {
+                handle.Free();
+            }
             context.SetConstantBuffer(shader, constantBuffer);
         }
 
         protected override void Dispose(bool isDisposing)
         {
             base.Dispose(isDisposing);
-        }
-
-        public override void Apply(IRenderContext context, Camera camera, Material material, Matrix4x4 world)
-        {
-            Apply(context, camera.ViewProjection, material, world);
         }
     }
 }

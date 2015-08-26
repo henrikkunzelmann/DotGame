@@ -73,7 +73,7 @@
     <Compile Include="Graphics\Blend.cs" />
     <Compile Include="Graphics\BlendOp.cs" />
     <Compile Include="Graphics\BlendStateInfo.cs" />
-    <Compile Include="Graphics\BufferUsage.cs" />
+    <Compile Include="Graphics\ResourceUsage.cs" />
     <Compile Include="Graphics\ColorWriteMaskFlags.cs" />
     <Compile Include="Graphics\DepthStencilStateInfo.cs" />
     <Compile Include="Graphics\DepthWriteMask.cs" />
@@ -100,6 +100,7 @@
     <Compile Include="Graphics\IRenderTarget2DArray.cs" />
     <Compile Include="Graphics\IRenderTarget3D.cs" />
     <Compile Include="Graphics\IRenderTarget3DArray.cs" />
+    <Compile Include="Graphics\IRenderUpdateContext.cs" />
     <Compile Include="Graphics\ISampler.cs" />
     <Compile Include="Graphics\IShader.cs" />
     <Compile Include="Graphics\ITexture2DArray.cs" />
@@ -116,6 +117,7 @@
     <Compile Include="Graphics\SamplerType.cs" />
     <Compile Include="Graphics\ShaderCompileInfo.cs" />
     <Compile Include="Graphics\StencilOperation.cs" />
+    <Compile Include="Graphics\ITextureCubemap.cs" />
     <Compile Include="Graphics\TextureFilter.cs" />
     <Compile Include="Graphics\TextureFormat.cs" />
     <Compile Include="Graphics\IGameWindow.cs" />

@@ -12,7 +12,11 @@ namespace DotGame.DirectX11
 {
     public class RenderContext : GraphicsObject, IRenderContext
     {
-        private DeviceContext context;
+        internal DeviceContext Context
+        {
+            get; private set;
+        }
+
 
         private RenderStateInfo currentState = new RenderStateInfo();
         private VertexBuffer currentVertexBuffer;
@@ -36,225 +40,29 @@ namespace DotGame.DirectX11
         private Color currentBlendFactor;
         private byte currentStencilRefrence;
 
+        public IRenderUpdateContext UpdateContext
+        {
+            get;
+            private set;
+        }
+
 
         public RenderContext(GraphicsDevice graphicsDevice, DeviceContext context)
             : base(graphicsDevice, new StackTrace(1))
         {
             if (context == null)
                 throw new ArgumentNullException("context");
-            this.context = context;
+            this.Context = context;
 
             vertexCache = new ShaderStageCache(null);
             pixelCache = new ShaderStageCache(null);
+
+            UpdateContext = new RenderUpdateContext(graphicsDevice, this);
         }
 
         protected override void Dispose(bool isDisposing)
         {
-        }
-
-        public void Update<T>(IVertexBuffer buffer, T[] data) where T : struct
-        {
-            var dxBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
-
-            if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match VertexBuffer size.", "data");
-
-            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
-                context.UpdateSubresource(data, dxBuffer.Buffer);
-            else
-            {
-                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
-                SharpDX.Utilities.Write(box.DataPointer, data, 0, data.Length);
-                context.UnmapSubresource(dxBuffer.Buffer, 0);
-            }
-        }
-
-        public void Update<T>(IIndexBuffer buffer, T[] data) where T : struct
-        {
-            var dxBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
-
-            if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match IndexBuffer size.", "data");
-
-            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
-                context.UpdateSubresource(data, dxBuffer.Buffer);
-            else
-            {
-                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
-                SharpDX.Utilities.Write(box.DataPointer, data, 0, data.Length);
-                context.UnmapSubresource(dxBuffer.Buffer, 0);
-            }
-        }
-
-        public void Update<T>(IConstantBuffer buffer, T data) where T : struct
-        {
-            var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
-
-            if (SharpDX.Utilities.SizeOf<T>() != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
-
-            if (dxBuffer.Handle.Description.Usage == ResourceUsage.Default)
-                context.UpdateSubresource(ref data, dxBuffer.Handle);
-            else
-            {
-                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Handle, 0, MapMode.WriteDiscard, MapFlags.None);
-                SharpDX.Utilities.Write(box.DataPointer, ref data);
-                context.UnmapSubresource(dxBuffer.Handle, 0);
-            }
-        }
-
-        public void Update<T>(ITexture2D texture, T[] data) where T : struct
-        {
-            Update(texture, 0, data);
-        }
-
-        public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
-        {
-            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
-
-            var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
-            context.UpdateSubresource<T>(data, dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, 0, texture.MipLevels), texture.Width * graphicsDevice.GetSizeOf(texture.Format), texture.Width * texture.Height * graphicsDevice.GetSizeOf(texture.Format));
-        }
-
-        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
-        {
-            Update(textureArray, arrayIndex, 0, data);
-        }
-
-        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct
-        {
-            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "texture");
-            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
-                throw new ArgumentOutOfRangeException("arrayIndex");
-            if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
-
-            context.UpdateSubresource<T>(data, dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels), textureArray.Width * graphicsDevice.GetSizeOf(textureArray.Format), textureArray.Width * textureArray.Height * graphicsDevice.GetSizeOf(textureArray.Format));
-        }
-
-        public void Update(IVertexBuffer buffer, DataArray data) 
-        {
-            var dxBuffer = graphicsDevice.Cast<VertexBuffer>(buffer, "buffer");
-
-            if (data.Size != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match VertexBuffer size.", "data");
-
-
-            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
-                context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, 0, 0), dxBuffer.Buffer);
-            else
-            {
-                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
-                SharpDX.Utilities.CopyMemory(box.DataPointer, data.Pointer, data.Size);
-                context.UnmapSubresource(dxBuffer.Buffer, 0);
-            }
-        }
-
-        public void Update(IIndexBuffer buffer, DataArray data)
-        {
-            var dxBuffer = graphicsDevice.Cast<IndexBuffer>(buffer, "buffer");
-
-            if (data.Size != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match IndexBuffer size.", "data");
-
-            if (dxBuffer.Buffer.Description.Usage == ResourceUsage.Default)
-                context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, 0, 0), dxBuffer.Buffer);
-            else
-            {
-                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Buffer, 0, MapMode.WriteDiscard, MapFlags.None);
-                SharpDX.Utilities.CopyMemory(box.DataPointer, data.Pointer, data.Size);
-                context.UnmapSubresource(dxBuffer.Buffer, 0);
-            }
-        }
-
-        public void Update(IConstantBuffer buffer,  DataArray data)
-        {
-            var dxBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
-
-            if (data.Size != buffer.SizeBytes)
-                throw new ArgumentException("Data does not match ConstantBuffer size.", "data");
-
-            if (dxBuffer.Handle.Description.Usage == ResourceUsage.Default)
-                context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, 0, 0), dxBuffer.Handle);
-            else
-            {
-                SharpDX.DataBox box = context.MapSubresource(dxBuffer.Handle, 0, MapMode.WriteDiscard, MapFlags.None);
-                SharpDX.Utilities.CopyMemory(box.DataPointer, data.Pointer, data.Size);
-                context.UnmapSubresource(dxBuffer.Handle, 0);
-            }
-        }
-
-
-        public void Update(ITexture2D texture, DataRectangle data)
-        {
-            Update(texture, 0, data);
-        }
-
-        public void Update(ITexture2D texture, DataRectangle[] data)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-
-            for (int i = 0; i < data.Length; i++)
-                Update(texture,i, data[i]);
-        }
-
-        public void Update(ITexture2DArray textureArray, DataRectangle[] data)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-
-            for (int i = 0; i < data.Length; i++)
-                Update(textureArray, i, data[i]);
-        }
-
-        public void Update(ITexture2D texture, int mipLevel, DataRectangle data) 
-        {
-            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
-
-            var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
-            context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, data.Pitch, 0), dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, 0, texture.MipLevels));
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data) 
-        {
-            Update(textureArray, arrayIndex, 0, data);
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data) 
-        {
-            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "texture");
-            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
-                throw new ArgumentOutOfRangeException("arrayIndex");
-            if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
-
-            context.UpdateSubresource(new SharpDX.DataBox(data.Pointer, data.Pitch, 0), dxTexture.Handle, Resource.CalculateSubResourceIndex(mipLevel, arrayIndex, textureArray.MipLevels));
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle[] data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void GenerateMips(ITexture2D texture)
-        {
-            var dxTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
-            if (!dxTexture.Handle.Description.OptionFlags.HasFlag(SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps))
-                throw new ArgumentException("Texture does not have the GenerateMipMaps flag.", "texture");
-            context.GenerateMips(dxTexture.ResourceView);
-        }
-
-        public void GenerateMips(ITexture2DArray textureArray)
-        {
-            var dxTexture = graphicsDevice.Cast<Texture2D>(textureArray, "textureArray");
-            if (!dxTexture.Handle.Description.OptionFlags.HasFlag(SharpDX.Direct3D11.ResourceOptionFlags.GenerateMipMaps))
-                throw new ArgumentException("TextureArray does not have the GenerateMipMaps flag.", "textureArray");
-
-            context.GenerateMips(dxTexture.ResourceView);
-        }
+        }       
 
         public void Clear(Color color)
         {
@@ -263,7 +71,7 @@ namespace DotGame.DirectX11
 
             var clearColor = new SharpDX.Color4(color.R, color.G, color.B, color.A);
             for (int i = 0; i < currentColorTargets.Length; i++)
-                context.ClearRenderTargetView(currentColorTargets[i], clearColor);
+                Context.ClearRenderTargetView(currentColorTargets[i], clearColor);
         }
 
         public void Clear(ClearOptions clearOptions, Color color, float depth, byte stencil)
@@ -284,7 +92,7 @@ namespace DotGame.DirectX11
             {
                 if (currentDepthTarget == null)
                     throw new InvalidOperationException("No render target set for depth.");
-                context.ClearDepthStencilView(currentDepthTarget, clearFlags, depth, stencil);
+                Context.ClearDepthStencilView(currentDepthTarget, clearFlags, depth, stencil);
             }
         }
 
@@ -353,7 +161,7 @@ namespace DotGame.DirectX11
         {
             if (renderTargetsDirty)
             {
-                context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
+                Context.OutputMerger.SetTargets(currentDepthTarget, currentColorTargets);
                 renderTargetsDirty = false;
             }
         }
@@ -361,19 +169,19 @@ namespace DotGame.DirectX11
 
         public void SetViewport(Viewport viewport)
         {
-            context.Rasterizer.SetViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth, viewport.MaxDepth);
+            Context.Rasterizer.SetViewport(viewport.X, viewport.Y, viewport.Width, viewport.Height, viewport.MinDepth, viewport.MaxDepth);
         }
 
         public void SetScissor(Rectangle rectangle)
         {
-            context.Rasterizer.SetScissorRectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Right, (int)rectangle.Bottom);
+            Context.Rasterizer.SetScissorRectangle((int)rectangle.Left, (int)rectangle.Top, (int)rectangle.Right, (int)rectangle.Bottom);
         }
 
         public void SetBlendFactor(Color color)
         {
             if (currentBlendFactor != color)
             {
-                context.OutputMerger.BlendFactor = new SharpDX.Color4(color.ToRgba());
+                Context.OutputMerger.BlendFactor = new SharpDX.Color4(color.ToRgba());
                 currentBlendFactor = color;
             }
         }
@@ -382,7 +190,7 @@ namespace DotGame.DirectX11
         {
             if (currentStencilRefrence != stencilReference)
             {
-                context.OutputMerger.DepthStencilReference = stencilReference;
+                Context.OutputMerger.DepthStencilReference = stencilReference;
                 currentStencilRefrence = stencilReference;
             }
         }
@@ -458,9 +266,9 @@ namespace DotGame.DirectX11
 
             int slot;
             if (dxShader.TryGetSlotVertex(name, out slot))
-                SetConstantBuffer(context.VertexShader, vertexCache, slot, dxBuffer.Handle);
+                SetConstantBuffer(Context.VertexShader, vertexCache, slot, dxBuffer.Buffer);
             if (dxShader.TryGetSlotPixel(name, out slot))
-                SetConstantBuffer(context.PixelShader, pixelCache, slot,  dxBuffer.Handle);
+                SetConstantBuffer(Context.PixelShader, pixelCache, slot,  dxBuffer.Buffer);
         }
 
         private void SetConstantBuffer(CommonShaderStage stage, ShaderStageCache cache, int slot, Buffer buffer)
@@ -521,9 +329,9 @@ namespace DotGame.DirectX11
             var dxShader = graphicsDevice.Cast<Shader>(shader, "shader");
             int slot;
             if (dxShader.TryGetSlotVertex(name, out slot))
-                SetTexture(context.VertexShader, vertexCache, slot, view);
+                SetTexture(Context.VertexShader, vertexCache, slot, view);
             if (dxShader.TryGetSlotPixel(name, out slot))
-                SetTexture(context.PixelShader, pixelCache, slot, view);
+                SetTexture(Context.PixelShader, pixelCache, slot, view);
         }
 
         private void SetTexture(CommonShaderStage stage, ShaderStageCache cache, int slot, ShaderResourceView view)
@@ -551,9 +359,9 @@ namespace DotGame.DirectX11
 
             int slot;
             if (dxShader.TryGetSlotVertex(name, out slot))
-                SetSampler(context.VertexShader, vertexCache, slot, dxSampler.Handle);
+                SetSampler(Context.VertexShader, vertexCache, slot, dxSampler.Handle);
             if (dxShader.TryGetSlotPixel(name, out slot))
-                SetSampler(context.PixelShader, pixelCache, slot, dxSampler.Handle);
+                SetSampler(Context.PixelShader, pixelCache, slot, dxSampler.Handle);
         }
 
         private void SetSampler(CommonShaderStage stage, ShaderStageCache cache, int slot, SamplerState sampler)
@@ -574,30 +382,33 @@ namespace DotGame.DirectX11
             {
                 if (vertexCache.Shader != shader)
                 {
-                    context.VertexShader.Set(shader.VertexShaderHandle);
+                    Context.VertexShader.Set(shader.VertexShaderHandle);
                     vertexCache.Shader = shader;
                 }
                 if (pixelCache.Shader != shader)
                 {
-                    context.PixelShader.Set(shader.PixelShaderHandle);
+                    if (!currentState.Shader.VertexDescription.EqualsIgnoreOrder(currentVertexBuffer.Description))
+                        throw new GraphicsException("Current shader VertexDescription doesn't match the description of the current VertexBuffer");
+
+                    Context.PixelShader.Set(shader.PixelShaderHandle);
                     pixelCache.Shader = shader;
                 }
                 if (primitiveType != currentState.PrimitiveType)
                 {
-                    context.InputAssembler.PrimitiveTopology = EnumConverter.Convert(currentState.PrimitiveType);
+                    Context.InputAssembler.PrimitiveTopology = EnumConverter.Convert(currentState.PrimitiveType);
                     primitiveType = currentState.PrimitiveType;
                 }
                 if (currentRasterizer != currentState.Rasterizer)
                 {
                     var rasterizer = graphicsDevice.Cast<RasterizerState>(currentState.Rasterizer, "currentState.Rasterizer");
-                    context.Rasterizer.State = rasterizer.Handle;
+                    Context.Rasterizer.State = rasterizer.Handle;
 
                     currentRasterizer = rasterizer;
                 }
                 if (currentDepthStencil != currentState.DepthStencil)
                 {
                     var depthStencil = graphicsDevice.Cast<DepthStencilState>(currentState.DepthStencil, "currentState.DepthStencil");
-                    context.OutputMerger.DepthStencilState = depthStencil.Handle;
+                    Context.OutputMerger.DepthStencilState = depthStencil.Handle;
 
                     currentDepthStencil = depthStencil;
                 }
@@ -605,18 +416,21 @@ namespace DotGame.DirectX11
                 if (currentBlend != currentState.Blend)
                 {
                     var blend = graphicsDevice.Cast<BlendState>(currentState.Blend, "currentState.Blend");
-                    context.OutputMerger.BlendState = blend.Handle;
+                    Context.OutputMerger.BlendState = blend.Handle;
 
                     currentBlend = blend;
                 }
             }
             if (vertexBufferDirty)
             {
-                context.InputAssembler.InputLayout = graphicsDevice.GetLayout(currentVertexBuffer.Description, shader);
-                context.InputAssembler.SetVertexBuffers(0, currentVertexBuffer.Binding);
+                if (!currentState.Shader.VertexDescription.EqualsIgnoreOrder(currentVertexBuffer.Description))
+                    throw new GraphicsException("Current shader VertexDescription doesn't match the description of the current VertexBuffer");
+
+                Context.InputAssembler.InputLayout = graphicsDevice.GetLayout(currentVertexBuffer.Description, shader);
+                Context.InputAssembler.SetVertexBuffers(0, currentVertexBuffer.Binding);
             }
             if (indexBufferDirty)
-                context.InputAssembler.SetIndexBuffer(currentIndexBuffer.Buffer, currentIndexBuffer.IndexFormat, 0);
+                Context.InputAssembler.SetIndexBuffer(currentIndexBuffer.Buffer, currentIndexBuffer.IndexFormat, 0);
 
             stateDirty = false;
             vertexBufferDirty = false;
@@ -638,7 +452,7 @@ namespace DotGame.DirectX11
                 throw new ArgumentOutOfRangeException("startVertexLocation");
 
             ApplyState();
-            context.Draw(vertexCount, startVertexLocation);
+            Context.Draw(vertexCount, startVertexLocation);
         }
 
         public void DrawIndexed()
@@ -660,7 +474,7 @@ namespace DotGame.DirectX11
                 throw new ArgumentOutOfRangeException("baseVertexLocation");
 
             ApplyState();
-            context.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
+            Context.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
         }
 
         private struct ShaderStageCache

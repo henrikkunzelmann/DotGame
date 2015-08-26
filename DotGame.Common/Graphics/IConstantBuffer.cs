@@ -16,6 +16,6 @@ namespace DotGame.Graphics
         /// <summary>
         /// Gibt an wie der ConstantBuffer benutzt wird.
         /// </summary>
-        BufferUsage Usage { get; }
+        ResourceUsage Usage { get; }
     }
 }

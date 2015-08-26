@@ -18,8 +18,12 @@ namespace DotGame.OpenGL4
 
         public int MipLevels { get; private set; }
         public TextureFormat Format { get; private set; }
+        public ResourceUsage Usage { get; private set; }
 
-        internal int TextureID { get; private set; }internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, bool generateMipMaps, TextureFormat format)
+        //Ob man TexSubImageXD verwenden kann
+        private bool isInitialized = false;
+
+        internal int TextureID { get; private set; }internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, TextureFormat format, bool generateMipMaps,  ResourceUsage usage = ResourceUsage.Normal, DataBox data = new DataBox())
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -36,19 +40,80 @@ namespace DotGame.OpenGL4
                 throw new PlatformNotSupportedException("Driver doesn't support non power of two textures");
             if (length > graphicsDevice.OpenGLCapabilities.MaxTextureSize)
                 throw new PlatformNotSupportedException("length exceeds the maximum texture size");
+            if (usage == ResourceUsage.Immutable && (data.IsNull))
+                throw new ArgumentException("data", "Immutable textures must be initialized with data.");
 
             this.Width = width;
             this.Height = height;
             this.Length = length;
             this.MipLevels = generateMipMaps ? OpenGL4.GraphicsDevice.MipLevels(width, height) : 1;
             this.Format = format;
+            this.Usage = usage;
+            var internalFormat = EnumConverter.Convert(Format);
 
             this.TextureID = GL.GenTexture();
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                //Höchstes Mipmap-Level setzen
+                GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
 
-            graphicsDevice.CheckGLError();     
+                //Die Textur erstellen (Null Daten funktionieren nicht mit Compression)
+                if (graphicsDevice.OpenGLCapabilities.SupportsTextureStorage && graphicsDevice.OpenGLCapabilities.OpenGLVersion > new Version(4, 2))
+                    GL.TexStorage3D(TextureTarget3d.Texture3D, MipLevels, EnumConverter.ConvertSizedInternalFormat(Format), Width, Height, Length);
+                else
+                {
+                    int size = 0;
+                    IntPtr ptr = IntPtr.Zero;
+                    if (!data.IsNull)
+                    {
+                        size = data.Size;
+                        ptr = data.Pointer;
+                    }
+                    if (!TextureFormatHelper.IsCompressed(Format))
+                        GL.TexImage3D(TextureTarget.Texture3D, 0, internalFormat.Item1, width, height, length, 0, internalFormat.Item2, internalFormat.Item3, ptr);
+                    else if (ptr != IntPtr.Zero)
+                    {
+                        GL.CompressedTexImage3D(TextureTarget.Texture3D, 0, internalFormat.Item1, width, height, length, 0, size, ptr);
+                        isInitialized = true;
+                    }
+                }
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                //Höchstes Mipmap-Level setzen
+                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+
+                //Die Textur erstellen (Null Daten funktionieren nicht mit Compression)
+
+                if (graphicsDevice.OpenGLCapabilities.SupportsTextureStorage && graphicsDevice.OpenGLCapabilities.OpenGLVersion > new Version(4, 2) && !TextureFormatHelper.IsCompressed(Format))
+                    Ext.TextureStorage3D(TextureID, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)TextureTarget3d.Texture3D, MipLevels, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.ConvertSizedInternalFormat(Format), Width, Height, Length);
+                else
+                {
+                    int size = 0;
+                    IntPtr ptr = IntPtr.Zero;
+                    if (!data.IsNull)
+                    {
+                        size = data.Size;
+                        ptr = data.Pointer;
+                    }
+                    if (!TextureFormatHelper.IsCompressed(Format))
+                        Ext.TextureImage3D(TextureID, (OpenTK.Graphics.OpenGL.TextureTarget)TextureTarget.Texture3D, 0, (int)internalFormat.Item1, width, height, length, 0, (OpenTK.Graphics.OpenGL.PixelFormat)internalFormat.Item2, (OpenTK.Graphics.OpenGL.PixelType)internalFormat.Item3, ptr);
+                    else if (ptr != IntPtr.Zero)
+                    {
+                        Ext.CompressedTextureImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, 0, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)internalFormat.Item1, width, height, length, 0, size, ptr);
+                        isInitialized = true;
+                    }
+                }
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
+            {
+            }
+
+            graphicsDevice.CheckGLError("Texture3D Constructor");            
         }
 
-        internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, int mipLevels, bool generateMipMaps, TextureFormat format)
+        internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataBox[] data)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -67,62 +132,114 @@ namespace DotGame.OpenGL4
                 throw new PlatformNotSupportedException("Driver doesn't support non power of two textures");
             if (length > graphicsDevice.OpenGLCapabilities.MaxTextureSize)
                 throw new PlatformNotSupportedException("length exceeds the maximum texture size");
+            if (usage == ResourceUsage.Immutable && (data == null || data.Length == 0))
+                throw new ArgumentException("data", "Immutable textures must be initialized with data.");
+            if (data != null && data.Length != 0 && data.Length < mipLevels)
+                throw new ArgumentOutOfRangeException("data", data.Length, string.Format("data Lenght is too small for specified mipLevels, expected: {0}", mipLevels));
 
             this.Width = width;
             this.Height = height;
             this.Length = length;
-            this.MipLevels = mipLevels == 0 ? OpenGL4.GraphicsDevice.MipLevels(width, height) : mipLevels;
+            this.MipLevels = mipLevels > 0 ? mipLevels : 1;
             this.Format = format;
+            this.Usage = usage;
+            var internalFormat = EnumConverter.Convert(Format);
 
             this.TextureID = GL.GenTexture();
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.SetTexture(this, 0);
+                //Höchstes Mipmap-Level setzen
+                GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
 
-            graphicsDevice.CheckGLError();
+                //Die Textur erstellen (Null Daten funktionieren nicht mit Compression)
+                if (graphicsDevice.OpenGLCapabilities.SupportsTextureStorage && graphicsDevice.OpenGLCapabilities.OpenGLVersion > new Version(4, 2))
+                    GL.TexStorage3D(TextureTarget3d.Texture3D, MipLevels, EnumConverter.ConvertSizedInternalFormat(Format), Width, Height, Length);
+                else
+                {
+                    int size = 0;
+                    IntPtr ptr = IntPtr.Zero;
+                    if (data != null && data.Length > 0)
+                    {
+                        size = data[0].Size;
+                        ptr = data[0].Pointer;
+                    }
+                    if (!TextureFormatHelper.IsCompressed(Format))
+                        GL.TexImage3D(TextureTarget.Texture3D, 0, internalFormat.Item1, width, height, length, 0, internalFormat.Item2, internalFormat.Item3, ptr);
+                    else if (ptr != IntPtr.Zero)
+                    {
+                        GL.CompressedTexImage3D(TextureTarget.Texture3D, 0, internalFormat.Item1, width, height, length, 0, size, ptr);
+                        isInitialized = true;
+                    }
+                }
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                //Höchstes Mipmap-Level setzen
+                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+
+                //Die Textur erstellen (Null Daten funktionieren nicht mit Compression)
+
+                if (graphicsDevice.OpenGLCapabilities.SupportsTextureStorage && graphicsDevice.OpenGLCapabilities.OpenGLVersion > new Version(4, 2) && !TextureFormatHelper.IsCompressed(Format))
+                    Ext.TextureStorage3D(TextureID, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)TextureTarget3d.Texture3D, MipLevels, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.ConvertSizedInternalFormat(Format), Width, Height, Length);
+                else
+                {
+                    int size = 0;
+                    IntPtr ptr = IntPtr.Zero;
+                    if (data != null && data.Length > 0)
+                    {
+                        size = data[0].Size;
+                        ptr = data[0].Pointer;
+                    }
+                    if (!TextureFormatHelper.IsCompressed(Format))
+                        Ext.TextureImage3D(TextureID, (OpenTK.Graphics.OpenGL.TextureTarget)TextureTarget.Texture3D, 0, (int)internalFormat.Item1, width, height, length, 0, (OpenTK.Graphics.OpenGL.PixelFormat)internalFormat.Item2, (OpenTK.Graphics.OpenGL.PixelType)internalFormat.Item3, ptr);
+                    else if (ptr != IntPtr.Zero)
+                    {
+                        Ext.CompressedTextureImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, 0, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)internalFormat.Item1, width, height, length, 0, size, ptr);
+                        isInitialized = true;
+                    }
+                }
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
+            {
+            }
+
+            graphicsDevice.CheckGLError("Texture3D Constructor");
+
+            if (data != null && data.Length > 1)
+                for (int i = 1; i < data.Length; i++)
+                    SetData(data[i], i);
         }
 
-        internal void SetData<T>(T[] data, int mipLevel)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (data.Length == 0)
-                throw new ArgumentException("Data must not be empty.", "data");
-
-            GCHandle arrayHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                IntPtr ptr = arrayHandle.AddrOfPinnedObject();
-                SetData(ptr, mipLevel, data.Length * Marshal.SizeOf(typeof(T)));
-            }
-            finally
-            {
-                arrayHandle.Free();
-            }
-            graphicsDevice.CheckGLError("Texture3D GenerateMipMaps");
-        }
-
-        internal void SetData(IntPtr data, int mipLevel, int imageSize)
+        internal void SetData(DataBox data, int mipLevel)
         {
             var format = EnumConverter.Convert(Format);
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
                 graphicsDevice.BindManager.SetTexture(this, 0);
-                
-                if (!TextureFormatHelper.IsCompressed(Format))
-                    GL.TexImage3D(TextureTarget.Texture3D, mipLevel, format.Item1, Width, Height, Length, 0, format.Item2, format.Item3, data);
-                else
-                    GL.CompressedTexImage3D(TextureTarget.Texture3D, mipLevel, format.Item1, Width, Height, Length, 0, imageSize, data);
 
-                GL.TexParameter(TextureTarget.Texture3D, TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+                if (!TextureFormatHelper.IsCompressed(Format))
+                    GL.TexSubImage3D(TextureTarget.Texture3D, mipLevel, 0, 0, 0, Width, Height, Length, format.Item2, format.Item3, data.Pointer);
+                else
+                {
+                    if (isInitialized)
+                        GL.CompressedTexSubImage3D(TextureTarget.Texture3D, mipLevel,0,0,0, Width, Height, Length, format.Item2, data.Size, data.Pointer);
+                    else
+                        GL.CompressedTexImage3D(TextureTarget.Texture3D, mipLevel, format.Item1, Width, Height, Length, 0, data.Size, data.Pointer);
+                }
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-
                 if (!TextureFormatHelper.IsCompressed(Format))
-                    Ext.TextureImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, mipLevel, (int)format.Item1, Width, Height, Length, 0, (OpenTK.Graphics.OpenGL.PixelFormat)format.Item2, (OpenTK.Graphics.OpenGL.PixelType)format.Item3, data);
+                    Ext.TextureSubImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, mipLevel, 0, 0, 0, Width, Height, Length, (OpenTK.Graphics.OpenGL.PixelFormat)format.Item2, (OpenTK.Graphics.OpenGL.PixelType)format.Item3, data.Pointer);
                 else
-                    Ext.CompressedTextureImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, mipLevel, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Format).Item1, Width, Height, Length, 0, Marshal.SizeOf(data), data);
-                
-                OpenTK.Graphics.OpenGL.GL.Ext.TextureParameter(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, OpenTK.Graphics.OpenGL.TextureParameterName.TextureMaxLevel, this.MipLevels - 1);
+                {
+                    if(isInitialized)
+                        Ext.CompressedTextureSubImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, mipLevel,0,0,0, Width, Height, Length, (OpenTK.Graphics.OpenGL.PixelFormat)format.Item2, Marshal.SizeOf(data), data.Pointer);
+                    else
+                        Ext.CompressedTextureImage3D(TextureID, OpenTK.Graphics.OpenGL.TextureTarget.Texture3D, mipLevel, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)format.Item1, Width, Height, Length, 0, Marshal.SizeOf(data), data.Pointer);
+                }
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Core)
             { 
@@ -131,6 +248,8 @@ namespace DotGame.OpenGL4
 
             graphicsDevice.CheckGLError("Texture3D GenerateMipMaps");
         }
+
+
 
         internal void GenerateMipMaps()
         {

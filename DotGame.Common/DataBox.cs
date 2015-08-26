@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -53,6 +54,20 @@ namespace DotGame
             this.Pitch = pitch;
             this.Slice = slice;
             this.Size = size;
+        }
+
+        public static DataBox FromArray<T>(T[] array, int pitch, int slice, out GCHandle handle)
+        {
+            if (array != null)
+            {
+                handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+                return new DataBox(handle.AddrOfPinnedObject(), pitch, slice, Marshal.SizeOf(typeof(T)) * array.Length);
+            }
+            else
+            {
+                handle = new GCHandle();
+                return new DataBox(IntPtr.Zero, 0, 0, 0);
+            }
         }
 
         public static bool operator ==(DataBox a, DataBox b)

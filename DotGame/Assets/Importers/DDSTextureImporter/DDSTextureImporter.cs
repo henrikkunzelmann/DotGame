@@ -18,9 +18,7 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
 
         private bool IsHeaderLoaded = false;
         private bool hasHeaderDXT10 = false;
-
-        private IntPtr ptr;
-        
+                
         public DDSTextureImporter(AssetManager manager)
             :base(manager)
         {
@@ -116,23 +114,31 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
                     else
                         arrayHandle = GCHandle.Alloc(ConvertFormat(data), GCHandleType.Pinned);
 
-                    IntPtr pointer = arrayHandle.AddrOfPinnedObject();
-
-                    for (int face = 0; face < faces; face++)
+                    try
                     {
-                        int width = header.Width;
-                        int height = header.Height;
-                        for (int mipLevel = 0; mipLevel < levels; mipLevel++)
-                        {
-                            int size = (int)GetSize(width, height);
-                            rectangles[levels * face + mipLevel] = new DataRectangle(pointer, (int)GetPitch(width), size);
+                        IntPtr pointer = arrayHandle.AddrOfPinnedObject();
 
-                            width /= 2;
-                            height /= 2;
-                            pointer += size;
+                        for (int face = 0; face < faces; face++)
+                        {
+                            int width = header.Width;
+                            int height = header.Height;
+                            for (int mipLevel = 0; mipLevel < levels; mipLevel++)
+                            {
+                                int size = (int)GetSize(width, height);
+                                rectangles[levels * face + mipLevel] = new DataRectangle(pointer, (int)GetPitch(width), size);
+
+                                width /= 2;
+                                height /= 2;
+                                pointer += size;
+                            }
                         }
+                        for (int i = 0; i < rectangles.Length; i++)
+                            Engine.GraphicsDevice.RenderContext.UpdateContext.Update(handle, i, rectangles[i]);
                     }
-                    Engine.GraphicsDevice.RenderContext.Update(handle, rectangles);
+                    finally
+                    {
+                        arrayHandle.Free();
+                    }
 
                 }
                 else

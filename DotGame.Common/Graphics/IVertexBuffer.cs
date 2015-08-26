@@ -26,6 +26,6 @@ namespace DotGame.Graphics
         /// <summary>
         /// Gibt an wie der VertexBuffer benutzt wird.
         /// </summary>
-        BufferUsage Usage { get; }
+        ResourceUsage Usage { get; }
     }
 }

@@ -12,7 +12,7 @@ namespace DotGame.Graphics
     public interface IShader : IGraphicsObject
     {
         /// <summary>
-        /// Der Name des Shaders.
+        /// Der Name des Shaders
         /// </summary>
         string Name { get; }
 
@@ -23,16 +23,21 @@ namespace DotGame.Graphics
         byte[] BinaryCode { get; }
 
         /// <summary>
+        /// Die VertexDescription des Shaders
+        /// </summary>
+        VertexDescription VertexDescription { get; }
+
+        /// <summary>
         /// Erstellt einen passenden ConstantBuffer für alle globale Variablen.
         /// </summary>
         /// <returns></returns>
-        IConstantBuffer CreateConstantBuffer(BufferUsage usage);
+        IConstantBuffer CreateConstantBuffer(ResourceUsage usage);
 
         /// <summary>
         /// Erstellt für die Variable name im Shader einen passenden Constant-Buffer.
         /// </summary>
         /// <param name="name"></param>
         /// <returns></returns>
-        IConstantBuffer CreateConstantBuffer(string name, BufferUsage usage);
+        IConstantBuffer CreateConstantBuffer(string name, ResourceUsage usage);
     }
 }

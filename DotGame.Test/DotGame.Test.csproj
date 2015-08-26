@@ -78,8 +78,6 @@
     <Compile Include="MoveComponent.cs" />
     <Compile Include="RotateComponent.cs" />
     <Compile Include="SceneGraphTest.cs" />
-    <Compile Include="TestPass.cs" />
-    <Compile Include="TestShader.cs" />
     <None Include="forward.fragment.glsl">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>

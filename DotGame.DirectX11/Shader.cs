@@ -35,6 +35,11 @@ namespace DotGame.DirectX11
         private Dictionary<string, int> resourcesPixel = new Dictionary<string, int>();
         private Dictionary<string, int> constantBufferSizes = new Dictionary<string, int>();
 
+        public VertexDescription VertexDescription
+        {
+            get; private set;
+        }
+
         public Shader(GraphicsDevice graphicsDevice, string name, ShaderBytecode vertex, ShaderBytecode pixel)
             : base(graphicsDevice, new StackTrace(1))
         {
@@ -61,6 +66,32 @@ namespace DotGame.DirectX11
                     if (res.Type == ShaderInputType.ConstantBuffer)
                         constantBufferSizes[res.Name] = reflection.GetConstantBuffer(res.Name).Description.Size;
                 }
+
+                int inputCount = reflection.Description.InputParameters;
+                var vertexElements = new VertexElement[inputCount];
+                for (int i = 0; i < inputCount; i++)
+                {
+                    var input = reflection.GetInputParameterDescription(i);
+                    if (input.ComponentType != RegisterComponentType.Float32)
+                        continue;
+
+                    VertexElementType type;
+                    if (input.UsageMask.HasFlag(RegisterComponentMaskFlags.All))
+                        type = VertexElementType.Vector4;
+                    else if (input.UsageMask.HasFlag(RegisterComponentMaskFlags.ComponentX | RegisterComponentMaskFlags.ComponentY | RegisterComponentMaskFlags.ComponentZ))
+                        type = VertexElementType.Vector3;
+                    else if (input.UsageMask.HasFlag(RegisterComponentMaskFlags.ComponentX | RegisterComponentMaskFlags.ComponentY))
+                        type = VertexElementType.Vector2;
+                    else if (input.UsageMask.HasFlag(RegisterComponentMaskFlags.ComponentX))
+                        type = VertexElementType.Single;
+                    else
+                        continue;
+
+                    VertexElementUsage usage = EnumConverter.ConvertToUsage(input.SemanticName);
+
+                    vertexElements[i] = new VertexElement(usage, input.SemanticIndex, type);
+                }
+                VertexDescription = new VertexDescription(vertexElements);
             }
 
             using (ShaderReflection reflection = new ShaderReflection(PixelCode))
@@ -102,12 +133,12 @@ namespace DotGame.DirectX11
                 PixelCode.Dispose();
         }
 
-        public IConstantBuffer CreateConstantBuffer(BufferUsage usage)
+        public IConstantBuffer CreateConstantBuffer(Graphics.ResourceUsage usage)
         {
             return CreateConstantBuffer("$Globals", usage);
         }
  
-        public IConstantBuffer CreateConstantBuffer(string name, BufferUsage usage)
+        public IConstantBuffer CreateConstantBuffer(string name, Graphics.ResourceUsage usage)
         {
             if (name == null)
                 throw new ArgumentNullException("name");

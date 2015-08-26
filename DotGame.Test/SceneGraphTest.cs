@@ -23,20 +23,19 @@ namespace DotGame.Test
 
             Entity entity = new Entity("hi", Engine);
             Material material = new Material(Engine.AssetManager, "TestMaterial");
-            material.Texture = Engine.AssetManager.LoadTexture("CubeTexture", "GeneticaMortarlessBlocksMipped.dds");
-            material.Texture = Engine.AssetManager.LoadTexture("CubeTexture", "CubeTextureDXT1MipMaps.dds");
+            material.Texture = Engine.AssetManager.LoadTexture("CubeTexture", "GeneticaMortarlessBlocks.jpg");
 
             MeshBuilder builder = new MeshBuilder(Engine);
             builder.PushCube(-Vector3.One, Vector3.One, Vector2.Zero, Vector2.One);
 
-            Mesh mesh = builder.BuildMesh("cube");            
-            entity.AddComponent(new ModelRenderer(mesh, material));
+            StaticMesh mesh = builder.BuildMesh("cube");            
+            entity.AddComponent(new StaticModel(mesh, material));
             var scene = ((Scene)Engine.Components.First(c => c is Scene));
             scene.Root.AddChild(entity);
 
             Entity cameraEntity = new Entity("camera", Engine);
             Camera camera = new Camera();
-            cameraEntity.Transform.LocalPosition = new Vector3(0, 0, -15);
+            cameraEntity.Transform.LocalPosition = new Vector3(0, 0, -5);
             camera.IsEnabled = true;
             camera.ClearColor = Graphics.Color.CornflowerBlue;
             cameraEntity.AddComponent(camera);

@@ -16,8 +16,6 @@ namespace DotGame.EntitySystem
     public sealed class Prefab
     {
         private byte[] data;
-        // Nur für Testzwecke.
-        private string jsonData;
 
         private static JsonSerializer serializer;
 

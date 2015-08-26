@@ -31,6 +31,9 @@ namespace DotGame.OpenGL4
             {TextureFormat.RGBA16_UIntNorm, SizedInternalFormat.Rgba16},
             {TextureFormat.RGBA8_UIntNorm, SizedInternalFormat.Rgba8},
             {TextureFormat.BGRA8_UIntNorm, SizedInternalFormat.Rgba8},
+            {TextureFormat.Depth16, SizedInternalFormat.R16},
+            {TextureFormat.Depth32, SizedInternalFormat.R32f},
+            {TextureFormat.Depth24Stencil8, SizedInternalFormat.R32f},
         };
 
         private static readonly Dictionary<string, string> shaderModels = new Dictionary<string, string>() 
@@ -53,7 +56,7 @@ namespace DotGame.OpenGL4
         private static readonly Dictionary<VertexElementUsage, string> vertexElementUsages = new Dictionary<VertexElementUsage, string>()
         {
             { VertexElementUsage.Position, "in_position" },
-            { VertexElementUsage.Color, "in_COLOR" },
+            { VertexElementUsage.Color, "in_color" },
             { VertexElementUsage.TexCoord, "in_texCoord" },
             { VertexElementUsage.Normal, "in_normal" },
             { VertexElementUsage.Tangent, "in_tangent" },
@@ -151,10 +154,19 @@ namespace DotGame.OpenGL4
             {StencilOperation.Replace, StencilOp.Replace},
             {StencilOperation.Zero, StencilOp.Zero},
         };
-        private static readonly Dictionary<BufferUsage, BufferUsageHint> bufferUsages = new Dictionary<BufferUsage, BufferUsageHint>() 
+        private static readonly Dictionary<ResourceUsage, BufferUsageHint> bufferUsages = new Dictionary<ResourceUsage, BufferUsageHint>() 
         {
-            {BufferUsage.Dynamic, BufferUsageHint.DynamicDraw},
-            {BufferUsage.Static, BufferUsageHint.StaticDraw},
+            {ResourceUsage.Dynamic, BufferUsageHint.StreamDraw},
+            {ResourceUsage.Staging, BufferUsageHint.DynamicDraw},
+            {ResourceUsage.Normal, BufferUsageHint.StaticDraw},
+            {ResourceUsage.Immutable, BufferUsageHint.StaticDraw},
+        };
+        private static readonly Dictionary<VertexElementType, ActiveAttribType> attribTypes = new Dictionary<VertexElementType, ActiveAttribType>()
+        {
+            { VertexElementType.Single, ActiveAttribType.Float },
+            { VertexElementType.Vector2, ActiveAttribType.FloatVec2 },
+            { VertexElementType.Vector3, ActiveAttribType.FloatVec3 },
+            { VertexElementType.Vector4, ActiveAttribType.FloatVec4 },
         };
 
         internal static Tuple<PixelInternalFormat, PixelFormat, PixelType> Convert(TextureFormat format)
@@ -204,6 +216,13 @@ namespace DotGame.OpenGL4
             if (!vertexElementUsages.ContainsKey(usage))
                 throw new NotSupportedException("Usage is not supported.");
             return vertexElementUsages[usage];
+        }
+        internal static VertexElementUsage Convert(string usage)
+        {
+            if (!vertexElementUsages.ContainsValue(usage))
+                throw new NotSupportedException("usage is not supported");
+
+            return vertexElementUsages.First((f) => f.Value == usage).Key;
         }
 
         internal static string ConvertToGLSLVersion(string shaderModel)
@@ -362,20 +381,35 @@ namespace DotGame.OpenGL4
             return stencilOperations.First((f) => f.Value == stencilOperation).Key;
         }
 
-        internal static BufferUsageHint Convert(BufferUsage bufferUsage)
+        internal static BufferUsageHint Convert(ResourceUsage bufferUsage)
         {
             if (!bufferUsages.ContainsKey(bufferUsage))
-                throw new NotSupportedException("indexFormat is not supported");
+                throw new NotSupportedException("bufferUsage is not supported");
 
             return bufferUsages[bufferUsage];
         }
 
-        internal static BufferUsage Convert(BufferUsageHint bufferUsage)
+        internal static ResourceUsage Convert(BufferUsageHint bufferUsage)
         {
             if (!bufferUsages.ContainsValue(bufferUsage))
                 throw new NotSupportedException("bufferUsage is not supported");
 
             return bufferUsages.First((f) => f.Value == bufferUsage).Key;
+        }
+
+        internal static ActiveAttribType Convert(VertexElementType type)
+        {
+            if (!attribTypes.ContainsKey(type))
+                throw new NotSupportedException("type is not supported");
+
+            return attribTypes[type];
+        }
+        internal static VertexElementType Convert(ActiveAttribType type)
+        {
+            if (!attribTypes.ContainsValue(type))
+                throw new NotSupportedException("type is not supported");
+
+            return attribTypes.First((f) => f.Value == type).Key;
         }
     }
 }

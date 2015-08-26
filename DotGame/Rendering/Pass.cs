@@ -24,18 +24,10 @@ namespace DotGame.Rendering
             } 
         }
 
-        /// <summary>
-        /// Gibt den Standard-Shader für diesen Pass zurück.
-        /// </summary>
-        public Shader Shader { get; private set; }
-
-        public Pass(Engine engine, Shader shader)
+        public Pass(Engine engine)
             : base(engine)
         {
-            this.Shader = shader;
         }
-
-        //public void AddShader<T>(Shader shader) where T : Material
 
         /// <summary>
         /// Wendet den Pass an.

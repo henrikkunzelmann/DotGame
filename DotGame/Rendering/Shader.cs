@@ -26,13 +26,17 @@ namespace DotGame.Rendering
             this.shader = engine.ShaderManager.CompileShader(name);
         }
 
+        public VertexDescription VertexDescription
+        {
+            get
+            {
+                return shader?.VertexDescription;
+            }
+        }
+
         protected override void Dispose(bool isDisposing)
         {
             shader.Dispose();
         }
-
-        public abstract void Apply(IRenderContext context);
-        public abstract void Apply(IRenderContext context, Matrix4x4 viewProjection, Material material, Matrix4x4 world);
-        public abstract void Apply(IRenderContext context, Camera camera, Material material, Matrix4x4 world);
     }
 }

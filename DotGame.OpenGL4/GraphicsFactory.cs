@@ -32,36 +32,50 @@ namespace DotGame.OpenGL4
             objects = new List<WeakReference<GraphicsObject>>();
             this.graphicsDevice = graphicsDevice;
         }
-
-        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps)
+        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps, ResourceUsage usage = ResourceUsage.Normal, DataRectangle data = new DataRectangle())
         {
             AssertCurrent();
-            Texture2D texture = Register(new Texture2D(graphicsDevice, width, height, format, generateMipMaps));
-
-            return texture;
+            return Register(new Texture2D(graphicsDevice, width, height, format, generateMipMaps, usage, data));
         }
 
-        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, int mipLevels)
+        public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataRectangle[] data)
         {
             AssertCurrent();
-            return Register(new Texture2D(graphicsDevice, width, height, format, mipLevels));
+            return Register(new Texture2D(graphicsDevice, width, height, format, mipLevels, usage, data));
         }
 
-        public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
+        public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps, ResourceUsage usage = ResourceUsage.Normal, DataBox data = new DataBox())
         {
             AssertCurrent();
-            return Register(new Texture3D(graphicsDevice, width, height, length, generateMipMaps, format));
+            return Register(new Texture3D(graphicsDevice, width, height, length, format, generateMipMaps, usage, data));
         }
 
-        public ITexture2DArray CreateTexture2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
+        public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataBox[] data)
         {
             AssertCurrent();
-            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize, false, generateMipMaps, format));
+            return Register(new Texture3D(graphicsDevice, width, height, length, format, mipLevels, usage, data));
         }
 
-        public ITexture3DArray CreateTexture3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
+        public ITexture2DArray CreateTexture2DArray(int width, int height, int arraySize, TextureFormat format, bool generateMipMaps, ResourceUsage usage = ResourceUsage.Normal, params DataRectangle[] data)
         {
-            throw new NotSupportedException();
+            AssertCurrent();
+            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize, format, generateMipMaps, usage, data));
+        }
+
+        public ITexture2DArray CreateTexture2DArray(int width, int height, int arraySize, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataRectangle[] data)
+        {
+            AssertCurrent();
+            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize, format, mipLevels, usage, data));
+        }
+
+        public ITexture3DArray CreateTexture3DArray(int width, int height, int length, int arraySize, TextureFormat format, bool generateMipMaps, ResourceUsage usage = ResourceUsage.Normal, params DataBox[] data)
+        {
+            throw new NotImplementedException();
+        }
+
+        public ITexture3DArray CreateTexture3DArray(int width, int height, int length, int arraySize, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataBox[] data)
+        {
+            throw new NotImplementedException();
         }
 
         public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format, bool generateMipMaps)
@@ -73,13 +87,13 @@ namespace DotGame.OpenGL4
         public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            return Register(new Texture3D(graphicsDevice, width, height,length, generateMipMaps, format));
+            return (IRenderTarget3D)CreateTexture3D(width, height, length, format, generateMipMaps); ;
         }
 
         public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
         {
             AssertCurrent();
-            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize, false, generateMipMaps, format));
+            return Register(new Texture2DArray(graphicsDevice, width, height, arraySize,format, false));
         }
 
         public IRenderTarget3DArray CreateRenderTarget3DArray(int width, int height, int length, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -87,64 +101,98 @@ namespace DotGame.OpenGL4
             throw new NotSupportedException();
         }
 
-        public IVertexBuffer CreateVertexBuffer(int vertexCount, VertexDescription description, BufferUsage usage)
+        public IVertexBuffer CreateVertexBuffer(int vertexCount, VertexDescription description, ResourceUsage usage)
         {
             AssertCurrent();
-            return Register(new VertexBuffer(graphicsDevice, description, usage));
+            return Register(new VertexBuffer(graphicsDevice, description, usage, vertexCount));
         }
 
-        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description, BufferUsage usage) where T : struct
+        public IVertexBuffer CreateVertexBuffer<T>(T[] data, VertexDescription description, ResourceUsage usage) where T : struct
         {
             AssertCurrent();
 
-            VertexBuffer buffer = Register(new VertexBuffer(graphicsDevice, description, usage));
-            buffer.SetData<T>(data);
+            VertexBuffer buffer = null;
+            if (data != null)
+            {
+                GCHandle handle;
+                DataArray dataArray = DataArray.FromArray(data, out handle);
+                try
+                {
+                    buffer = Register(new VertexBuffer(graphicsDevice, description, usage, dataArray));
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
             return buffer;
         }
 
-        public IIndexBuffer CreateIndexBuffer(int indexCount, IndexFormat format, BufferUsage usage)
+        public IIndexBuffer CreateIndexBuffer(int indexCount, IndexFormat format, ResourceUsage usage)
         {
             AssertCurrent();
-            return Register(new IndexBuffer(graphicsDevice, usage, format));
+            return Register(new IndexBuffer(graphicsDevice, format, usage, indexCount));
         }
 
-        public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format, BufferUsage usage) where T : struct
+        public IIndexBuffer CreateIndexBuffer<T>(T[] data, IndexFormat format, ResourceUsage usage) where T : struct
         {
             AssertCurrent();
-            IndexBuffer buffer = Register(new IndexBuffer(graphicsDevice, usage, format));
-            buffer.SetData<T>(data);
+            IndexBuffer buffer = null;
+            if (data != null)
+            {
+                GCHandle handle;
+                DataArray dataArray = DataArray.FromArray(data, out handle);
+                try
+                {
+                    buffer = Register(new IndexBuffer(graphicsDevice, format, usage, dataArray));
+                }
+                finally
+                {
+                    handle.Free();
+                }
+            }
             return buffer;
         }
 
-        public IIndexBuffer CreateIndexBuffer(int[] data, BufferUsage usage)
+        public IIndexBuffer CreateIndexBuffer(int[] data, ResourceUsage usage)
         {
             return CreateIndexBuffer(data, IndexFormat.Int32, usage);
         }
 
-        public IIndexBuffer CreateIndexBuffer(uint[] data, BufferUsage usage)
+        public IIndexBuffer CreateIndexBuffer(uint[] data, ResourceUsage usage)
         {
             return CreateIndexBuffer(data, IndexFormat.UInt32, usage);
         }
 
-        public IIndexBuffer CreateIndexBuffer(short[] data, BufferUsage usage)
+        public IIndexBuffer CreateIndexBuffer(short[] data, ResourceUsage usage)
         {
             return CreateIndexBuffer(data, IndexFormat.Short16, usage);
         }
 
-        public IIndexBuffer CreateIndexBuffer(ushort[] data, BufferUsage usage)
+        public IIndexBuffer CreateIndexBuffer(ushort[] data, ResourceUsage usage)
         {
             return CreateIndexBuffer(data, IndexFormat.UShort16, usage);
         }
 
-        public IConstantBuffer CreateConstantBuffer(int size, BufferUsage usage)
+        public IConstantBuffer CreateConstantBuffer(int size, ResourceUsage usage)
         {
             return Register(new ConstantBuffer(graphicsDevice, size, usage));
         }
 
-        public IConstantBuffer CreateConstantBuffer<T>(T data, BufferUsage usage) where T : struct
+        public IConstantBuffer CreateConstantBuffer<T>(T data, ResourceUsage usage) where T : struct
         {
-            ConstantBuffer constantBuffer = Register(new ConstantBuffer(graphicsDevice, Marshal.SizeOf(typeof(T)), usage));
-            constantBuffer.SetData<T>(data);
+            AssertCurrent();
+            ConstantBuffer constantBuffer = null;
+            GCHandle handle;
+            DataArray dataArray = DataArray.FromObject<T>(data, out handle);
+            try
+            {
+                constantBuffer = Register(new ConstantBuffer(graphicsDevice, usage, dataArray));
+            }
+            finally
+            {
+                handle.Free();
+            }
             return constantBuffer;
         }
 
@@ -342,6 +390,6 @@ namespace DotGame.OpenGL4
 
             if (OnDisposed != null)
                 OnDisposed(this, EventArgs.Empty);
-        }
+        }        
     }
 }

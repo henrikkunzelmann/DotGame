@@ -30,7 +30,8 @@ namespace DotGame.Test
                 GraphicsAPI = GraphicsAPI.Direct3D11,
                 Width = 1280,
                 Height = 720,
-                AudioAPI = AudioAPI.OpenAL
+                AudioAPI = AudioAPI.OpenAL,
+                Debug = true
             });
 
             var scene = new Scene(engine);
@@ -39,7 +40,7 @@ namespace DotGame.Test
             engine.AddComponent(new SceneGraphTest(engine));
 
 
-            var renderer = new DotGamePipeline(engine, scene);
+            var renderer = PassPipeline.CreateDefault(engine, scene);
             engine.AddComponent(renderer);
 
             //engine.AddComponent(new GraphTest(engine));

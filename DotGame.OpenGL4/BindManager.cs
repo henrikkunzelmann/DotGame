@@ -239,7 +239,7 @@ namespace DotGame.OpenGL4
                     Texture2DArray internalTexture = graphicsDevice.Cast<Texture2DArray>(texture, "texture");
                     GL.ActiveTexture(TextureUnit.Texture0 + unit);
 
-                    GL.BindTexture(internalTexture.TextureTarget, internalTexture.TextureID);
+                    GL.BindTexture(TextureTarget.Texture2DArray, internalTexture.TextureID);
                 }
                 currentTextures[unit] = texture;
             }

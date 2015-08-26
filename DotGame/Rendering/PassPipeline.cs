@@ -10,7 +10,7 @@ namespace DotGame.Rendering
     /// <summary>
     /// Speichert die Passes und deren Reihenfolge die für das Rendering benutzt werden soll.
     /// </summary>
-    public class PassPipeline : EngineComponent
+    public abstract class PassPipeline : EngineComponent
     {
         private object locker = new object();
         private Pass[] passes;
@@ -60,12 +60,14 @@ namespace DotGame.Rendering
         /// Erstellt eine Standard PassPipeline.
         /// </summary>
         /// <returns></returns>
-        public static PassPipeline CreateDefault(Engine engine)
+        public static PassPipeline CreateDefault(Engine engine, Scene scene)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
 
-            return new PassPipeline(engine, new DeferredPass(engine), new ForwardPass(engine), new ParticlePass(engine), new UIPass(engine));
+            //TODO (Robin) Je nach Feature Level & API passende Pipeline erstellen (Forward for mobile, Deferred for PC,...)
+
+            return new DeferredPipeline(engine, scene);
         }
 
         /// <summary>
