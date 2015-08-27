@@ -11,30 +11,7 @@ namespace DotGame.Graphics
     /// </summary>
     public interface IRenderContext : IGraphicsObject
     {
-        void Update<T>(IConstantBuffer buffer, T data) where T : struct;
-        void Update<T>(ITexture2D texture, T[] data) where T : struct;
-        void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct;
-        void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct;
-        void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct;
-
-        void Update<T>(IVertexBuffer vertexBuffer, T[] data) where T : struct;
-        void Update<T>(IIndexBuffer indexBuffer, T[] data) where T : struct;
-
-        void Update(IConstantBuffer buffer, DataArray data);
-        void Update(ITexture2D texture, DataRectangle data);
-        void Update(ITexture2D texture, DataRectangle[] data);
-        void Update(ITexture2D texture, int mipLevel, DataRectangle data);
-        void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data);
-        void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle[] data);
-        void Update(ITexture2DArray textureArray, DataRectangle[] data);
-        void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data); 
-
-        void Update(IVertexBuffer vertexBuffer, DataArray data); 
-        void Update(IIndexBuffer indexBuffer, DataArray data);
-
-        void GenerateMips(ITexture2D texture);
-        void GenerateMips(ITexture2DArray textureArray);
-
+        IRenderUpdateContext UpdateContext { get; }
 
         /// <summary>
         /// Leert den Inhalt des aktuell gebundenen RenderTargets. Ist kein RenderTarget gebunden, wird der Backbuffer angesprochen.

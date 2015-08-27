@@ -7,6 +7,7 @@ using System.Drawing;
 using System.Drawing.Imaging;
 using DotGame.Graphics;
 using Color = DotGame.Graphics.Color;
+using System.Runtime.InteropServices;
 
 namespace DotGame.Assets.Importers
 {
@@ -81,7 +82,16 @@ namespace DotGame.Assets.Importers
                             default:
                                 throw new NotImplementedException("PixelFormat " + data.PixelFormat + " not implemented");
                         }
-                        Engine.GraphicsDevice.RenderContext.Update(handle, colorsArgb);
+                        GCHandle gcHandle;
+                        DataRectangle dataRectangle = DataRectangle.FromArray(colorsArgb, bitmap.Width * Engine.GraphicsDevice.GetSizeOf(TextureFormat.RGBA32_Float), out gcHandle);
+                        try
+                        {
+                            Engine.GraphicsDevice.RenderContext.UpdateContext.Update(handle, 0, dataRectangle);
+                        }
+                        finally
+                        {
+                            gcHandle.Free();
+                        }
                     }
                     finally
                     {

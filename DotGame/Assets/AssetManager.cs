@@ -112,7 +112,7 @@ namespace DotGame.Assets
                 Log.Debug("Removed {0} with name \"{1}\" from file \"{2}\"", asset.GetType().Name, asset.Name, asset.File);
         }
 
-        public Mesh LoadMesh<TVertex>(string name, TVertex[] vertices) where TVertex : struct, IVertexType
+        public StaticMesh LoadMesh<TVertex>(string name, TVertex[] vertices) where TVertex : struct, IVertexType
         {
             if (vertices == null)
                 throw new ArgumentNullException("vertices");
@@ -121,19 +121,19 @@ namespace DotGame.Assets
             return LoadMesh(name, vertices, vertices[0].VertexDescription);
         }
 
-        public Mesh LoadMesh<TVertex>(string name, TVertex[] vertices, VertexDescription vertexDescription) where TVertex : struct
+        public StaticMesh LoadMesh<TVertex>(string name, TVertex[] vertices, VertexDescription vertexDescription) where TVertex : struct
         {
             if (vertices == null)
                 throw new ArgumentNullException("vertices");
             if (vertices.Length == 0)
                 throw new ArgumentException("Vertices is empty.", "vertices");
 
-            IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, BufferUsage.Static);
-            return new Mesh(this, name, AssetType.User, vertexBuffer);
+            IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, ResourceUsage.Normal);
+            return new StaticMesh(this, name, AssetType.User, vertexBuffer);
         }
 
 
-        public Mesh LoadMesh<TVertex, TIndex>(string name, TVertex[] vertices, VertexDescription vertexDescription, TIndex[] indices, IndexFormat indexFormat) 
+        public StaticMesh LoadMesh<TVertex, TIndex>(string name, TVertex[] vertices, VertexDescription vertexDescription, TIndex[] indices, IndexFormat indexFormat) 
             where TVertex : struct 
             where TIndex : struct
         {
@@ -146,9 +146,9 @@ namespace DotGame.Assets
             if (indices.Length == 0)
                 throw new ArgumentException("Indices is empty.", "indices");
 
-            IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, BufferUsage.Static);
-            IIndexBuffer indexBuffer = Engine.GraphicsDevice.Factory.CreateIndexBuffer(indices, indexFormat, BufferUsage.Static);
-            return new Mesh(this, name, AssetType.User, vertexBuffer, indexBuffer);
+            IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, ResourceUsage.Normal);
+            IIndexBuffer indexBuffer = Engine.GraphicsDevice.Factory.CreateIndexBuffer(indices, indexFormat, ResourceUsage.Normal);
+            return new StaticMesh(this, name, AssetType.User, vertexBuffer, indexBuffer);
         }
 
         /// <summary>

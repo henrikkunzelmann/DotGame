@@ -261,6 +261,10 @@ namespace DotGame.OpenGL4
             CheckGLError("Init MaxTextureSize");
             openGLCapabilities.MaxVertexAttribs = GL.GetInteger(GetPName.MaxVertexAttribs);
             CheckGLError("Init MaxVertexAttribs");
+            openGLCapabilities.MaxUniformBlockSize = GL.GetInteger(GetPName.MaxUniformBlockSize);
+            CheckGLError("Init MaxUniformBlockSize");
+            openGLCapabilities.MaxUniformBufferBindings = GL.GetInteger(GetPName.MaxUniformBufferBindings);
+            CheckGLError("Init MaxUniformBufferBindings");
         }
 
         private void OnDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr user)
@@ -461,7 +465,7 @@ namespace DotGame.OpenGL4
                     
                     Ext.EnableVertexArrayAttrib(layout, i);
 
-                    Ext.VertexArrayVertexAttribBinding(layout, i, 0);
+                    Ext.VertexArrayVertexAttribBinding(layout, i, elements[i].UsageIndex);
                     Ext.VertexArrayVertexAttribFormat(layout, i, GetComponentsOf(elements[i].Type), (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)VertexAttribType.Float, false, offset);
                     offset += GetSizeOf(elements[i].Type);
                 }

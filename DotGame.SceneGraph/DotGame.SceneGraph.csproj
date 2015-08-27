@@ -43,13 +43,8 @@
     <Reference Include="System.Xml" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="Entity.cs" />
     <Compile Include="FixedCamera.cs" />
-    <Compile Include="ICamera.cs" />
-    <Compile Include="MeshEntity.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
-    <Compile Include="Scene.cs" />
-    <Compile Include="SceneNode.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

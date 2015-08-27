@@ -1,5 +1,5 @@
-﻿using DotGame.Cameras;
-using DotGame.Graphics;
+﻿using DotGame.Graphics;
+using DotGame.Rendering;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -13,7 +13,7 @@ namespace DotGame.EntitySystem.Components
     /// <summary>
     /// Stellt eine Kamera dar.
     /// </summary>
-    public class Camera : Component, ICamera
+    public class Camera : Component
     {
         public static readonly Vector3 Lookat = new Vector3(0, 0, 1);
 

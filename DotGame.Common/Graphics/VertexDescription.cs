@@ -41,11 +41,24 @@ namespace DotGame.Graphics
                     return true;
             return false;
         }
-
+        public bool HasElement(VertexElementUsage usage, VertexElementType type)
+        {
+            for (int i = 0; i < elements.Length; i++)
+                if (elements[i].Usage == usage && elements[i].Type == type)
+                    return true;
+            return false;
+        }
         public bool HasElement(VertexElementUsage usage, int usageIndex)
         {
             for (int i = 0; i < elements.Length; i++)
                 if (elements[i].Usage == usage && elements[i].UsageIndex == usageIndex)
+                    return true;
+            return false;
+        }
+        public bool HasElement(VertexElement element)
+        {
+            for (int i = 0; i < elements.Length; i++)
+                if (elements[i].Equals(element))
                     return true;
             return false;
         }
@@ -65,6 +78,20 @@ namespace DotGame.Graphics
         public bool Equals(VertexDescription other)
         {
             return Enumerable.SequenceEqual(elements, other.elements);
+        }
+
+        public bool EqualsIgnoreOrder(VertexDescription other)
+        {
+            if (ElementCount == other.ElementCount)
+            {
+                foreach (VertexElement element in elements)
+                    if (!other.HasElement(element))
+                        return false;
+
+                return true;
+            }
+            else
+                return false;
         }
 
         public override int GetHashCode()

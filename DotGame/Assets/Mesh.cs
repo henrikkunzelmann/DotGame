@@ -7,7 +7,7 @@ using DotGame.Graphics;
 
 namespace DotGame.Assets
 {
-    public class Mesh : Asset
+    public abstract class Mesh : Asset
     {
         private IVertexBuffer vertexBuffer;
         public IVertexBuffer VertexBufferHandle 
@@ -65,26 +65,7 @@ namespace DotGame.Assets
             this.IndexCount = indexBuffer.IndexCount;
         }
 
-        public void Draw(IRenderContext context)
-        {
-            IVertexBuffer vertexBuffer = VertexBufferHandle;
-            IIndexBuffer indexBuffer = IndexBufferHandle;
-            if (vertexBuffer == null || (HasIndices && indexBuffer == null)) // Buffer noch nicht geladen, nichts zeichnen
-                return;
-
-            context.SetVertexBuffer(vertexBuffer);
-            if (HasIndices)
-            {
-                context.SetIndexBuffer(indexBuffer);
-                context.DrawIndexed();
-            }
-            else
-                context.Draw();
-        }
-
-        protected override void Load()
-        {
-        }
+        public abstract void Draw(IRenderContext context);
 
         protected override void Unload()
         {

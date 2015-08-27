@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -28,7 +29,7 @@ namespace DotGame
         {
             get { return Pointer == IntPtr.Zero; }
         }
-
+        
         public DataArray(IntPtr pointer, int size)
             : this()
         {
@@ -37,6 +38,33 @@ namespace DotGame
 
             this.Pointer = pointer;
             this.Size = size;
+        }
+        
+        public static DataArray FromArray<T>(T[] array, out GCHandle handle)
+        {
+            if (array != null)
+            {
+                handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+                return new DataArray(handle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)) * array.Length);
+            }
+            else
+            {
+                handle = new GCHandle();
+                return new DataArray(IntPtr.Zero, 0);
+            }
+        }
+        public static DataArray FromObject<T>(T data, out GCHandle handle)
+        {
+            if (data != null)
+            {
+                handle = GCHandle.Alloc(data, GCHandleType.Pinned);
+                return new DataArray(handle.AddrOfPinnedObject(), Marshal.SizeOf(typeof(T)));
+            }
+            else
+            {
+                handle = new GCHandle();
+                return new DataArray(IntPtr.Zero, 0);
+            }
         }
 
         public static bool operator ==(DataArray a, DataArray b)

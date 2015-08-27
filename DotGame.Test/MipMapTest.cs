@@ -6,14 +6,13 @@ using System.Threading.Tasks;
 using System.Numerics;
 using DotGame;
 using DotGame.Utils;
-using DotGame.SceneGraph;
 using DotGame.Rendering;
 using DotGame.Assets;
 using DotGame.Geometry;
 
 
 namespace DotGame.Test
-{
+{/*
     public class MipMapTest : GameComponent
     {
         public Scene Scene { get; private set; }
@@ -65,5 +64,5 @@ namespace DotGame.Test
         public override void Unload()
         {
         }
-    }
+    }*/
 }

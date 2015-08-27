@@ -95,6 +95,16 @@ namespace DotGame.Graphics
         /// Gibt an, ob der Treiber das Validieren von Texturen, Buffern und FrameBuffern beherrscht. (ARB_invalidate_subdata, core ab 4.3)
         /// </summary>
         internal bool SupportsResourceValidation;
+
+        /// <summary>
+        /// Gibt die maximale größe für Uniform-Blöcke an
+        /// </summary>
+        internal int MaxUniformBlockSize;
+
+        /// <summary>
+        /// Gibt die maximale Anzahl an UniformBlockBindingPoints an
+        /// </summary>
+        internal int MaxUniformBufferBindings;
     }
 
     internal enum DirectStateAccess

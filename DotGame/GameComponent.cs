@@ -4,25 +4,25 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using DotGame.Graphics;
+using Newtonsoft.Json;
 
 namespace DotGame
 {
-    public abstract class GameComponent
+    public abstract class EngineComponent : EngineObject
     {
-        public Engine Engine { get; private set; }
+        [JsonIgnore]
         public IGraphicsDevice GraphicsDevice { get { return Engine.GraphicsDevice; } }
        
-        public GameComponent(Engine engine)
+        public EngineComponent(Engine engine) : base(engine)
         {
-            if (engine == null)
-                throw new ArgumentNullException("engine");
-
-            this.Engine = engine;
         }
 
-        public abstract void Init();
-        public abstract void Update(GameTime gameTime);
-        public abstract void Draw(GameTime gameTime);
-        public abstract void Unload();
+        public virtual void Init() { }
+        public virtual void Update(GameTime gameTime) { }
+        public virtual void Draw(GameTime gameTime) { }
+        public virtual void Unload()
+        {
+            Dispose(true);
+        }
     }
 }

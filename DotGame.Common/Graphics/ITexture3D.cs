@@ -35,5 +35,7 @@ namespace DotGame.Graphics
         /// Das Format der Texture.
         /// </summary>
         TextureFormat Format { get; }
+
+        ResourceUsage Usage { get; }
     }
 }

@@ -15,18 +15,19 @@ namespace DotGame.EntitySystem
     /// <summary>
     /// Stellt eine Basiskomponente dar.
     /// </summary>
-    public abstract class Component : EventHandler
+    public abstract class Component
     {
         /// <summary>
         /// Ruft das Entity, in dem diese Komponente registriert ist, ab.
         /// </summary>
+        [JsonIgnore]
         public Entity Entity { get { return entity; } set { if (entity != null) throw new InvalidOperationException("Entity already set."); entity = value; } }
         [JsonIgnore]
         [DebuggerBrowsable(DebuggerBrowsableState.Never)]
         private Entity entity;
 
         // 1st: single, 2nd: required components
-        private static Dictionary<Type, Tuple<bool, RequiresComponentAttribute[]>> componentCache = new Dictionary<Type, Tuple<bool, RequiresComponentAttribute[]>>();
+        private static Dictionary<Type, Tuple<bool, RequiresComponentAttribute[], RequiresGameComponentAttribute[]>> componentCache = new Dictionary<Type, Tuple<bool, RequiresComponentAttribute[], RequiresGameComponentAttribute[]>>();
 
         /// <summary>
         /// Gibt zurück, ob der angegebene Komponententyp ein SingleComponentAttribute enthält.
@@ -78,14 +79,40 @@ namespace DotGame.EntitySystem
             return GetCache(typeof(T)).Item2;
         }
 
-        private static Tuple<bool, RequiresComponentAttribute[]> GetCache(Type type)
+        /// <summary>
+        /// Gibt einen Array, der alle RequiresComponentAttribute eines Komponententyps enthält, zurück.
+        /// </summary>
+        /// <param name="type">Der Komponententyp.</param>
+        /// <returns>Den Array.</returns>
+        public static RequiresGameComponentAttribute[] GetRequiredGameComponents(Type type)
         {
-            Tuple<bool, RequiresComponentAttribute[]> entry;
+            if (type == null)
+                throw new ArgumentNullException("type");
+            if (!typeof(Component).IsAssignableFrom(type))
+                throw new ArgumentException("Given type is no component.", "type");
+
+            return GetCache(type).Item3;
+        }
+
+        /// <summary>
+        /// Gibt einen Array, der alle RequiresComponentAttribute eines Komponententyps enthält, zurück.
+        /// </summary>
+        /// <typeparam name="T">Der Komponententyp.</typeparam>
+        /// <returns>Den Array.</returns>
+        public static RequiresGameComponentAttribute[] GetRequiredGameComponents<T>() where T : Component
+        {
+            return GetCache(typeof(T)).Item3;
+        }
+
+        private static Tuple<bool, RequiresComponentAttribute[], RequiresGameComponentAttribute[]> GetCache(Type type)
+        {
+            Tuple<bool, RequiresComponentAttribute[], RequiresGameComponentAttribute[]> entry;
             if (!componentCache.TryGetValue(type, out entry))
             {
                 var single = type.GetCustomAttributes(typeof(SingleComponentAttribute), true).Length > 0;
                 var required = type.GetCustomAttributes(typeof(RequiresComponentAttribute), true).Cast<RequiresComponentAttribute>().ToArray();
-                entry = new Tuple<bool, RequiresComponentAttribute[]>(single, required);
+                var gameRequired = type.GetCustomAttributes(typeof(RequiresGameComponentAttribute), true).Cast<RequiresGameComponentAttribute>().ToArray();
+                entry = new Tuple<bool, RequiresComponentAttribute[], RequiresGameComponentAttribute[]>(single, required, gameRequired);
                 componentCache[type] = entry;
             }
             return entry;
@@ -94,37 +121,21 @@ namespace DotGame.EntitySystem
         /// <summary>
         /// Wird bei der Initialisierung aufegrufen.
         /// </summary>
-        [Event]
-        protected virtual void Init() { }
+        public virtual void Init() { }
 
         /// <summary>
         /// Wird bei einem Update aufegrufen.
         /// </summary>
-        [Event]
-        protected virtual void Update(GameTime gameTime) { }
-
-        /// <summary>
-        /// Wird beim Zeichnen aufegrufen.
-        /// </summary>
-        [Event]
-        protected virtual void Draw(GameTime gameTime) { }
-
-        /// <summary>
-        /// Wird aufgerufen, wenn ein Pass sich auf das Rendern vorbereitet.
-        /// </summary>
-        [Event]
-        protected virtual void PrepareDraw(GameTime gameTime, List<IRenderItem> renderList) { }
+        public virtual void Update(GameTime gameTime) { }
 
         /// <summary>
         /// Wird aufgerufen, wenn das Entity zerstört wird.
         /// </summary>
-        [Event]
-        protected virtual void Destroy() { }
+        public virtual void Destroy() { }
 
         /// <summary>
         /// Wird nach dem Deserialisieren aufgerufen.
         /// </summary>
-        [Event]
-        protected virtual void AfterDeserialize() { }
+        public virtual void AfterDeserialize(Entity entity) { this.Entity = entity; }
     }
 }

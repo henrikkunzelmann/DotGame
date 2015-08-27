@@ -343,7 +343,7 @@ namespace DotGame.Geometry
         /// </summary>
         /// <param name="name">Der Name für das zu erzeugende Mesh.</param>
         /// <returns></returns>
-        public Mesh BuildMesh(string name)
+        public StaticMesh BuildMesh(string name)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Can not be null or whitespace.", "name");
@@ -379,7 +379,7 @@ namespace DotGame.Geometry
                     data[index++] = colors[i].W;
                 }
             }
-            Mesh mesh;
+            StaticMesh mesh;
             if (!HasIndices)
                 mesh = Engine.AssetManager.LoadMesh(name, data, CreateDescription());
             else

@@ -7,6 +7,7 @@ using System.Diagnostics;
 using SharpDX.Direct3D11;
 using DotGame.Graphics;
 using SharpDX.DXGI;
+using ResourceUsage = DotGame.Graphics.ResourceUsage;
 
 namespace DotGame.DirectX11
 {
@@ -14,46 +15,67 @@ namespace DotGame.DirectX11
     {
         public IndexFormat Format { get; private set; }
         public int IndexCount { get; private set; }
-        public int SizeBytes { get; private set; }
-        public BufferUsage Usage { get; private set; }
+        public ResourceUsage Usage { get; private set; }
 
-        internal SharpDX.DXGI.Format IndexFormat { get; private set; }
+        internal SharpDX.DXGI.Format IndexFormat { get { return EnumConverter.Convert(Format); } }
         internal SharpDX.Direct3D11.Buffer Buffer { get; private set; }
 
-        public IndexBuffer(GraphicsDevice graphicsDevice, int indexCount, IndexFormat format, BufferUsage usage)
-            : this(graphicsDevice, format, usage)
+        private int sizeBytes;
+        public int SizeBytes
         {
-            this.IndexCount = indexCount;
-            this.SizeBytes = graphicsDevice.GetSizeOf(format) * indexCount;
-
-            this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, SizeBytes, 
-                EnumConverter.Convert(usage), 
-                BindFlags.IndexBuffer, Usage == BufferUsage.Static ? CpuAccessFlags.None : CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
+            get
+            {
+                return sizeBytes;
+            }
+            private set
+            {
+                int formatSize = graphicsDevice.GetSizeOf(Format);
+                if (value % formatSize != 0)
+                    throw new ArgumentException("Data does not match IndexFormat.", "data");
+                this.IndexCount = value / formatSize;
+                sizeBytes = value;
+            }
         }
 
-        public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, BufferUsage usage)
+        public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, Graphics.ResourceUsage usage, DataArray data)
             : base(graphicsDevice, new StackTrace(1))
         {
-            this.graphicsDevice = graphicsDevice;
+            if (data.IsNull)
+                throw new ArgumentException("data.Pointer is null");
+            if (data.Size <= 0)
+                throw new ArgumentOutOfRangeException("data.Size", data.Size, "Size must be bigger than 0.");
+
             this.Format = format;
-            this.IndexFormat = EnumConverter.Convert(format);
+            this.SizeBytes = data.Size;
             this.Usage = usage;
+
+            if (!data.IsNull)
+            {
+                this.SizeBytes = data.Size;
+
+                BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(usage),
+                 BindFlags.IndexBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
+
+                this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, data.Pointer, bufferDescription);
+            }
         }
 
-        internal void SetData<T>(T[] data) where T : struct
+        public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, Graphics.ResourceUsage usage, int indexCount)
+            : base(graphicsDevice, new StackTrace(1))
         {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (data.Length == 0)
-                throw new ArgumentException("Data must not be empty.", "data");
+            if (indexCount <= 0)
+                throw new ArgumentOutOfRangeException("indexCount", indexCount, "indexCount must be bigger than zero.");
+            if (usage == ResourceUsage.Immutable)
+                throw new ArgumentException("data", "Immutable buffers must be initialized with data.");
 
-            int formatSize = FormatHelper.SizeOfInBytes(IndexFormat);
-            this.SizeBytes = SharpDX.Utilities.SizeOf(data);
-            if (this.SizeBytes % formatSize == 0)
-                throw new ArgumentException("Data does not match index format.", "data");
+            this.Format = format;
+            this.SizeBytes = indexCount * graphicsDevice.GetSizeOf(format);
+            this.Usage = usage;
+            
+            BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(Usage),
+             BindFlags.IndexBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
 
-            this.IndexCount = this.SizeBytes / formatSize;
-            Buffer = SharpDX.Direct3D11.Buffer.Create(graphicsDevice.Device, BindFlags.IndexBuffer, data);
+            this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, bufferDescription);
         }
 
         protected override void Dispose(bool isDisposing)

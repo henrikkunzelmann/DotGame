@@ -14,66 +14,102 @@ namespace DotGame.OpenGL4
     {
         public IndexFormat Format { get; private set; }
         public int IndexCount { get; private set; }
-        public int SizeBytes { get; private set; }
-        public BufferUsage Usage { get; private set;}
+        public ResourceUsage Usage { get; private set;}
 
         internal int IboID { get; private set; }
- 
-        public IndexBuffer(GraphicsDevice graphicsDevice, BufferUsage usage, IndexFormat format) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+
+        private int sizeBytes;
+        public int SizeBytes
         {
-            if (graphicsDevice == null)
-                throw new ArgumentNullException("graphicsDevice");
-            if (graphicsDevice.IsDisposed)
-                throw new ArgumentException("GraphicsDevice is disposed.", "graphicsDevice");
+            get
+            {
+                return sizeBytes;
+            }
+            private set
+            {
+                int formatSize = graphicsDevice.GetSizeOf(Format);
+                if (value % formatSize != 0)
+                    throw new ArgumentException("Data does not match IndexFormat.", "data");
+                this.IndexCount = value / formatSize;
+                sizeBytes = value;
+            }
+        }
+        
+        public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, ResourceUsage usage, DataArray data) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        {
+            if(data.IsNull)
+                throw new ArgumentNullException("data.Pointer");
+            if (data.Size <= 0)
+                throw new ArgumentOutOfRangeException("data.Size", data.Size, "Size must be bigger than 0.");
+            EnumConverter.Convert(Format); //Check whether format is supported
 
             this.Usage = usage;
             this.Format = format;
-            EnumConverter.Convert(Format);
 
             IboID = GL.GenBuffer();
-            graphicsDevice.CheckGLError();
+
+            if (!data.IsNull)
+            {
+                SizeBytes = data.Size;
+
+                if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+                {
+                    graphicsDevice.BindManager.IndexBuffer = this;
+                    GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(SizeBytes), data.Pointer, EnumConverter.Convert(Usage));
+                }
+                else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+                {
+                    OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(IboID, new IntPtr(SizeBytes), data.Pointer, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
+                }
+            }
+
+            graphicsDevice.CheckGLError("IndexBuffer Constructor");
         }
 
-        internal void SetData<T>(T[] data) where T : struct
+        public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, ResourceUsage usage, int indexCount) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (data.Length == 0)
-                throw new ArgumentException("Data must not be empty.", "data");
-            
-            // TODO (henrik1235) Format und SizeBytes supporten
-            this.IndexCount = data.Length;
-            this.SizeBytes = Marshal.SizeOf(data[0]) * data.Length;
+            if (indexCount <= 0)
+                throw new ArgumentOutOfRangeException("indexCount", indexCount, "indexCount must be bigger than zero.");
+            if (usage == ResourceUsage.Immutable)
+                throw new ArgumentException("data", "Immutable buffers must be initialized with data.");
+            EnumConverter.Convert(Format); //Check whether format is supported
+
+            this.Usage = usage;
+            this.Format = format;
+            SizeBytes = indexCount * graphicsDevice.GetSizeOf(format);
+
+            IboID = GL.GenBuffer();
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
                 graphicsDevice.BindManager.IndexBuffer = this;
-                GL.BufferData<T>(BufferTarget.ElementArrayBuffer, new IntPtr(this.SizeBytes), data, EnumConverter.Convert(Usage));
+                GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(SizeBytes), IntPtr.Zero, EnumConverter.Convert(Usage));
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-                Ext.NamedBufferData<T>(IboID, new IntPtr(this.SizeBytes), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess) EnumConverter.Convert(Usage));
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(IboID, new IntPtr(SizeBytes), IntPtr.Zero, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
             }
-            graphicsDevice.CheckGLError();
-        }
-        internal void SetData(IntPtr data, int size, int indexCount)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (size <= 0)
-                throw new ArgumentException("Data must not be empty.", "data");
 
-            SizeBytes = size;
-            this.IndexCount = indexCount;
+            graphicsDevice.CheckGLError("IndexBuffer Constructor");
+        }
+
+        internal void UpdateData(DataArray data)
+        {
+            if (data.IsNull)
+                throw new ArgumentException("data.Pointer is null");
+            if (data.Size < 0)
+                throw new ArgumentException("Data must not be smaller than zero.", "data");
+            if (data.Size != SizeBytes)
+                throw new ArgumentException("Data does not match IndexBuffer size.", "data");
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
                 graphicsDevice.BindManager.IndexBuffer = this;
-                GL.BufferData(BufferTarget.ElementArrayBuffer, new IntPtr(SizeBytes), data, EnumConverter.Convert(Usage));
+                GL.BufferSubData(BufferTarget.ElementArrayBuffer, new IntPtr(0), new IntPtr(SizeBytes), data.Pointer);
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(IboID, new IntPtr(SizeBytes), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferSubData(IboID, new IntPtr(0), new IntPtr(SizeBytes), data.Pointer);
             }
             graphicsDevice.CheckGLError();
         }

@@ -16,8 +16,6 @@ namespace DotGame.EntitySystem
     public sealed class Prefab
     {
         private byte[] data;
-        // Nur für Testzwecke.
-        private string jsonData;
 
         private static JsonSerializer serializer;
 
@@ -40,21 +38,14 @@ namespace DotGame.EntitySystem
                 throw new ArgumentNullException("entity");
 
             var prefab = new Prefab();
+            
             using (var stream = new MemoryStream())
             {
                 using (var writer = new BsonWriter(stream))
-                    serializer.Serialize(writer, entity.Transform);
+                    serializer.Serialize(writer, entity);
 
                 prefab.data = stream.GetBuffer();
             }
-
-            // Nur für Testzwecke.
-            prefab.jsonData = JsonConvert.SerializeObject(entity.Transform, new JsonSerializerSettings()
-            {
-                TypeNameAssemblyFormat = System.Runtime.Serialization.Formatters.FormatterAssemblyStyle.Simple,
-                TypeNameHandling = TypeNameHandling.Objects,
-                PreserveReferencesHandling = PreserveReferencesHandling.Objects
-            });
 
             return prefab;
         }
@@ -63,31 +54,26 @@ namespace DotGame.EntitySystem
         {
         }
 
+        
         /// <summary>
         /// Instanziiert das zugrundeliegende Entity in der gegebenen Szene.
         /// </summary>
         /// <param name="scene">Die Szene.</param>
         /// <returns>Das Entity.</returns>
-        public Entity CreateInstance(Scene scene)
+        public Entity CreateInstance()
         {
-            if (scene == null)
-                throw new ArgumentNullException("scene");
-
-            Transform instance;
+            Entity instance;
             using (var stream = new MemoryStream(data))
             using (var reader = new BsonReader(stream))
-                instance = serializer.Deserialize(reader) as Transform;
+                instance = serializer.Deserialize(reader) as Entity;
 
             if (instance == null)
                 throw new InvalidOperationException("Given prefab could not be deserialized.");
-            instance.Entity.Name += " Clone";
-            instance.Entity.Scene = scene;
-            foreach (var child in instance.GetChildren())
-                child.Entity.Scene = scene;
-            scene.AddChild(instance.Entity);
-            instance.Invoke("AfterDeserialize", false);
+            instance.Name += " Clone";
 
-            return instance.Entity;
+            instance.AfterDeserialize();
+
+            return instance;
         }
     }
 }

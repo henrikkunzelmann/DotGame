@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +9,9 @@ namespace DotGame
 {
     public abstract class EngineObject : IDisposable
     {
+        [JsonIgnore]
         public Engine Engine { get; private set; }
+        [JsonIgnore]
         public object Tag { get; set; }
 
         public EngineObject(Engine engine)

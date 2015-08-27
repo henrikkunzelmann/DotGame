@@ -10,7 +10,7 @@ namespace DotGame.Test
 {
     public class MoveComponent : Component
     {
-        protected override void Update(GameTime gameTime)
+        public override void Update(GameTime gameTime)
         {
             float t = (float)gameTime.TotalTime.TotalMilliseconds / 1000f;
             Entity.Transform.LocalPosition = new Vector3(Entity.Transform.LocalPosition.X, Entity.Transform.LocalPosition.Y, (float)Math.Sin(t) * 20 + (float)Math.Sin(t) * 10);

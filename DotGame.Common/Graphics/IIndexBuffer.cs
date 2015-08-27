@@ -29,6 +29,6 @@ namespace DotGame.Graphics
         /// <summary>
         /// Gibt an wie der IndexBuffer benutzt wird.
         /// </summary>
-        BufferUsage Usage { get; }
+        ResourceUsage Usage { get; }
     }
 }

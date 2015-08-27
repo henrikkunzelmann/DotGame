@@ -7,6 +7,7 @@ using DotGame.Graphics;
 using SharpDX.DXGI;
 using SharpDX.Direct3D11;
 using SharpDX.Direct3D;
+using SharpDX.D3DCompiler;
 
 namespace DotGame.DirectX11
 {
@@ -171,10 +172,20 @@ namespace DotGame.DirectX11
              { DotGame.Graphics.Blend.Zero,           SharpDX.Direct3D11.BlendOption.Zero         },
         };
 
-        private static Dictionary<BufferUsage, ResourceUsage> bufferUsages = new Dictionary<BufferUsage, ResourceUsage>()
+        private static Dictionary<Graphics.ResourceUsage, SharpDX.Direct3D11.ResourceUsage> resourceUsages = new Dictionary<Graphics.ResourceUsage, SharpDX.Direct3D11.ResourceUsage>()
         {
-            { BufferUsage.Static, ResourceUsage.Default },
-            { BufferUsage.Dynamic, ResourceUsage.Dynamic },
+            { Graphics.ResourceUsage.Normal, SharpDX.Direct3D11.ResourceUsage.Default },
+            { Graphics.ResourceUsage.Dynamic, SharpDX.Direct3D11.ResourceUsage.Dynamic },
+            { Graphics.ResourceUsage.Staging, SharpDX.Direct3D11.ResourceUsage.Staging },
+            { Graphics.ResourceUsage.Immutable, SharpDX.Direct3D11.ResourceUsage.Immutable },
+        };
+
+        private static Dictionary<Graphics.ResourceUsage, CpuAccessFlags> accessFlags = new Dictionary<Graphics.ResourceUsage, CpuAccessFlags>()
+        {
+            { Graphics.ResourceUsage.Normal, CpuAccessFlags.None},
+            { Graphics.ResourceUsage.Immutable, CpuAccessFlags.None},
+            { Graphics.ResourceUsage.Dynamic, CpuAccessFlags.Write},
+            { Graphics.ResourceUsage.Staging, CpuAccessFlags.Write},
         };
 
         public static SharpDX.Direct3D11.DeviceCreationFlags Convert(DotGame.Graphics.DeviceCreationFlags flags)
@@ -345,13 +356,18 @@ namespace DotGame.DirectX11
             return f;
         }
 
-        public static ResourceUsage Convert(BufferUsage usage)
+        public static SharpDX.Direct3D11.ResourceUsage Convert(Graphics.ResourceUsage usage)
         {
-            ResourceUsage f;
-            if (!bufferUsages.TryGetValue(usage, out f))
+            SharpDX.Direct3D11.ResourceUsage f;
+            if (!resourceUsages.TryGetValue(usage, out f))
                 throw new NotSupportedException("Buffer usage not supported.");
             return f;
-            
+        }
+        public static Graphics.ResourceUsage Convert(SharpDX.Direct3D11.ResourceUsage usage)
+        {
+            if (!resourceUsages.ContainsValue(usage))
+                throw new NotImplementedException();
+            return resourceUsages.First((f) => f.Value == usage).Key;
         }
 
         public static TextureFormat ConvertToTexture(Format format)
@@ -410,6 +426,21 @@ namespace DotGame.DirectX11
             if (!cullModes.ContainsValue(cullMode))
                 throw new NotImplementedException();
             return cullModes.First((f) => f.Value == cullMode).Key;
+        }
+
+        public static CpuAccessFlags ConvertToAccessFlag(Graphics.ResourceUsage usage)
+        {
+            CpuAccessFlags accessFlag;
+            if (!accessFlags.TryGetValue(usage, out accessFlag))
+                throw new NotImplementedException();
+
+            return accessFlag;
+        }
+        public static Graphics.ResourceUsage ConvertToAccessFlag(CpuAccessFlags accessFlag)
+        {
+            if (!accessFlags.ContainsValue(accessFlag))
+                throw new NotImplementedException();
+            return accessFlags.First((f) => f.Value == accessFlag).Key;
         }
     }
 }
