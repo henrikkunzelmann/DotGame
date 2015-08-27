@@ -28,7 +28,7 @@ namespace DotGame.EntitySystem.Rendering
             }
         }
 
-        public GBufferShader(Engine engine) : base(engine, "gbuffer")
+        public GBufferShader(Engine engine) : base(engine, @"Rendering\Passes\Shaders\gbuffer")
         {
             sampler = engine.GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
             constantBuffer = shader.CreateConstantBuffer(ResourceUsage.Dynamic);

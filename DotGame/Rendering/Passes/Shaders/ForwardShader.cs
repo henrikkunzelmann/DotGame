@@ -28,7 +28,7 @@ namespace DotGame.EntitySystem.Rendering
             }
         }
 
-        public ForwardShader(Engine engine) : base(engine, "forward")
+        public ForwardShader(Engine engine) : base(engine, @"Rendering\Passes\Shaders\forward")
         {
             sampler = engine.GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
             constantBuffer = shader.CreateConstantBuffer(ResourceUsage.Dynamic);
