@@ -375,6 +375,12 @@ namespace DotGame.EntitySystem
             components.ForEach(component => component.Init());
         }
 
+        public void Update(GameTime gameTime)
+        {
+            components.ForEach(component => component.Update(gameTime));
+            children.ForEach(entity => entity.Update(gameTime));
+        }
+
         public void AfterDeserialize()
         {
             children.ForEach(entity => entity.Parent = this);

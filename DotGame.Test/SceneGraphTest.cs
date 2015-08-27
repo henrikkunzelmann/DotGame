@@ -14,6 +14,8 @@ namespace DotGame.Test
 {
     public class SceneGraphTest : EngineComponent
     {
+        Entity cube;
+
         public SceneGraphTest(Engine engine) : base(engine)
         { }
 
@@ -21,17 +23,19 @@ namespace DotGame.Test
         {
             base.Init();
 
-            Entity entity = new Entity("hi", Engine);
+            cube = new Entity("cube", Engine);
             Material material = new Material(Engine.AssetManager, "TestMaterial");
             material.Texture = Engine.AssetManager.LoadTexture("CubeTexture", "GeneticaMortarlessBlocks.jpg");
+
+            cube.AddComponent(new RotateComponent());
 
             MeshBuilder builder = new MeshBuilder(Engine);
             builder.PushCube(-Vector3.One, Vector3.One, Vector2.Zero, Vector2.One);
 
             StaticMesh mesh = builder.BuildMesh("cube");            
-            entity.AddComponent(new StaticModel(mesh, material));
+            cube.AddComponent(new StaticModel(mesh, material));
             var scene = ((Scene)Engine.Components.First(c => c is Scene));
-            scene.Root.AddChild(entity);
+            scene.Root.AddChild(cube);
 
             Entity cameraEntity = new Entity("camera", Engine);
             Camera camera = new Camera();
@@ -41,7 +45,7 @@ namespace DotGame.Test
             cameraEntity.AddComponent(camera);
             scene.Root.AddChild(cameraEntity);
 
-            Entity entity1 = Prefab.FromEntity(entity).CreateInstance();
+            Entity entity1 = Prefab.FromEntity(cube).CreateInstance();
             entity1.Transform.LocalPosition = new Vector3(-2, -1, 3);
             scene.Root.AddChild(entity1);
 
