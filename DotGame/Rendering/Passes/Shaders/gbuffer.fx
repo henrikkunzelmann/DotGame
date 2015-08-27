@@ -38,6 +38,6 @@ PS_OUT PS( PS_IN input ) : SV_Target
 {
 	PS_OUT ps_out;
 	ps_out.diffuse = picture.Sample(pictureSampler, input.tex);
-	ps_out.normals = input.normals
-	return 
+	ps_out.normals = float4(input.normal, 1.0f);
+	return ps_out;
 }
