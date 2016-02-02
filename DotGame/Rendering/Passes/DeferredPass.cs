@@ -12,12 +12,12 @@ namespace DotGame.Rendering.Passes
     public class DeferredPass : Pass
     {
         public DeferredPass(Engine engine)
-            : base(engine, null)
+            : base(engine)
         {
 
         }
 
-        public override void Apply(GameTime gameTime)
+        public override void Render(GameTime gameTime)
         {
             throw new NotImplementedException();
         }

@@ -20,7 +20,7 @@ namespace DotGame.OpenGL4
             int vertexShaderStatus;
             GL.GetShader(ID, ShaderParameter.CompileStatus, out vertexShaderStatus);
             if (vertexShaderStatus == 0)
-                throw new DotGame.Graphics.GraphicsException(GL.GetShaderInfoLog(ID));
+                throw new DotGame.Graphics.GraphicsException(string.Format("{0}: {1}", shaderType.ToString(), GL.GetShaderInfoLog(ID)));
 
             graphicsDevice.CheckGLError();
         }

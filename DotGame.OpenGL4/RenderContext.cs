@@ -38,10 +38,16 @@ namespace DotGame.OpenGL4
         //BlendState
         private bool[] currentBlendingEnabled = new bool[8];
 
+        public IRenderUpdateContext UpdateContext
+        {
+            get; private set;
+        }
+
         public RenderContext(GraphicsDevice graphicsDevice)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             CreateDefaultState();
+            UpdateContext = new RenderUpdateContext(graphicsDevice, this);
         }
 
         /// <summary>
@@ -108,212 +114,6 @@ namespace DotGame.OpenGL4
             graphicsDevice.Cast<DepthStencilState>(defaultDepthStencil, "depthStencil").Apply(currentStencilReference);
         }
 
-        #region Update
-        // TODO (henrik1235) Data* Update einbauen
-
-        #region Update IVertexBuffer
-        public void Update<T>(IVertexBuffer vertexBuffer, T[] data) where T : struct
-        {
-            if (vertexBuffer == null)
-                throw new ArgumentNullException("vertexBuffer");
-            if (vertexBuffer.IsDisposed)
-                throw new ObjectDisposedException("vertexBuffer");
-
-            var internalBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer");
-
-            internalBuffer.SetData<T>(data);
-        }
-
-        public void Update(IVertexBuffer vertexBuffer, DataArray data)
-        {
-            if (vertexBuffer == null)
-                throw new ArgumentNullException("vertexBuffer");
-            if (vertexBuffer.IsDisposed)
-                throw new ObjectDisposedException("vertexBuffer");
-
-            var internalBuffer = graphicsDevice.Cast<VertexBuffer>(vertexBuffer, "vertexBuffer");
-
-            internalBuffer.SetData(data.Pointer, data.Size);
-        }
-        #endregion
-
-        #region Update IIndexBuffer
-        public void Update<T>(IIndexBuffer indexBuffer, T[] data) where T : struct
-        {
-            if (indexBuffer == null)
-                throw new ArgumentNullException("indexBuffer");
-            if (indexBuffer.IsDisposed)
-                throw new ObjectDisposedException("indexBuffer");
-
-            var internalBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "indexBuffer");
-
-            internalBuffer.SetData<T>(data);
-        }
-
-        public void Update(IIndexBuffer indexBuffer, DataArray data)
-        {
-            if (indexBuffer == null)
-                throw new ArgumentNullException("buffer");
-            if (indexBuffer.IsDisposed)
-                throw new ObjectDisposedException("buffer");
-
-            var internalBuffer = graphicsDevice.Cast<IndexBuffer>(indexBuffer, "buffer");
-
-            internalBuffer.SetData(data.Pointer, data.Size, data.Size/4);
-        }
-        #endregion
-
-        #region Update IConstantBuffer
-        public void Update<T>(IConstantBuffer constantBuffer, T data) where T : struct
-        {
-            if (constantBuffer == null)
-                throw new ArgumentNullException("constantBuffer");
-            if (constantBuffer.IsDisposed)
-                throw new ObjectDisposedException("constantBuffer");
-
-            var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(constantBuffer, "constantBuffer");
-
-            internalBuffer.SetData<T>(data);
-        }
-
-        public void Update(IConstantBuffer constantBuffer, DataArray data)
-        {
-            if (constantBuffer == null)
-                throw new ArgumentNullException("constantBuffer");
-            if (constantBuffer.IsDisposed)
-                throw new ObjectDisposedException("constantBuffer");
-
-            var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(constantBuffer, "constantBuffer");
-
-            internalBuffer.SetData(data.Pointer, data.Size);
-        }
-        #endregion
-
-        #region Update ITexture2D
-        public void Update<T>(ITexture2D texture, T[] data) where T : struct
-        {
-            Update<T>(texture, 0, data);
-        }
-
-        public void Update<T>(ITexture2D texture, int mipLevel, T[] data) where T : struct
-        {
-            if (texture == null)
-                throw new ArgumentNullException("texture");
-            if (texture.IsDisposed)
-                throw new ObjectDisposedException("texture");
-            if (mipLevel < 0 || mipLevel >= texture.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
-
-            var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "buffer");
-
-            GCHandle handle = GCHandle.Alloc(data, GCHandleType.Pinned);
-            try
-            {
-                internalTexture.SetData(handle.AddrOfPinnedObject(), mipLevel, data.Length * Marshal.SizeOf(typeof(T)));
-            }
-            finally
-            {
-                handle.Free();
-            }
-        }       
-
-        public void Update(ITexture2D texture, DataRectangle data)
-        {
-            Update(texture, 0, data);
-        }
-        public void Update(ITexture2D texture, DataRectangle[] data)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-
-            Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "data");
-
-            for (int i = 0; i < data.Length; i++)
-                if (data[i] != null && !data[i].IsNull)
-                    internalTexture.SetData(data[i].Pointer, i, data[i].Size);
-        }
-
-        public void Update(ITexture2D texture, int mipLevel, DataRectangle data)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-
-            Texture2D internalTexture = graphicsDevice.Cast<Texture2D>(texture, "data");
-            internalTexture.SetData(data.Pointer, mipLevel, data.Size);
-        }
-        #endregion
-
-        #region Update ITexture2DArray
-        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, T[] data) where T : struct
-        {
-            if (textureArray == null)
-                throw new ArgumentNullException("textureArray");
-            if (textureArray.IsDisposed)
-                throw new ObjectDisposedException("textureArray");
-            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
-                throw new ArgumentOutOfRangeException("arrayIndex");
-
-            Update(textureArray, arrayIndex, 0, data);
-        }
-
-        public void Update<T>(ITexture2DArray textureArray, int arrayIndex, int mipLevel, T[] data) where T : struct
-        {
-            if (textureArray == null)
-                throw new ArgumentNullException("texture");
-            if (arrayIndex < 0 || arrayIndex >= textureArray.ArraySize)
-                throw new ArgumentOutOfRangeException("arrayIndex");
-            if (mipLevel < 0 || mipLevel >= textureArray.MipLevels)
-                throw new ArgumentOutOfRangeException("mipLevel");
-
-            var internalTexture = graphicsDevice.Cast<Texture2DArray>(textureArray, "buffer");
-
-            internalTexture.SetData<T>(data, mipLevel);
-        }
-        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, int mipLevel, DataRectangle data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2DArray textureArray, int arrayIndex, DataRectangle[] data)
-        {
-            throw new NotImplementedException();
-        }
-
-        public void Update(ITexture2DArray textureArray, DataRectangle[] data)
-        {
-            throw new NotImplementedException();
-        }
-        #endregion
-        #endregion
-
-        public void GenerateMips(ITexture2D texture)
-        {
-            if (texture == null)
-                throw new ArgumentNullException("texture");
-            if (texture.IsDisposed)
-                throw new ObjectDisposedException("texture");
-
-            var internalTexture = graphicsDevice.Cast<Texture2D>(texture, "texture");
-            internalTexture.GenerateMipMaps();
-        }
-
-        public void GenerateMips(ITexture2DArray textureArray)
-        {
-            if (textureArray == null)
-                throw new ArgumentNullException("textureArray");
-            if (textureArray.IsDisposed)
-                throw new ObjectDisposedException("textureArray");
-
-            var internalTexture = graphicsDevice.Cast<Texture2DArray>(textureArray, "texture");
-            internalTexture.GenerateMipMaps();
-        }
-
-
         public void SetRenderTargetsBackBuffer()
         {
             currentDepthRenderTarget = -1;
@@ -333,6 +133,9 @@ namespace DotGame.OpenGL4
                 currentRenderTargets = new int[colorTargets.Length];
                 for (int i = 0; i < colorTargets.Length; i++)
                 {
+                    if (colorTargets[i] == null)
+                        continue;
+
                     Texture2D texture = graphicsDevice.Cast<Texture2D>(colorTargets[i], string.Format("color[{0}]", i));
                     currentRenderTargets[i] = texture.TextureID;
                 }
@@ -473,8 +276,7 @@ namespace DotGame.OpenGL4
             if (name == null)
                 throw new ArgumentNullException("name");
             var internalBuffer = graphicsDevice.Cast<ConstantBuffer>(buffer, "buffer");
-
-            // TODO (Robin) Durch GraphicsDevice Methode ersetzen
+            
             graphicsDevice.BindManager.Shader = shader;
 
             graphicsDevice.BindManager.ConstantBuffer = buffer;
@@ -609,6 +411,9 @@ namespace DotGame.OpenGL4
 
             if (currentVertexBuffer.Shader != currentState.Shader)
             {
+                if (!currentState.Shader.VertexDescription.EqualsIgnoreOrder(currentVertexBuffer.Description))
+                    throw new GraphicsException("Current shader VertexDescription doesn't match the description of the current VertexBuffer");
+
                 VertexElement[] elements = currentVertexBuffer.Description.GetElements();
                 for (int i = 0; i < currentVertexBuffer.Description.ElementCount; i++)
                 {
@@ -624,6 +429,9 @@ namespace DotGame.OpenGL4
 
                 if (currentVertexBuffer.LayoutDirty)
                 {
+                    if (!currentState.Shader.VertexDescription.EqualsIgnoreOrder(currentVertexBuffer.Description))
+                        throw new GraphicsException("Current shader VertexDescription doesn't match the description of the current VertexBuffer");
+
                     graphicsDevice.BindManager.VertexBuffer = currentVertexBuffer;
 
                     int offset = 0;
@@ -648,6 +456,9 @@ namespace DotGame.OpenGL4
             }
             else
             {
+                if (!currentState.Shader.VertexDescription.EqualsIgnoreOrder(currentVertexBuffer.Description))
+                    throw new GraphicsException("Current shader VertexDescription doesn't match the description of the current VertexBuffer");
+
                 graphicsDevice.BindManager.VertexBuffer = null;
                 int layout = graphicsDevice.GetLayout(currentVertexBuffer.Description, graphicsDevice.Cast<Shader>(currentState.Shader, "currentState.shader"));
                 graphicsDevice.BindManager.VertexArray = layout;
@@ -657,7 +468,7 @@ namespace DotGame.OpenGL4
 
             graphicsDevice.BindManager.IndexBuffer = currentIndexBuffer;
 
-            graphicsDevice.CheckGLError();
+            graphicsDevice.CheckGLError("RenderContext.ApplyState");
         }
 
         public void Draw()

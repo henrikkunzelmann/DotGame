@@ -24,21 +24,15 @@ namespace DotGame.Rendering
             } 
         }
 
-        /// <summary>
-        /// Gibt den Standard-Shader für diesen Pass zurück.
-        /// </summary>
-        public Shader Shader { get; private set; }
-
-        public Pass(Engine engine, Shader shader)
+        public Pass(Engine engine)
             : base(engine)
         {
-            this.Shader = shader;
         }
 
         /// <summary>
         /// Wendet den Pass an.
         /// </summary>
         /// <param name="gameTime"></param>
-        public abstract void Apply(GameTime gameTime);
+        public abstract void Render(GameTime gameTime);
     }
 }

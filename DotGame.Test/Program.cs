@@ -9,7 +9,6 @@ using System.Threading;
 using DotGame;
 using DotGame.Utils;
 using DotGame.Rendering;
-using DotGame.SceneGraph;
 using DotGame.Geometry;
 using DotGame.EntitySystem;
 using DotGame.Assets;
@@ -31,14 +30,21 @@ namespace DotGame.Test
                 GraphicsAPI = GraphicsAPI.Direct3D11,
                 Width = 1280,
                 Height = 720,
-                AudioAPI = AudioAPI.OpenAL
+                AudioAPI = AudioAPI.OpenAL,
+                Debug = true
             });
 
-            var component = new EntitySystemComponent(engine);
-            engine.AddComponent(component);
+            var scene = new Scene(engine);
+            engine.AddComponent(scene);
+
+            engine.AddComponent(new SceneGraphTest(engine));
+
+
+            var renderer = PassPipeline.CreateDefault(engine, scene);
+            engine.AddComponent(renderer);
 
             //engine.AddComponent(new GraphTest(engine));
-            engine.AddComponent(new MipMapTest(engine));
+            //engine.AddComponent(new MipMapTest(engine));
 
             Application.Run();
         }

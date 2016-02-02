@@ -10,7 +10,7 @@ namespace DotGame.Rendering
     /// <summary>
     /// Speichert die Passes und deren Reihenfolge die für das Rendering benutzt werden soll.
     /// </summary>
-    public class PassPipeline : EngineObject
+    public abstract class PassPipeline : EngineComponent
     {
         private object locker = new object();
         private Pass[] passes;
@@ -45,11 +45,10 @@ namespace DotGame.Rendering
         public PassPipeline(Engine engine)
             : base(engine)
         {
-            
         }
 
         public PassPipeline(Engine engine, params Pass[] passes)
-            : base(engine)
+            : this(engine)
         {
             if (passes == null)
                 throw new ArgumentNullException("passes");
@@ -61,12 +60,14 @@ namespace DotGame.Rendering
         /// Erstellt eine Standard PassPipeline.
         /// </summary>
         /// <returns></returns>
-        public static PassPipeline CreateDefault(Engine engine)
+        public static PassPipeline CreateDefault(Engine engine, Scene scene)
         {
             if (engine == null)
                 throw new ArgumentNullException("engine");
 
-            return new PassPipeline(engine, new DeferredPass(engine), new ForwardPass(engine), new ParticlePass(engine), new UIPass(engine));
+            //TODO (Robin) Je nach Feature Level & API passende Pipeline erstellen (Forward for mobile, Deferred for PC,...)
+
+            return new DeferredPipeline(engine, scene);
         }
 
         /// <summary>
@@ -104,7 +105,7 @@ namespace DotGame.Rendering
             }
         }
 
-        public void Draw(GameTime gameTime)
+        public override void Draw(GameTime gameTime)
         {
             lock (locker)
             {
@@ -116,7 +117,7 @@ namespace DotGame.Rendering
             }
 
             for (int i = 0; i < passes.Length; i++)
-                passes[i].Apply(gameTime);
+                passes[i].Render(gameTime);
         }
 
         protected override void Dispose(bool isDisposing)

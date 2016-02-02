@@ -124,9 +124,9 @@ namespace DotGame
         private ManualResetEvent onStart = new ManualResetEvent(false);
 
         // drei Listen erlauben es, dass man Komponenten flexibler hinzufügen bzw. entfernen kann
-        private List<GameComponent> components = new List<GameComponent>();
-        private List<GameComponent> componentsToAdd = new List<GameComponent>();
-        private List<GameComponent> componentsToRemove = new List<GameComponent>();
+        private List<EngineComponent> components = new List<EngineComponent>();
+        private List<EngineComponent> componentsToAdd = new List<EngineComponent>();
+        private List<EngineComponent> componentsToRemove = new List<EngineComponent>();
 
         public Engine()
             : this(new EngineSettings())
@@ -202,7 +202,7 @@ namespace DotGame
 
         private void Init()
         {
-            this.GraphicsDevice = window.CreateDevice(DeviceCreationFlags.Debug);
+            this.GraphicsDevice = window.CreateDevice(Settings.Debug ? DeviceCreationFlags.Debug : DeviceCreationFlags.None);
             GraphicsDevice.MakeCurrent();
             Log.Debug("Got GraphicsDevice: " + GraphicsDevice.GetType().FullName);
             Log.Debug("Got window: [width: {0}, height: {1}]", GraphicsDevice.DefaultWindow.Width, GraphicsDevice.DefaultWindow.Height);
@@ -287,7 +287,7 @@ namespace DotGame
 
                 lock (components)
                 {
-                    foreach (GameComponent component in components)
+                    foreach (EngineComponent component in components)
                         component.Unload();
                 }
 
@@ -304,7 +304,7 @@ namespace DotGame
             lock (components)
             {
                 // alle Komponenten die noch nicht hinzugefügt wurden hinzufügen und initialisieren
-                foreach (GameComponent component in componentsToAdd)
+                foreach (EngineComponent component in componentsToAdd)
                     if (!components.Contains(component))
                     {
                         components.Add(component);
@@ -312,19 +312,19 @@ namespace DotGame
                     }
 
                 // alle Komponenten die entfernt werden sollen entfernen und entladen
-                foreach (GameComponent component in componentsToRemove)
+                foreach (EngineComponent component in componentsToRemove)
                 {
                     components.Remove(component);
                     component.Unload();
                 }
 
                 // alle Komponenten aktualisieren
-                foreach (GameComponent component in components)
+                foreach (EngineComponent component in components)
                     if (!componentsToRemove.Contains(component))
                         component.Update(gameTime);
 
                 // alle Komponenten zeichnen
-                foreach (GameComponent component in components)
+                foreach (EngineComponent component in components)
                     if (!componentsToRemove.Contains(component))
                         component.Draw(gameTime);
 
@@ -350,7 +350,7 @@ namespace DotGame
             }
         }
 
-        public void AddComponent(GameComponent component)
+        public void AddComponent(EngineComponent component)
         {
             if (component == null)
                 throw new ArgumentNullException("component");
@@ -364,7 +364,7 @@ namespace DotGame
             }
         }
 
-        public void RemoveComponent(GameComponent component)
+        public void RemoveComponent(EngineComponent component)
         {
             if (component == null)
                 throw new ArgumentNullException("component");
@@ -375,6 +375,14 @@ namespace DotGame
                     componentsToAdd.Remove(component);
                 if (components.Contains(component))
                     componentsToRemove.Add(component);
+            }
+        }
+
+        public IReadOnlyCollection<EngineComponent> Components
+        {
+            get
+            {
+                return components.AsReadOnly();
             }
         }
 

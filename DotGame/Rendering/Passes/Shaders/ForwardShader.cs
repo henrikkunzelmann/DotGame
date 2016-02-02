@@ -1,31 +1,41 @@
-﻿using System;
+﻿using DotGame.Graphics;
+using DotGame.Rendering;
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Numerics;
 using System.Text;
 using System.Threading.Tasks;
-using System.Numerics;
-using DotGame.Utils;
-using DotGame.Rendering;
-using DotGame.Graphics;
+using DotGame.Assets;
+using DotGame.EntitySystem.Components;
+using System.Runtime.InteropServices;
 
-namespace DotGame.Test
+namespace DotGame.EntitySystem.Rendering
 {
-    public class TestShader : Shader
+    public class ForwardShader : SceneShader
     {
         private ISampler sampler;
         private IConstantBuffer constantBuffer;
         private IRasterizerState rasterizerState;
         private IDepthStencilState depthStencil;
 
-        public TestShader(Engine engine)
-            : base(engine, "shader")
+        private MaterialDescription materialDescription = new MaterialDescription() { HasDiffuseTexture = true };
+        public override MaterialDescription MaterialDescription
+        {
+            get
+            {
+                return materialDescription;
+            }
+        }
+
+        public ForwardShader(Engine engine) : base(engine, "forward")
         {
             sampler = engine.GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
-            constantBuffer = shader.CreateConstantBuffer(BufferUsage.Dynamic);
+            constantBuffer = shader.CreateConstantBuffer(ResourceUsage.Dynamic);
 
             rasterizerState = engine.GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
             {
-                CullMode = CullMode.Front,
+                CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
             });
@@ -38,12 +48,7 @@ namespace DotGame.Test
             });
         }
 
-        public override void Apply(IRenderContext context)
-        {
-            throw new NotImplementedException();
-        }
-
-        public override void Apply(IRenderContext context, Matrix4x4 viewProjection, Assets.Material material, Matrix4x4 world)
+        public override void Apply(Graphics.IRenderContext context, System.Numerics.Matrix4x4 viewProjection, Assets.Material material, System.Numerics.Matrix4x4 world)
         {
             context.SetState(Engine.RenderStatePool.GetRenderState(new RenderStateInfo()
             {
@@ -53,13 +58,27 @@ namespace DotGame.Test
                 DepthStencil = depthStencil
             }));
             context.SetTexture(shader, "picture", material.Texture.Handle);
-            if (Engine.Settings.GraphicsAPI == GraphicsAPI.Direct3D11)
+            if(Engine.Settings.GraphicsAPI == GraphicsAPI.Direct3D11)
                 context.SetSampler(shader, "pictureSampler", sampler);
             else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
                 context.SetSampler(shader, "picture", sampler);
 
-            context.Update(constantBuffer, Matrix4x4.Transpose(world * viewProjection));
+            GCHandle handle;
+            DataArray dataArray = DataArray.FromObject<Matrix4x4>(Matrix4x4.Transpose(world * viewProjection), out handle);
+            try
+            {
+                context.UpdateContext.Update(constantBuffer, dataArray);
+            }
+            finally
+            {
+                handle.Free();
+            }
             context.SetConstantBuffer(shader, constantBuffer);
+        }
+
+        protected override void Dispose(bool isDisposing)
+        {
+            base.Dispose(isDisposing);
         }
     }
 }

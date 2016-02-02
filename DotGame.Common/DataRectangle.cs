@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -45,6 +46,20 @@ namespace DotGame
             this.Pointer = pointer;
             this.Pitch = pitch;
             this.Size = size;
+        }
+        
+        public static DataRectangle FromArray<T>(T[] array, int pitch, out GCHandle handle)
+        {
+            if (array != null)
+            {
+                handle = GCHandle.Alloc(array, GCHandleType.Pinned);
+                return new DataRectangle(handle.AddrOfPinnedObject(), pitch, Marshal.SizeOf(typeof(T)) * array.Length);
+            }
+            else
+            {
+                handle = new GCHandle();
+                return new DataRectangle(IntPtr.Zero, 0, 0);
+            }
         }
 
         public static bool operator ==(DataRectangle a, DataRectangle b)

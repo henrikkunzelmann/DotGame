@@ -18,6 +18,8 @@ bld/
 [Bb]in/
 [Oo]bj/
 
+.vs/config/applicationhost.config
+
 # Roslyn cache directories
 *.ide/
 

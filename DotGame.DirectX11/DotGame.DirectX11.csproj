@@ -72,6 +72,7 @@
     <Compile Include="RasterizerState.cs" />
     <Compile Include="RenderContext.cs" />
     <Compile Include="RenderState.cs" />
+    <Compile Include="RenderUpdateContext.cs" />
     <Compile Include="Sampler.cs" />
     <Compile Include="Shader.cs" />
     <Compile Include="Texture2D.cs" />

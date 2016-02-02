@@ -30,9 +30,7 @@ namespace DotGame.OpenGL4
 
 
             SamplerID = GL.GenSampler();
-
-            //graphicsDevice.BindManager.SetSampler(this, 0);
-
+            
             //AddressMode
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureWrapS, (float)EnumConverter.Convert(Info.AddressU));
             GL.SamplerParameter(SamplerID, SamplerParameterName.TextureWrapT, (float)EnumConverter.Convert(Info.AddressV));

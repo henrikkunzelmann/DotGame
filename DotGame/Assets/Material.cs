@@ -14,8 +14,7 @@ namespace DotGame.Assets
     {
         private bool dirty = true;
         private Texture texture;
-
-
+        
         public Texture Texture
         {
             get { return texture; }
@@ -41,6 +40,13 @@ namespace DotGame.Assets
 
         protected override void Unload()
         {
+        }
+
+        public MaterialDescription CreateDescription()
+        {
+            var info = new MaterialDescription();
+            info.HasDiffuseTexture = true;
+            return info;
         }
     }
 }

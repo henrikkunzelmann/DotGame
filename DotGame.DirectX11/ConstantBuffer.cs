@@ -8,41 +8,58 @@ using SharpDX;
 using SharpDX.Direct3D11;
 using Buffer = SharpDX.Direct3D11.Buffer;
 using DotGame.Graphics;
+using ResourceUsage = DotGame.Graphics.ResourceUsage;
 
 namespace DotGame.DirectX11
 {
     public class ConstantBuffer : GraphicsObject, IConstantBuffer
     {
         public int SizeBytes { get; private set; }
-        public BufferUsage Usage { get; private set; }
+        public ResourceUsage Usage { get; private set; }
 
-        internal Buffer Handle { get; private set; }
+        internal Buffer Buffer { get; private set; }
 
-        public ConstantBuffer(GraphicsDevice graphicsDevice, int sizeBytes, BufferUsage usage)
-            : this(graphicsDevice, usage)
-        {
-            if (sizeBytes < 0)
-                throw new ArgumentException("Size must be bigger or equal to 0.", "sizeBytes");
-            this.SizeBytes = sizeBytes;
-
-            Handle = new Buffer(graphicsDevice.Device, sizeBytes, EnumConverter.Convert(usage), BindFlags.ConstantBuffer, Usage == BufferUsage.Static ? CpuAccessFlags.None : CpuAccessFlags.Write, ResourceOptionFlags.None, 0);
-        }
-        
-        public ConstantBuffer(GraphicsDevice graphicsDevice, BufferUsage usage)
+        public ConstantBuffer(GraphicsDevice graphicsDevice, Graphics.ResourceUsage usage, int sizeBytes)
             : base(graphicsDevice, new StackTrace(1))
         {
+            if (usage == ResourceUsage.Immutable)
+                throw new ArgumentException("data", "Immutable buffers must be initialized with data.");
+            if (sizeBytes <= 0)
+                throw new ArgumentOutOfRangeException("sizeBytes", sizeBytes, "Size must be bigger than 0.");
+
+            this.SizeBytes = sizeBytes;
             this.Usage = usage;
+
+            BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(Usage),
+                         BindFlags.ConstantBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
+
+            this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, bufferDescription);
         }
 
-        internal void SetData<T>(T data) where T : struct
+        public ConstantBuffer(GraphicsDevice graphicsDevice, Graphics.ResourceUsage usage, DataArray data)
+            : base(graphicsDevice, new StackTrace(1))
         {
-            Handle = Buffer.Create(graphicsDevice.Device, BindFlags.ConstantBuffer, ref data, 0, EnumConverter.Convert(Usage), Usage == BufferUsage.Static ? CpuAccessFlags.None : CpuAccessFlags.Write);
+            if (data.IsNull)
+                throw new ArgumentNullException("data.Pointer");
+            if (data.Size <= 0)
+                throw new ArgumentOutOfRangeException("data.Size", data.Size, "Size must be bigger than 0.");
+
+            this.Usage = usage;
+            this.SizeBytes = data.Size;
+
+            if (!data.IsNull)
+            {
+                BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(usage),
+                 BindFlags.ConstantBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
+
+                this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, data.Pointer, bufferDescription);
+            }
         }
 
         protected override void Dispose(bool disposing)
         {
-            if (Handle != null)
-                Handle.Dispose();
+            if (Buffer != null)
+                Buffer.Dispose();
         }
     }
 }

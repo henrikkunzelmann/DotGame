@@ -13,17 +13,8 @@ namespace DotGame.EntitySystem
     /// <summary>
     /// Stellt ein Objekt in der Szene dar, welches Komponenten kapselt.
     /// </summary>
-    public sealed class Entity : EventHandler, IEquatable<Entity>
+    public sealed class Entity : IEquatable<Entity>
     {
-        /// <summary>
-        /// Ruft die Szene des Entities ab.
-        /// </summary>
-        [JsonIgnore]
-        public Scene Scene { get { return scene; } set { SetScene(value); } }
-        [JsonIgnore]
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Scene scene;
-
         /// <summary>
         /// Die Guid des Entities.
         /// </summary>
@@ -53,8 +44,89 @@ namespace DotGame.EntitySystem
         [JsonIgnore]
         private Transform transform;
 
+        [JsonIgnore]
+        private Scene scene;
+
+        [JsonIgnore]
+        public Scene Scene {
+            get
+            {
+                return scene;
+            }
+            private set
+            {
+                if (IsRootNode && scene != null)
+                {
+                    scene.Root = null;
+                }
+
+                scene = value;
+
+                lock(children)
+                    children.ForEach(child => child.Scene = Scene);
+            }
+        }
+        
         [JsonRequired]
         private List<Component> components = new List<Component>();
+
+        /// <summary>
+        /// Gibt zurück ob diese Entity disposed wurde.
+        /// </summary>
+        [JsonIgnore]
+        public bool IsDisposed { get; private set; }
+
+        /// <summary>
+        /// Gibt die Scene zurück, zu welcher diese Node gehört.
+        /// </summary>
+        [JsonIgnore]
+        private Entity parent;
+
+        /// <summary>
+        /// Gibt die Parent-Node zurück oder setzt diese.
+        /// </summary>
+        [JsonIgnore]
+        public Entity Parent
+        {
+            get
+            {
+                return parent;
+            }
+            set
+            {
+                if (parent == value)
+                    return;
+
+                if (parent != null && parent.Scene != Scene)
+                    throw new ArgumentException("Parent is from a different scene.");
+
+                // Als Child von alter Parent-Node entfernen
+                if (parent != null)
+                {
+                    lock (parent.children)
+                    {
+                        parent.children.Remove(this);
+                    }
+                }
+
+                parent = value;
+                Scene = parent.Scene;
+
+                Transform.MarkDirty();
+
+                if (parent != null)
+                {
+                    parent.children.Add(this);
+                }
+            }
+        }
+
+        [JsonIgnore]
+        public Engine Engine
+        {
+            get;
+            private set;
+        }
 
         #region Operatoren
         public static bool operator ==(Entity a, Entity b)
@@ -79,11 +151,26 @@ namespace DotGame.EntitySystem
         {
         }
 
-        internal Entity(Scene scene, string name)
+        public Entity(string name, Engine engine)
         {
-            this.Scene = scene;
             Name = name;
-            AddComponent<Transform>();
+            Engine = engine;
+            AddComponent(new Transform());
+        }
+        internal Entity(string name, Entity parent, Engine engine)
+        {
+            Name = name;
+            Engine = engine;
+            AddComponent(new Transform());
+            parent.AddChild(this);
+        }
+        internal Entity(string name, Scene scene, Engine engine)
+        {
+            Name = name;
+            Engine = engine;
+            AddComponent(new Transform());
+            Scene = scene;
+            Scene.Root = this;
         }
         #endregion
 
@@ -97,7 +184,7 @@ namespace DotGame.EntitySystem
         public Component GetComponent(Type type)
         {
             lock (components)
-                return components.Find(c => c.GetType() == type);
+                return components.Find(c => type.IsAssignableFrom(c.GetType()));
         }
 
         /// <summary>
@@ -112,42 +199,36 @@ namespace DotGame.EntitySystem
                 return (T)GetComponent(typeof(T));
         }
 
-        public Component AddComponent(Type type)
+        public void AddComponent(Component component)
         {
-            if (type == null)
-                throw new ArgumentNullException("type");
-            if (!typeof(Component).IsAssignableFrom(type))
-                throw new ArgumentException("Given type is no component.", "type");
+            Type type = component.GetType();
 
             if (Component.IsSingle(type) && GetComponent(type) != null)
                 throw new InvalidOperationException(string.Format("Component of type {0} can only be added once.", type.FullName));
-
-            var component = (Component)CachedActivator.CreateInstance(type);
-
+            
             component.Entity = this;
             lock (components)
                 components.Add(component);
 
-            foreach (var attrib in Component.GetRequired(type))
+            
+            foreach (var attrib in Component.GetRequiredGameComponents(type))
             {
-                var a = (RequiresComponentAttribute)attrib;
-                if (GetComponent(a.ComponentType) == null)
-                    AddComponent(a.ComponentType);
+                if (!this.Scene.Engine.Components.Any(t => t.GetType() == attrib.GameComponentType))
+                    throw new Exception("Component requires attached GameComponent " + type.ToString());
             }
 
-            component.Invoke("Init", false);
-
-            return component;
+            component.Init();
         }
 
-        /// <summary>
-        /// Fügt eine neue Komponente vom gegebenen Typen hinzu und gibt diese zurück.
-        /// </summary>
-        /// <typeparam name="T">Der Typ der Komponente.</typeparam>
-        /// <returns>Die neue Komponente.</returns>
-        public T AddComponent<T>() where T : Component
+        public void RemoveComponent<T>() where T : Component
         {
-            return (T)AddComponent(typeof(T));
+            RemoveComponent(typeof(T));
+        }
+
+        public void RemoveComponent(Type type)
+        {
+            lock(components)
+                components.Remove(components.First(c => type.IsAssignableFrom(c.GetType())));
         }
 
         /// <summary>
@@ -187,46 +268,125 @@ namespace DotGame.EntitySystem
                     else
                     {
                         lock (components)
-                            list.AddRange(components.Where(c => types.Contains(c.GetType())));
+                            list.AddRange(components.Where(c => types.Any(t => t.IsAssignableFrom(c.GetType()))));
                     }
-                    foreach (var child in Transform.GetChildren())
-                        list.AddRange(child.Entity.GetComponents(false, types));
+                    foreach (var child in children)
+                        list.AddRange(child.GetComponents(true, types));
 
                     return list.ToArray();
                 }
                 else
                 {
                     lock (components)
-                        return components.Where(c => types.Contains(c.GetType())).ToArray();
+                        return components.Where(c => types.Any(t => t.IsAssignableFrom(c.GetType()))).ToArray();
                 }
             }
         }
-        #endregion
 
-        #region EventHandler
-        protected override void GetChildHandlers(List<EventHandler> handlers)
+        public T[] GetComponents<T>(bool deep) where T : Component
         {
-            lock (components)
-                handlers.AddRange(components);
+            Component[] components = GetComponents(deep, typeof(T));
+
+            if (components == null)
+                return null;
+
+            T[] tComponents = new T[components.Length];
+            for (int i = 0; i < components.Length; i++)
+                tComponents[i] = (T)components[i];
+
+            return tComponents;
         }
         #endregion
+
+            #region Entity
+
+            /// <summary>
+            /// Gibt zurück ob diese Node eine Root-Node ist, d.h. keine Parent-Node hat.
+            /// </summary>
+        [JsonIgnore]
+        public bool IsRootNode
+        {
+            get { return Parent == null; }
+        }
+
+        private List<Entity> children = new List<Entity>();
+
+        /// <summary>
+        /// Gibt alle Children dieser Node zurück.
+        /// </summary>
+        public IReadOnlyCollection<Entity> Children
+        {
+            get
+            {
+                lock (children)
+                {
+                    List<Entity> entities = new List<Entity>();
+                    children.ForEach(l => entities.Add(l));
+                    return entities.AsReadOnly();
+                }
+            }
+        }
+        
+        /// <summary>
+        /// Fügt eine Entity als Child zu dieser Node hinzu.
+        /// </summary>
+        /// <param name="node"></param>
+        public void AddChild(Entity entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
+            entity.Parent = this;
+            children.Add(entity);
+        }
+
+        /// <summary>
+        /// Entfernt eine Entity als Child von dieser Node.
+        /// </summary>
+        /// <param name="node"></param>
+        public void RemoveChild(Entity entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
+            if (entity.Parent != this)
+                throw new ArgumentException("Entity is not child of this node.", "entity");
+
+            entity.Parent = null;
+            this.children.Remove(entity);
+        }
+
+        /// <summary>
+        /// Gibt zurück, ob eine Node als Child in dieser Node vorhanden ist.
+        /// </summary>
+        /// <param name="node"></param>
+        /// <returns></returns>
+        public bool ContainsChild(Entity entity)
+        {
+            if (entity == null)
+                throw new ArgumentNullException("entity");
+
+            return entity.Parent == this;
+        }
+        #endregion
+
+        public void Init()
+        {
+            components.ForEach(component => component.Init());
+        }
+
+        public void AfterDeserialize()
+        {
+            children.ForEach(entity => entity.Parent = this);
+            components.ForEach(component => component.AfterDeserialize(this));
+        }
 
         /// <summary>
         /// Zerstört das Entity.
         /// </summary>
         public void Destroy()
         {
-            Invoke("Destroy", false);
-        }
-
-        private void SetScene(Scene scene)
-        {
-            if (scene == null)
-                throw new ArgumentNullException("scene");
-            if (this.scene != null)
-                throw new InvalidOperationException("Entity already has a scene.");
-
-            this.scene = scene;
+            components.ForEach(component => component.Destroy());
         }
 
         /// <inheritdoc/>

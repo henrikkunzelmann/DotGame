@@ -16,17 +16,77 @@ namespace DotGame.OpenGL4
 
         public VertexDescription Description { get; private set; }
         public int VertexCount { get; private set; }
-        public BufferUsage Usage { get; private set; }
+        public ResourceUsage Usage { get; private set; }
 
         internal Shader Shader { get; set; }
 
         internal bool LayoutDirty { get; set; }
 
-        public int SizeBytes { get; private set; }
+        private int sizeBytes;
+        public int SizeBytes
+        {
+            get
+            {
+                return sizeBytes;
+            }
+            private set
+            {
+                int descriptionSize = graphicsDevice.GetSizeOf(Description);
+                if (value % descriptionSize != 0)
+                    throw new ArgumentException("Data does not match vertex description.", "data");
+                this.VertexCount = value / descriptionSize;
+                sizeBytes = value;
+            }
+        }
 
-        internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, BufferUsage usage)
+        internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, ResourceUsage usage, DataArray data)
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
+            if (data.IsNull)
+                throw new ArgumentNullException("data.Pointer");
+            if (data.Size <= 0)
+                throw new ArgumentOutOfRangeException("data.Size", data.Size, "Size must be bigger than 0.");
+
+            this.Description = description;
+            this.Usage = usage;
+
+            VboID = GL.GenBuffer();
+
+            if (!graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
+            {
+                VaoID = GL.GenVertexArray();
+                LayoutDirty = true;
+            }            
+            
+            if (!data.IsNull)
+            {
+                SizeBytes = data.Size;
+
+                if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+                {
+                    graphicsDevice.BindManager.VertexBuffer = this;
+                    GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(SizeBytes), data.Pointer, EnumConverter.Convert(Usage));
+                }
+                else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+                {
+                    OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(VboID, new IntPtr(SizeBytes), data.Pointer, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
+                }
+            }
+
+            graphicsDevice.CheckGLError("VertexBuffer Constructor");
+        }
+
+        internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, ResourceUsage usage, int vertexCount)
+            : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
+        {
+            if (vertexCount <= 0)
+                throw new ArgumentException("vertexCount must not be smaller than/ equal to zero.", "vertexCount");
+            if (usage == ResourceUsage.Immutable)
+                throw new ArgumentException("data", "Immutable buffers must be initialized with data.");
+
+            this.Description = description;
+            this.Usage = usage;
+
             VboID = GL.GenBuffer();
 
             if (!graphicsDevice.OpenGLCapabilities.VertexAttribBinding)
@@ -34,64 +94,42 @@ namespace DotGame.OpenGL4
                 VaoID = GL.GenVertexArray();
                 LayoutDirty = true;
             }
-            
-            graphicsDevice.CheckGLError();
 
-            this.Description = description;
-            this.Usage = usage;
-        }
-
-        internal void SetData<T>(T[] data) where T : struct
-        {
-            if(data == null) 
-                throw new ArgumentNullException("data");
-            if(data.Length == 0) 
-                throw new ArgumentException("Data must not be empty.", "data");
-
-            int sizePerVertex = GraphicsDevice.GetSizeOf(Description);
-
-            if (typeof(T) == typeof(IVertexType))
-            {
-                SizeBytes = data.Length * sizePerVertex;
-                VertexCount = data.Length;
-            }
-            else
-            {
-                SizeBytes = data.Length * Marshal.SizeOf(typeof(T));
-                VertexCount = SizeBytes / sizePerVertex; // TODO (henrik1235) Überprüfen ob Date-Größe (in bytes) der VertexDescription entspricht (dataSizeBytes % size == 0)
-            }
+            SizeBytes = vertexCount * graphicsDevice.GetSizeOf(description);
 
             if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
             {
                 graphicsDevice.BindManager.VertexBuffer = this;
-                GL.BufferData<T>(BufferTarget.ArrayBuffer, new IntPtr(SizeBytes), data, EnumConverter.Convert(Usage));
-            } 
-            else if(graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
-            {
-                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData<T>(VboID, new IntPtr(SizeBytes), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
-            }
-
-            graphicsDevice.CheckGLError();
-        }
-        internal void SetData(IntPtr data, int size)
-        {
-            if (data == null)
-                throw new ArgumentNullException("data");
-            if (size <= 0)
-                throw new ArgumentException("Data must not be empty.", "data");
-
-            SizeBytes=size;
-
-            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
-            {
-                graphicsDevice.BindManager.VertexBuffer = this;
-                GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(SizeBytes), data, EnumConverter.Convert(Usage));
+                GL.BufferData(BufferTarget.ArrayBuffer, new IntPtr(SizeBytes), IntPtr.Zero, EnumConverter.Convert(Usage));
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
             {
-                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(VboID, new IntPtr(SizeBytes), data, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(VboID, new IntPtr(SizeBytes), IntPtr.Zero, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
+            }
+
+            graphicsDevice.CheckGLError("VertexBuffer Constructor");
+        }
+
+        internal void UpdateData(DataArray data)
+        {
+            if (data.IsNull)
+                throw new ArgumentException("data.Pointer is null");
+            if (data.Size < 0)
+                throw new ArgumentException("Data must not be smaller than zero.", "data");
+            if (data.Size != SizeBytes)
+                throw new ArgumentException("Data does not match VertexBuffer size.", "data");
+
+            if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.None)
+            {
+                graphicsDevice.BindManager.VertexBuffer = this;
+                GL.BufferSubData(BufferTarget.ArrayBuffer, new IntPtr(0), new IntPtr(SizeBytes), data.Pointer);
+            }
+            else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
+            {
+                OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferSubData(VboID, new IntPtr(0), new IntPtr(SizeBytes), data.Pointer);
             }
             graphicsDevice.CheckGLError();
+            
         }
 
         protected override void Dispose(bool isDisposing)

@@ -29,14 +29,22 @@ namespace DotGame.OpenGL4
         internal ShaderPart FragmentShader { get; private set; }
         internal int ProgramID { get; private set; }
 
-        private Dictionary<string, int> uniformBindingPoints = new Dictionary<string, int>();
-        private Dictionary<string, int> uniformBlockLocations = new Dictionary<string, int>();
+        private int bindingBlocksCount = 0;
+        private Dictionary<string, UniformBlock> uniformBlocks = new Dictionary<string, UniformBlock>();
+
         private Dictionary<string, int> uniformLocations = new Dictionary<string, int>();
         private Dictionary<string, int> textureUnits = new Dictionary<string, int>();
+                
+        public VertexDescription VertexDescription
+        {
+            get; private set;
+        }
 
         internal Shader(GraphicsDevice device, string vertexShaderCode, string fragmentShaderCode)
             : base(device, new System.Diagnostics.StackTrace())
         {
+            //TODO (Robin) Attribs untersuchen und im Interface speichern
+
             //Create Program
             ProgramID = GL.CreateProgram();
 
@@ -83,6 +91,7 @@ namespace DotGame.OpenGL4
 
             FindUniforms();
             FindUniformBlocks();
+            FindAttributes();
 
             // TODO (Robin) Custom Exception
             // TODO (Robin) Im Fall einer Exception Shader freigeben
@@ -133,6 +142,28 @@ namespace DotGame.OpenGL4
             }
         }
 
+        private void FindAttributes()
+        {
+            int attributes;
+            GL.GetProgram(ProgramID, GetProgramParameterName.ActiveAttributes, out attributes);
+            VertexElement[] elements = new VertexElement[attributes];
+            for (int i = 0; i < attributes; i++)
+            {
+                int size;
+                ActiveAttribType type;
+
+                StringBuilder builder = new StringBuilder(255);
+                int length;
+
+                GL.GetActiveAttrib(ProgramID, i, 255, out length, out size, out type, builder);
+                string name = builder.ToString(0, length);
+
+                elements[attributes - 1 -  i] = new VertexElement(EnumConverter.Convert(name), 0, EnumConverter.Convert(type));
+            }
+
+            VertexDescription = new VertexDescription(elements);
+        }
+
         private void FindUniformBlocks()
         {
             int count;
@@ -145,18 +176,36 @@ namespace DotGame.OpenGL4
                 GL.GetActiveUniformBlockName(ProgramID, i, 255, out length, nameBuilder);
                 string name = nameBuilder.ToString(0, length);
 
-                uniformBlockLocations[name] = GL.GetUniformBlockIndex(ProgramID, name);
+                int location = GL.GetUniformBlockIndex(ProgramID, name);
+
+                int size;
+                GL.GetActiveUniformBlock(ProgramID, i, ActiveUniformBlockParameter.UniformBlockDataSize, out size);
+
+                uniformBlocks[name] = new UniformBlock()
+                {
+                    Size = size,
+                    Name = name,
+                    Index = location,
+                };
             }
         }
 
-        public IConstantBuffer CreateConstantBuffer(BufferUsage usage)
+        public IConstantBuffer CreateConstantBuffer(ResourceUsage usage)
         {
-            return graphicsDevice.Factory.CreateConstantBuffer(-1, usage);
+            UniformBlock block;
+            if (!uniformBlocks.TryGetValue("global", out block))
+                throw new Exception("Shader doesn't have a global constant buffer.");
+
+            return graphicsDevice.Factory.CreateConstantBuffer(block.Size, usage);
         }
 
-        public IConstantBuffer CreateConstantBuffer(string name, BufferUsage usage)
+        public IConstantBuffer CreateConstantBuffer(string name, ResourceUsage usage)
         {
-            return graphicsDevice.Factory.CreateConstantBuffer(-1, usage);
+            UniformBlock block;
+            if (!uniformBlocks.TryGetValue(name, out block))
+                throw new Exception(string.Format("Shader doesn't have constant buffer {0}.", name));
+
+            return graphicsDevice.Factory.CreateConstantBuffer(block.Size, usage);
         }
 
         /// <summary>
@@ -168,10 +217,12 @@ namespace DotGame.OpenGL4
         {
             if (name == null)
                 throw new ArgumentNullException("name");
-            if (!uniformLocations.ContainsKey(name))
+
+            int location;
+            if (!uniformLocations.TryGetValue(name, out location))
                 throw new ArgumentException(string.Format("Uniform {0} not found.", name), "name");
 
-            return uniformLocations[name];
+            return location;
         }
 
         /// <summary>
@@ -184,20 +235,24 @@ namespace DotGame.OpenGL4
             if (name == null)
                 throw new ArgumentNullException("name");
 
-            int bindingPoint;
-            if (uniformBindingPoints.TryGetValue(name, out bindingPoint))
-                return bindingPoint;
-
-            int unifomBlock;
-            if (!uniformBlockLocations.TryGetValue(name, out unifomBlock))
+            UniformBlock block;
+            if (!uniformBlocks.TryGetValue(name, out block))
                 throw new ArgumentException(string.Format("Uniform block {0} not found.", name), "name");
-
+            else if(block.HasBindingPoint)
+                return block.BindingPoint;
+            
             graphicsDevice.BindManager.Shader = this;
 
-            bindingPoint = uniformBindingPoints.Count;
-            GL.UniformBlockBinding(ProgramID, unifomBlock, bindingPoint);
+            int bindingPoint = bindingBlocksCount;
 
-            uniformBindingPoints[name] = bindingPoint;
+            if (bindingPoint >= graphicsDevice.OpenGLCapabilities.MaxUniformBufferBindings)
+                throw new PlatformNotSupportedException(string.Format("Requested binding point {0} is too big. Supported maximum is {1}", bindingPoint, graphicsDevice.OpenGLCapabilities.MaxUniformBufferBindings));
+
+            bindingBlocksCount++;
+            GL.UniformBlockBinding(ProgramID, block.Index, bindingPoint);
+
+            block.BindingPoint = bindingBlocksCount;
+            uniformBlocks[name] = block;
 
             return bindingPoint;
         }
@@ -248,6 +303,43 @@ namespace DotGame.OpenGL4
                 }
 
                 GL.DeleteProgram(ProgramID);
+            }
+        }
+
+        internal struct UniformBlock
+        {
+            public int Index
+            {
+                get; set;
+            }
+
+            private int bindingPoint;
+            public int BindingPoint
+            {
+                get
+                {
+                    return HasBindingPoint ? bindingPoint : -1;
+                }
+                set
+                {
+                    if (value > -1)
+                    {
+                        HasBindingPoint = true;
+                        bindingPoint = value;
+                    }
+                }
+            }
+            public int Size
+            {
+                get; set;
+            }
+            public string Name
+            {
+                get; set;
+            }
+            public bool HasBindingPoint
+            {
+                get;private set;
             }
         }
     }

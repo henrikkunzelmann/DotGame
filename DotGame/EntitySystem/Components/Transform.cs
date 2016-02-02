@@ -19,9 +19,7 @@ namespace DotGame.EntitySystem.Components
         /// Ruft Eltern-Transformation ab, oder legt diese fest.
         /// </summary>
         [JsonIgnore]
-        public Transform Parent { get { return parent; } set { SetParent(value); } }
-        [DebuggerBrowsable(DebuggerBrowsableState.Never)]
-        private Transform parent;
+        public Transform Parent { get { return Entity.Parent?.Transform; }}
 
         /// <summary>
         /// Ruft die World-Matrix dieser Transformation ab (in Anbetracht aller Eltern-Transformationen).
@@ -87,149 +85,19 @@ namespace DotGame.EntitySystem.Components
 
         private bool isDirty = true;
 
-        [JsonRequired]
-        private List<Transform> children = new List<Transform>();
-
-        protected override void Destroy()
+        public override void Destroy()
         {
             base.Destroy();
-
-            if (parent == null)
-                Entity.Scene.RemoveChild(Entity);
-            else
-                parent.RemoveChild(this);
         }
 
-        protected override void AfterDeserialize()
-        {
-            base.AfterDeserialize();
-
-            lock (children)
-            {
-                foreach (var c in children)
-                {
-                    c.parent = this;
-                }
-            }
-        }
-
-        protected override void GetChildHandlers(List<EventHandler> handlers)
-        {
-            lock (children)
-            {
-                foreach (var child in children)
-                    handlers.Add(child.Entity);
-            }
-        }
-
-        /// <summary>
-        /// Gibt zurück, ob die gegebene Transformation ein Kind dieser Transformation ist.
-        /// </summary>
-        /// <param name="depth">Die maximal zu suchende Tiefe.</param>
-        /// <returns>True, wenn die Transformation gefunden wurde, ansonsten false.</returns>
-        public bool ContainsChild(Transform transform, int depth = -1)
-        {
-            if (depth == 0)
-                return false;
-
-            lock (children)
-            {
-                foreach (var child in children)
-                {
-                    if (child == transform)
-                        return true;
-                    if (child.ContainsChild(transform, depth - 1))
-                        return true;
-                }
-            }
-
-            return false;
-        }
-
-        /// <summary>
-        /// Gibt alle Kind-Transformationen mit der angegebenen maximalen Tiefe zurück.
-        /// </summary>
-        /// <param name="depth">Die maximale Tiefe eines Kind-Elements.</param>
-        /// <returns>Die Liste aller gefundenen Kind-Elemente.</returns>
-        public Transform[] GetChildren(int depth = -1)
-        {
-            if (depth == 0)
-                lock (children)
-                    return children.ToArray();
-
-            var list = new List<Transform>();
-            GetChildren(list, depth);
-
-            return list.ToArray();
-        }
-
-        private void GetChildren(List<Transform> list, int depth)
-        {
-            if (depth == 0)
-                return;
-
-            lock (children)
-            {
-                foreach (var child in children)
-                {
-                    list.Add(child);
-                    child.GetChildren(list, depth - 1);
-                }
-            }
-        }
-
-        private void AddChild(Transform transform)
-        {
-            if (transform == null)
-                throw new ArgumentNullException("transform");
-            if (transform == this)
-                throw new InvalidOperationException("Transforms can not add themselves as a child.");
-            if (ContainsChild(transform))
-                throw new InvalidOperationException("Adding the given transform as a child would create a loop.");
-
-            lock (children)
-                children.Add(transform);
-            transform.parent = this;
-        }
-
-        private void RemoveChild(Transform transform)
-        {
-            if (transform == null)
-                throw new ArgumentNullException("transform");
-
-            lock (children)
-                children.Remove(transform);
-            transform.parent = null;
-        }
-
-        private void SetParent(Transform parent)
-        {
-            if (this.parent == parent)
-                return;
-
-            if (this.parent != null)
-                this.parent.RemoveChild(this);
-
-            if (parent != null)
-            {
-                Entity.Scene.RemoveChild(Entity);
-                parent.AddChild(this);
-            }
-            else
-            {
-                Entity.Scene.AddChild(Entity);
-            }
-
-            isDirty = true;
-        }
-
-        protected void MarkDirty()
+        public void MarkDirty()
         {
             isDirty = true;
-            lock (children)
+            if (Entity != null)
             {
+                var children = Entity.Children;
                 foreach (var child in children)
-                    child.MarkDirty();
+                    child.Transform.MarkDirty();
             }
         }
 
@@ -241,8 +109,8 @@ namespace DotGame.EntitySystem.Components
             matrix = Matrix4x4.CreateTranslation(localPosition)
                     * Matrix4x4.CreateFromQuaternion(localRotation)
                     * Matrix4x4.CreateScale(localScale);
-            if (parent != null)
-                matrix = matrix * parent.Matrix;
+            if (Parent != null)
+                matrix = matrix * Parent.Matrix;
 
             Matrix4x4.Decompose(matrix, out scale, out rotation, out position);
             isDirty = false;
