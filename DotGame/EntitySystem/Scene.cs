@@ -62,6 +62,13 @@ namespace DotGame
             File.WriteAllText("scene.dot",writer.ToString());
         }
 
+        public override void Update(GameTime gameTime)
+        {
+            Root.Update(gameTime);
+
+            base.Update(gameTime);
+        }
+
         protected override void Dispose(bool isDisposing)
         {
             Root.Destroy();

@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.23107.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame", "DotGame\DotGame.csproj", "{F797A1BF-58C2-47B8-A089-72B27295DE1B}"
 EndProject
@@ -12,8 +12,6 @@ EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.Null", "DotGame.Null\DotGame.Null.csproj", "{0DA96FDB-02DD-4557-92C6-017C5E92B33D}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.Common", "DotGame.Common\DotGame.Common.csproj", "{002FB72C-EA2D-4FDA-9960-7C5EB47FACE6}"
-EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.Common.Tests", "DotGame.Common.Tests\DotGame.Common.Tests.csproj", "{75333509-E368-4525-885B-FACF344CE91C}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DotGame.Test", "DotGame.Test\DotGame.Test.csproj", "{7D44F990-CF80-4B2A-AE64-35BACB109C3E}"
 EndProject
@@ -45,10 +43,6 @@ Global
 		{002FB72C-EA2D-4FDA-9960-7C5EB47FACE6}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{002FB72C-EA2D-4FDA-9960-7C5EB47FACE6}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{002FB72C-EA2D-4FDA-9960-7C5EB47FACE6}.Release|Any CPU.Build.0 = Release|Any CPU
-		{75333509-E368-4525-885B-FACF344CE91C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{75333509-E368-4525-885B-FACF344CE91C}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{75333509-E368-4525-885B-FACF344CE91C}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{75333509-E368-4525-885B-FACF344CE91C}.Release|Any CPU.Build.0 = Release|Any CPU
 		{7D44F990-CF80-4B2A-AE64-35BACB109C3E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{7D44F990-CF80-4B2A-AE64-35BACB109C3E}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7D44F990-CF80-4B2A-AE64-35BACB109C3E}.Release|Any CPU.ActiveCfg = Release|Any CPU
