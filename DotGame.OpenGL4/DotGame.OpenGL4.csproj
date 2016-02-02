@@ -61,7 +61,6 @@
     <Compile Include="EnumConverter.cs" />
     <Compile Include="FrameBuffer.cs" />
     <Compile Include="FrameBufferDescription.cs" />
-    <Compile Include="GLSLPreprocessor.cs" />
     <Compile Include="OpenGLGraphicsCapabilities.cs" />
     <Compile Include="IndexBuffer.cs" />
     <Compile Include="RasterizerState.cs" />
