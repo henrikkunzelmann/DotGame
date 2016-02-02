@@ -29,8 +29,8 @@ namespace DotGame.Assets
             }
         }
 
-        internal Texture(AssetManager manager, string name, string file, TextureLoadSettings loadSettings, TextureImporterBase importer)
-            : base(manager, AssetType.File, name, file)
+        internal Texture(Engine engine, string name, string file, TextureLoadSettings loadSettings, TextureImporterBase importer)
+            : base(engine, AssetType.File, name, file)
         {
             if (importer == null)
                 throw new ArgumentNullException("importer");
@@ -41,8 +41,8 @@ namespace DotGame.Assets
             this.header = importer.LoadHeader(file, loadSettings);
         }
 
-        internal Texture(AssetManager manager, string name, ITexture2D handle)
-            : base(manager, AssetType.Wrapper, name, null)
+        internal Texture(Engine engine, string name, ITexture2D handle)
+            : base(engine, AssetType.Wrapper, name, null)
         {
             if (handle == null)
                 throw new ArgumentNullException("handle");

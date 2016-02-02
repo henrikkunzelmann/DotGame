@@ -23,7 +23,7 @@ namespace DotGame.OpenGL4
         //Ob man TexSubImageXD verwenden kann
         private bool isInitialized = false;
 
-        internal int TextureID { get; private set; }internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, TextureFormat format, bool generateMipMaps,  ResourceUsage usage = ResourceUsage.Normal, DataBox data = new DataBox())
+        internal int TextureID { get; private set; }internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, TextureFormat format, bool generateMipMaps, bool isRenderTarget, ResourceUsage usage = ResourceUsage.Normal, DataBox data = new DataBox())
             : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
         {
             if (width <= 0)
@@ -110,7 +110,7 @@ namespace DotGame.OpenGL4
             {
             }
 
-            graphicsDevice.CheckGLError("Texture3D Constructor");            
+            graphicsDevice.CheckGLError();            
         }
 
         internal Texture3D(GraphicsDevice graphicsDevice, int width, int height, int length, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataBox[] data)
@@ -204,7 +204,7 @@ namespace DotGame.OpenGL4
             {
             }
 
-            graphicsDevice.CheckGLError("Texture3D Constructor");
+            graphicsDevice.CheckGLError();
 
             if (data != null && data.Length > 1)
                 for (int i = 1; i < data.Length; i++)
@@ -246,7 +246,7 @@ namespace DotGame.OpenGL4
                 //OpenGL 4.5
             }
 
-            graphicsDevice.CheckGLError("Texture3D GenerateMipMaps");
+            graphicsDevice.CheckGLError();
         }
 
 
@@ -266,7 +266,7 @@ namespace DotGame.OpenGL4
             {
             }
 
-            graphicsDevice.CheckGLError("Texture3D GenerateMipMaps");
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

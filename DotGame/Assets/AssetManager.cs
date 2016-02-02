@@ -129,7 +129,7 @@ namespace DotGame.Assets
                 throw new ArgumentException("Vertices is empty.", "vertices");
 
             IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, ResourceUsage.Normal);
-            return new StaticMesh(this, name, AssetType.User, vertexBuffer);
+            return new StaticMesh(this.Engine, name, AssetType.User, vertexBuffer);
         }
 
 
@@ -148,7 +148,7 @@ namespace DotGame.Assets
 
             IVertexBuffer vertexBuffer = Engine.GraphicsDevice.Factory.CreateVertexBuffer(vertices, vertexDescription, ResourceUsage.Normal);
             IIndexBuffer indexBuffer = Engine.GraphicsDevice.Factory.CreateIndexBuffer(indices, indexFormat, ResourceUsage.Normal);
-            return new StaticMesh(this, name, AssetType.User, vertexBuffer, indexBuffer);
+            return new StaticMesh(this.Engine, name, AssetType.User, vertexBuffer, indexBuffer);
         }
 
         /// <summary>
@@ -169,7 +169,12 @@ namespace DotGame.Assets
         /// <returns></returns>
         public Texture LoadTexture(string name, string file, TextureLoadSettings settings)
         {
-            return new Texture(this, name, file, settings, GetImporter<TextureImporterBase>(Path.GetExtension(file)));
+            return new Texture(this.Engine, name, file, settings, GetImporter<TextureImporterBase>(Path.GetExtension(file)));
+        }
+
+        public Shader LoadShader(string name, string file, string vertexFunction, string pixelFunction, Version shaderModel)
+        {
+            return new Shader(this.Engine, name, file, vertexFunction, pixelFunction, shaderModel);
         }
 
         protected override void Dispose(bool isDisposing)

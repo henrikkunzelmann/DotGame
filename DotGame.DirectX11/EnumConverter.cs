@@ -71,9 +71,7 @@ namespace DotGame.DirectX11
 
         private static readonly Dictionary<IndexFormat, Format> indexFormats = new Dictionary<IndexFormat, Format>()
         {
-            { IndexFormat.Int32, Format.R32_SInt },
             { IndexFormat.UInt32, Format.R32_UInt },
-            { IndexFormat.Short16, Format.R16_SInt },
             { IndexFormat.UShort16, Format.R16_UInt },
         };
 

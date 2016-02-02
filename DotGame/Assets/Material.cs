@@ -28,8 +28,8 @@ namespace DotGame.Assets
             }
         }
 
-        public Material(AssetManager manager, string name)
-            : base(manager, AssetType.User, name, null)
+        public Material(Engine engine, string name)
+            : base(engine, AssetType.User, name, null)
         {
 
         }

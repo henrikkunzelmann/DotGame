@@ -27,7 +27,7 @@ namespace DotGame.Test
         {
             var engine = new Engine(new EngineSettings()
             {
-                GraphicsAPI = GraphicsAPI.Direct3D11,
+                GraphicsAPI = GraphicsAPI.OpenGL4,
                 Width = 1280,
                 Height = 720,
                 AudioAPI = AudioAPI.OpenAL,

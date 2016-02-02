@@ -124,6 +124,7 @@ namespace DotGame.OpenGL4
 
             FindUniforms();
             FindUniformBlocks();
+            FindAttributes();
         }
 
         private void FindUniforms()

@@ -18,7 +18,8 @@ namespace DotGame.Rendering
         {
             base.Init();
 
-            this.AddPass(new Passes.GBufferPass(Engine, scene));
+            this.AddPass(new Passes.GBufferPass(Engine, scene, Engine.AssetManager));
+            //this.AddPass(new Passes.DeferredPass(Engine));
         }
     }
 }

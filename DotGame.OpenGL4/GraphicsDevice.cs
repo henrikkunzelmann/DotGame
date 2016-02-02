@@ -12,6 +12,7 @@ using OpenTK;
 using OpenTK.Graphics.OpenGL4;
 using Ext = OpenTK.Graphics.OpenGL.GL.Ext;
 using DotGame.OpenGL4.Windows;
+using System.Runtime.CompilerServices;
 
 namespace DotGame.OpenGL4
 {
@@ -160,7 +161,7 @@ namespace DotGame.OpenGL4
             else
                 throw new Exception("Could not determine supported GLSL version");
 
-            CheckGLError("Init Version");
+            CheckGLError();
 
             Log.Write(logLevel, "\tGLSL Version: {0}", openGLCapabilities.GLSLVersion.ToString());
             Log.Write(logLevel, "\tExtensions supported:");
@@ -191,7 +192,7 @@ namespace DotGame.OpenGL4
                         openGLCapabilities.SupportsAnisotropicFiltering = true;
                         openGLCapabilities.MaxAnisotropicFiltering = (int)GL.GetFloat((GetPName)OpenTK.Graphics.OpenGL.ExtTextureFilterAnisotropic.MaxTextureMaxAnisotropyExt);
                         Log.Write(logLevel, "\t\t" + "GL_EXT_texture_filter_anisotropic");
-                        CheckGLError("Init GL_EXT_texture_filter_anisotropic");
+                        CheckGLError();
                         break;
 
 
@@ -207,7 +208,7 @@ namespace DotGame.OpenGL4
                             GL.DebugMessageControl(DebugSourceControl.DontCare, DebugTypeControl.DontCare, DebugSeverityControl.DontCare, 0, new int[0], true);
                         }
                         Log.Write(logLevel, "\t\t" + "GL_ARB_debug_output");
-                        CheckGLError("Init GL_ARB_debug_output");
+                        CheckGLError();
                         break;
 
                     case "GL_ARB_get_program_binary":
@@ -248,23 +249,23 @@ namespace DotGame.OpenGL4
                         openGLCapabilities.MaxVertexAttribBindingOffset = GL.GetInteger((GetPName)All.MaxVertexAttribRelativeOffset);
                         openGLCapabilities.MaxVertexAttribStride = GL.GetInteger((GetPName)All.MaxVertexAttribStride);
                         Log.Write(logLevel, "\t\t" + "GL_ARB_vertex_attrib_binding");
-                        CheckGLError("Init GL_ARB_vertex_attrib_binding");
+                        CheckGLError();
                         break;
                 }
             }
 
             openGLCapabilities.TextureUnits = GL.GetInteger(GetPName.MaxCombinedTextureImageUnits);
-            CheckGLError("Init MaxCombinedTextureImageUnits");
+            CheckGLError();
             openGLCapabilities.MaxTextureLoDBias = GL.GetInteger(GetPName.MaxTextureLodBias);
-            CheckGLError("Init MaxTextureLodBias");
+            CheckGLError();
             openGLCapabilities.MaxTextureSize = GL.GetInteger(GetPName.MaxTextureSize);
-            CheckGLError("Init MaxTextureSize");
+            CheckGLError();
             openGLCapabilities.MaxVertexAttribs = GL.GetInteger(GetPName.MaxVertexAttribs);
-            CheckGLError("Init MaxVertexAttribs");
+            CheckGLError();
             openGLCapabilities.MaxUniformBlockSize = GL.GetInteger(GetPName.MaxUniformBlockSize);
-            CheckGLError("Init MaxUniformBlockSize");
+            CheckGLError();
             openGLCapabilities.MaxUniformBufferBindings = GL.GetInteger(GetPName.MaxUniformBufferBindings);
-            CheckGLError("Init MaxUniformBufferBindings");
+            CheckGLError();
         }
 
         private void OnDebugMessage(DebugSource source, DebugType type, int id, DebugSeverity severity, int length, IntPtr message, IntPtr user)
@@ -296,7 +297,7 @@ namespace DotGame.OpenGL4
             Log.FlushBuffer();
         }
 
-        public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
+        public T Cast<T>(IGraphicsObject obj, string parameterName, [CallerMemberName] string callerMember = "", [CallerLineNumber] int line = 0, [CallerFilePath] string filePath = "") where T : class, IGraphicsObject
         {
             if (obj == null)
                 throw new ArgumentNullException(parameterName);
@@ -304,9 +305,9 @@ namespace DotGame.OpenGL4
                 throw new ObjectDisposedException(parameterName);
             T ret = obj as T;
             if (ret == null)
-                throw new ArgumentException("GraphicsObject is not part of this api.", parameterName);
+                throw new ArgumentException(string.Format("GraphicsObject is not part of this api. Called from {0} at {1} in file {2}.",callerMember, line, filePath), parameterName);
             if (obj.GraphicsDevice != this)
-                throw new ArgumentException("GraphicsObject is not part of this graphics device.", parameterName);
+                throw new ArgumentException(string.Format("GraphicsObject is not part of this graphics device. Called from {0} at {1} in file {2}.", callerMember, line, filePath), parameterName);
             return ret;
         }
 
@@ -371,10 +372,8 @@ namespace DotGame.OpenGL4
         {
             switch (format)
             {
-                case IndexFormat.Int32:
                 case IndexFormat.UInt32:
                     return 4;
-                case IndexFormat.Short16:
                 case IndexFormat.UShort16:
                     return 2;
                 default:
@@ -415,14 +414,14 @@ namespace DotGame.OpenGL4
             return fbo;
         }
 
-        internal FrameBuffer GetFBO(int depthAttachmentID)
+        internal FrameBuffer GetFBO(int depthStencilAttachmentID, DepthStencilAttachmentUsage depthStencilUsage)
         {
-            return GetFBO(new FrameBufferDescription(depthAttachmentID, new int[] { }));
+            return GetFBO(new FrameBufferDescription(depthStencilAttachmentID, depthStencilUsage, new int[] { }));
         }
 
-        internal FrameBuffer GetFBO(int depthAttachmentID, params int[] colorAttachmentIDs)
+        internal FrameBuffer GetFBO(int depthStencilAttachmentID, DepthStencilAttachmentUsage depthStencilUsage, params int[] colorAttachmentIDs)
         {
-            return GetFBO(new FrameBufferDescription(depthAttachmentID, colorAttachmentIDs));
+            return GetFBO(new FrameBufferDescription(depthStencilAttachmentID, depthStencilUsage, colorAttachmentIDs));
         }
 
         internal int GetLayout(VertexDescription description, Shader shader)
@@ -475,7 +474,7 @@ namespace DotGame.OpenGL4
             return layout;
         }
 
-        internal void CheckGLError(string msg = "N/A")
+        internal void CheckGLError(string message = "", [CallerMemberName] string callerMember = "", [CallerLineNumber] int line = 0, [CallerFilePath] string filePath = "")
         {
             if (!CreationFlags.HasFlag(DeviceCreationFlags.Debug))
                 return;
@@ -483,7 +482,7 @@ namespace DotGame.OpenGL4
             var error = GL.GetError();
             if (error != ErrorCode.NoError)
             {
-                throw new InvalidOperationException(string.Format("OpenGL threw an error at \"{0}\": {1}", msg, error.ToString()));
+                throw new InvalidOperationException(string.Format("OpenGL threw {3} with custom message:{5}{4}{5}in {0} at line {1} of file\"{2}\"", callerMember, line, filePath, error.ToString(), message, Environment.NewLine));
             }
         }
 
@@ -504,3 +503,5 @@ namespace DotGame.OpenGL4
         }
     }
 }
+
+// Todo (Robin): Bookmark: https://github.com/luca-piccioni/OpenGL.Net

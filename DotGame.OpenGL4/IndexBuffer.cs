@@ -63,7 +63,7 @@ namespace DotGame.OpenGL4
                 }
             }
 
-            graphicsDevice.CheckGLError("IndexBuffer Constructor");
+            graphicsDevice.CheckGLError();
         }
 
         public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, ResourceUsage usage, int indexCount) : base(graphicsDevice, new System.Diagnostics.StackTrace(1))
@@ -90,7 +90,7 @@ namespace DotGame.OpenGL4
                 OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(IboID, new IntPtr(SizeBytes), IntPtr.Zero, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
             }
 
-            graphicsDevice.CheckGLError("IndexBuffer Constructor");
+            graphicsDevice.CheckGLError();
         }
 
         internal void UpdateData(DataArray data)

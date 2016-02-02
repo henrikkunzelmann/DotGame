@@ -9,11 +9,12 @@ namespace DotGame.OpenGL4
     internal struct FrameBufferDescription
     {
         internal int[] ColorAttachmentIDs { get; private set; }
-        internal int DepthAttachmentID { get; private set; }
+        internal int DepthStencilAttachmentID { get; private set; }
+        internal DepthStencilAttachmentUsage DepthStencilUsage { get; private set; }
 
         internal bool HasAttachments
         {
-            get { return !(DepthAttachmentID <= 0 && (ColorAttachmentIDs == null || ColorAttachmentIDs.Length == 0)); }
+            get { return !(DepthStencilAttachmentID <= 0 && (ColorAttachmentIDs == null || ColorAttachmentIDs.Length == 0)); }
         }
 
         
@@ -21,11 +22,12 @@ namespace DotGame.OpenGL4
         {
             ColorAttachmentIDs = colorAttachmentIDs;
         }
-        internal FrameBufferDescription(int depthAttachmentID, params int[] colorAttachmentIDs)
+        internal FrameBufferDescription(int depthStencilAttachmentID, DepthStencilAttachmentUsage depthStencilUsage, params int[] colorAttachmentIDs)
             : this()
         {
-            DepthAttachmentID = depthAttachmentID;
+            DepthStencilAttachmentID = depthStencilAttachmentID;
             ColorAttachmentIDs = colorAttachmentIDs;
+            DepthStencilUsage = depthStencilUsage;
         }
 
         public override int GetHashCode()
@@ -42,7 +44,8 @@ namespace DotGame.OpenGL4
             unchecked
             {
                 int hash = 17;
-                hash = hash * 23 + DepthAttachmentID;
+                hash = hash * 23 + DepthStencilAttachmentID;
+                hash = hash * 23 + (int)DepthStencilUsage;
                 if (ColorAttachmentIDs == null || ColorAttachmentIDs.Length == 0)
                 {
                     hash = hash * 23 + 0;
@@ -78,5 +81,12 @@ namespace DotGame.OpenGL4
         {
             return !desc1.Equals(desc2);
         }
+    }
+    
+    internal enum DepthStencilAttachmentUsage
+    {
+        Depth,
+        Stencil,
+        Both
     }
 }

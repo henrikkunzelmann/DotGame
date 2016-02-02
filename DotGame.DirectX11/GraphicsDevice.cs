@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 using DotGame.Graphics;
 using SharpDX.Direct3D11;
 using Device = SharpDX.Direct3D11.Device;
-using System.Windows.Forms;
-using SharpDX.Windows;
 using SharpDX.DXGI;
 using DotGame.Utils;
 using DeviceCreationFlags = DotGame.Graphics.DeviceCreationFlags;
+using System.Runtime.CompilerServices;
 
 namespace DotGame.DirectX11
 {
@@ -84,7 +83,7 @@ namespace DotGame.DirectX11
             RenderContext.SetViewport(new Viewport(0, 0, DefaultWindow.Width, DefaultWindow.Height, 0, 1));
         }
 
-        public T Cast<T>(IGraphicsObject obj, string parameterName) where T : class, IGraphicsObject
+        public T Cast<T>(IGraphicsObject obj, string parameterName, [CallerMemberName] string callerMember = "", [CallerLineNumber] int line = 0, [CallerFilePath] string filePath = "") where T : class, IGraphicsObject
         {
             if (obj == null)
                 throw new ArgumentNullException(parameterName);
@@ -93,9 +92,9 @@ namespace DotGame.DirectX11
 
             T ret = obj as T;
             if (ret == null)
-                throw new ArgumentException("GraphicsObject is not part of this api.", parameterName);
+                throw new ArgumentException(string.Format("GraphicsObject is not part of this api. Called from {0} at {1} in file {2}.", callerMember, line, filePath), parameterName);
             if (obj.GraphicsDevice != this)
-                throw new ArgumentException("GraphicsObject is not part of this graphics device.", parameterName);
+                throw new ArgumentException(string.Format("GraphicsObject is not part of this graphics device. Called from {0} at {1} in file {2}.", callerMember, line, filePath), parameterName);
             return ret;
         }
 
@@ -179,7 +178,15 @@ namespace DotGame.DirectX11
 
         public void SwapBuffers()
         {
-            swapChain.Present(syncInterval, PresentFlags.None);
+            try
+            {
+                swapChain.Present(syncInterval, PresentFlags.None);
+            }
+            catch (SharpDX.SharpDXException e)
+            {
+                var reason = Device.DeviceRemovedReason;
+                Environment.Exit(0);
+            }
         }
     }
 }

@@ -55,8 +55,8 @@ namespace DotGame.Assets
         /// </summary>
         public GameTime LastUnloaded { get; private set; }
 
-        internal Asset(AssetManager manager, AssetType type, string name, string file)
-            : base(manager.Engine)
+        internal Asset(Engine engine, AssetType type, string name, string file)
+            : base(engine)
         {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name must not be null, empty or white-space.", "name");
@@ -64,8 +64,9 @@ namespace DotGame.Assets
             this.Name = name;
             this.Type = type;
             this.File = file;
+            this.Manager = Engine.AssetManager;
 
-            manager.Register(this);
+            Engine.AssetManager.Register(this);
         }
 
         /// <summary>

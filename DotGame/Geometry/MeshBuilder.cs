@@ -379,11 +379,15 @@ namespace DotGame.Geometry
                     data[index++] = colors[i].W;
                 }
             }
+
+            if(HasIndices)
+                Array.Resize(ref indices, indexCount);
+
             StaticMesh mesh;
             if (!HasIndices)
                 mesh = Engine.AssetManager.LoadMesh(name, data, CreateDescription());
             else
-                mesh = Engine.AssetManager.LoadMesh(name, data, CreateDescription(), indices, IndexFormat.Int32);
+                mesh = Engine.AssetManager.LoadMesh(name, data, CreateDescription(), indices, IndexFormat.UInt32);
             Reset();
             return mesh;
         }

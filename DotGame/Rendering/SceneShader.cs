@@ -11,8 +11,10 @@ namespace DotGame.Rendering
 {
     public abstract class SceneShader : Shader
     {
-        public SceneShader(Engine engine, string name) : base(engine, name) { }
-
+        public SceneShader(Engine engine, string name, string file, string vertexFunction, string pixelFunction, Version shaderModel) : base(engine, name, file, vertexFunction, pixelFunction, shaderModel)
+        {
+        }
+        
         public abstract MaterialDescription MaterialDescription
         {
             get;

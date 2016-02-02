@@ -184,7 +184,7 @@ namespace DotGame.OpenGL4
                     //OpenGL 4.5
                 }
 
-            graphicsDevice.CheckGLError("Texture2DArray SetData");
+            graphicsDevice.CheckGLError();
         }
 
         internal void GenerateMipMaps()
@@ -202,7 +202,7 @@ namespace DotGame.OpenGL4
             {
             }
 
-            graphicsDevice.CheckGLError("Texture2DArray GenerateMipMaps");
+            graphicsDevice.CheckGLError();
         }
 
         protected override void Dispose(bool isDisposing)

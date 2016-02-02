@@ -69,7 +69,7 @@ namespace DotGame.DirectX11
             if (currentColorTargets == null)
                 throw new InvalidOperationException("No render target set for color.");
 
-            var clearColor = new SharpDX.Color4(color.R, color.G, color.B, color.A);
+            var clearColor = new SharpDX.Mathematics.Interop.RawColor4(color.R, color.G, color.B, color.A);
             for (int i = 0; i < currentColorTargets.Length; i++)
                 Context.ClearRenderTargetView(currentColorTargets[i], clearColor);
         }
@@ -181,7 +181,7 @@ namespace DotGame.DirectX11
         {
             if (currentBlendFactor != color)
             {
-                Context.OutputMerger.BlendFactor = new SharpDX.Color4(color.ToRgba());
+                Context.OutputMerger.BlendFactor = new SharpDX.Mathematics.Interop.RawColor4(color.R, color.G, color.B, color.A);
                 currentBlendFactor = color;
             }
         }
@@ -475,6 +475,7 @@ namespace DotGame.DirectX11
 
             ApplyState();
             Context.DrawIndexed(indexCount, startIndexLocation, baseVertexLocation);
+            //Context.Draw(indexCount, baseVertexLocation);
         }
 
         private struct ShaderStageCache

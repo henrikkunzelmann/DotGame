@@ -17,7 +17,8 @@ namespace DotGame.OpenGL4
 
         //Wird benutzt um ein FBO vom Pool abzurufen oder zu erstellen
         private int[] currentRenderTargets;
-        private int currentDepthRenderTarget = -1;
+        private DepthStencilAttachmentUsage currentDepthStencilUsage;
+        private int currentDepthStencilRenderTarget = -1;
 
         private TextureFormat currentDepthFormat;
 
@@ -116,7 +117,7 @@ namespace DotGame.OpenGL4
 
         public void SetRenderTargetsBackBuffer()
         {
-            currentDepthRenderTarget = -1;
+            currentDepthStencilRenderTarget = -1;
             currentRenderTargets = null;
         }
 
@@ -149,11 +150,27 @@ namespace DotGame.OpenGL4
             if (depth != null)
             {
                 Texture2D texture = graphicsDevice.Cast<Texture2D>(depth, "depth");
-                currentDepthRenderTarget = texture.TextureID;
+
+                switch (texture.Format)
+                {
+                    case TextureFormat.Depth24Stencil8:
+                        currentDepthStencilUsage = DepthStencilAttachmentUsage.Both;
+                        break;
+                        
+                    case TextureFormat.Depth16:
+                    case TextureFormat.Depth32:
+                        currentDepthStencilUsage = DepthStencilAttachmentUsage.Depth;
+                        break;
+
+                    default:
+                        throw new Exception("Unsupported attachment format");
+                }
+
+                currentDepthStencilRenderTarget = texture.TextureID;
                 currentDepthFormat = texture.Format;
             }
             else
-                currentDepthRenderTarget = -1;
+                currentDepthStencilRenderTarget = -1;
         }
 
         public void Clear(Color color)
@@ -364,7 +381,7 @@ namespace DotGame.OpenGL4
 
         private void ApplyRenderTarget()
         {
-            graphicsDevice.BindManager.Fbo = graphicsDevice.GetFBO(currentDepthRenderTarget, currentRenderTargets);
+            graphicsDevice.BindManager.Fbo = graphicsDevice.GetFBO(currentDepthStencilRenderTarget, currentDepthStencilUsage, currentRenderTargets);
 
             if (currentClearBufferMask != 0)
             {
@@ -468,7 +485,7 @@ namespace DotGame.OpenGL4
 
             graphicsDevice.BindManager.IndexBuffer = currentIndexBuffer;
 
-            graphicsDevice.CheckGLError("RenderContext.ApplyState");
+            graphicsDevice.CheckGLError();
         }
 
         public void Draw()
@@ -484,6 +501,9 @@ namespace DotGame.OpenGL4
             ApplyRenderTarget();
             ApplyState();
             GL.DrawArrays(EnumConverter.Convert(currentState.PrimitiveType), firstVertexLocation, vertexCount);
+
+            for (int i = 0; i < graphicsDevice.OpenGLCapabilities.TextureUnits; i++)
+                graphicsDevice.BindManager.SetTexture((ITexture2D)null, i);
         }
 
         public void DrawIndexed()

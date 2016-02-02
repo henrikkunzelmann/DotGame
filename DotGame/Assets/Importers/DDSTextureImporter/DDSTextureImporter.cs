@@ -10,14 +10,10 @@ using DotGame.Graphics;
 namespace DotGame.Assets.Importers.DDSTextureImporter
 {
     public class DDSTextureImporter : TextureImporterBase
-    {
-        private TextureHeader header;
-
-        private Header headerDDS;
-        private HeaderDXT10 headerDXT10;
-
-        private bool IsHeaderLoaded = false;
-        private bool hasHeaderDXT10 = false;
+    {        
+        private Dictionary<string,TextureHeader> headers = new Dictionary<string, TextureHeader>();
+        private Dictionary<string,Header> ddsHeaders = new Dictionary<string, Header>();
+        private Dictionary<string, HeaderDXT10> dxt10Headers = new Dictionary<string, HeaderDXT10>();
                 
         public DDSTextureImporter(AssetManager manager)
             :base(manager)
@@ -29,7 +25,7 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
             if (file == null)
                 throw new ArgumentNullException("file");
 
-            header = new TextureHeader();
+            var header = new TextureHeader();
 
             FileStream stream = new FileStream(file, FileMode.Open);
             BinaryReader reader = new BinaryReader(stream);
@@ -45,21 +41,23 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
                     int headerSize = 124;
                     byte[] headerData = reader.ReadBytes(headerSize);
 
-                    this.headerDDS = DDSTextureImporter.ByteArrayToStruct<Header>(headerData, 0);
-                    header.Width = (int)this.headerDDS.Width;
-                    header.Height = (int)this.headerDDS.Height;
-                    header.Depth = (int)Depth;
-                    header.MipLevels = this.headerDDS.MipMapCount > 0 ? (int)this.headerDDS.MipMapCount : 1;
-
-                    headerDXT10 = new HeaderDXT10();
-                    if (this.headerDDS.PixelFormat.Flags == PixelFormatFlags.FourCC && this.headerDDS.PixelFormat.FourCC == "DXT10")
+                    var headerDDS = DDSTextureImporter.ByteArrayToStruct<Header>(headerData, 0);
+                    ddsHeaders.Add(file, headerDDS);
+                    header.Width = (int)headerDDS.Width;
+                    header.Height = (int)headerDDS.Height;
+                    header.Depth = (int)GetDepth(file);
+                    header.MipLevels = headerDDS.MipMapCount > 0 ? (int)headerDDS.MipMapCount : 1;
+                    
+                    if (headerDDS.PixelFormat.Flags == PixelFormatFlags.FourCC && headerDDS.PixelFormat.FourCC == "DXT10")
                     {
-                        hasHeaderDXT10 = true;
                         byte[] headerDxt10Data = reader.ReadBytes(Marshal.SizeOf(typeof(HeaderDXT10)));
-                        headerDXT10 = DDSTextureImporter.ByteArrayToStruct<HeaderDXT10>(headerDxt10Data, 0);
+                        var headerDXT10 = DDSTextureImporter.ByteArrayToStruct<HeaderDXT10>(headerDxt10Data, 0);
+                        dxt10Headers.Add(file, headerDXT10);
                     }
 
-                    header.Format = GetTextureFormat();
+                    header.Format = GetTextureFormat(file);
+
+                    headers.Add(file, header);
                 }
             }
             finally
@@ -67,7 +65,6 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
                 reader.Close();
                 stream.Close();
             }
-            IsHeaderLoaded = true;
             return header;
         }
 
@@ -78,7 +75,7 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
             if (handle == null)
                 throw new ArgumentNullException("handle");
 
-            if (!IsHeaderLoaded)
+            if (!ddsHeaders.ContainsKey(file) || !headers.ContainsKey(file))
             {
                 LoadHeader(file, settings);
             }
@@ -93,7 +90,7 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
             {
                 int dataOffset = 4 + 124;
 
-                if (hasHeaderDXT10)
+                if (dxt10Headers.ContainsKey(file))
                     dataOffset += Marshal.SizeOf(typeof(HeaderDXT10));
 
                 stream.Position = dataOffset;
@@ -102,17 +99,16 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
                 byte[] data = new byte[dataSize];
                 stream.Read(data, 0, dataSize);
 
-                if (!IsVolumeTexture)
+                if (!GetIsVolumeTexture(file))
                 {
-                    int faces = IsCubeMap ? 6 : 1;
-                    int levels = header.MipLevels > 0 ? header.MipLevels : 1;
+                    int faces = GetIsCubeMap(file) ? 6 : 1;
+                    int levels = headers[file].MipLevels > 0 ? headers[file].MipLevels : 1;
                     DataRectangle[] rectangles = new DataRectangle[levels*faces];
-
-
-                    if (TextureFormatHelper.IsCompressed(header.Format))
+                                        
+                    if (TextureFormatHelper.IsCompressed(headers[file].Format))
                         arrayHandle = GCHandle.Alloc(data, GCHandleType.Pinned);
                     else
-                        arrayHandle = GCHandle.Alloc(ConvertFormat(data), GCHandleType.Pinned);
+                        arrayHandle = GCHandle.Alloc(ConvertFormat(file, data), GCHandleType.Pinned);
 
                     try
                     {
@@ -120,12 +116,17 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
 
                         for (int face = 0; face < faces; face++)
                         {
-                            int width = header.Width;
-                            int height = header.Height;
+                            int width = headers[file].Width;
+                            int height = headers[file].Height;
                             for (int mipLevel = 0; mipLevel < levels; mipLevel++)
                             {
-                                int size = (int)GetSize(width, height);
-                                rectangles[levels * face + mipLevel] = new DataRectangle(pointer, (int)GetPitch(width), size);
+                                int size;
+                                if (TextureFormatHelper.IsCompressed(headers[file].Format))
+                                    size = (int)CalculateSize(file, width, height);
+                                else
+                                    size = width * height * Engine.GraphicsDevice.GetSizeOf(headers[file].Format);
+
+                                rectangles[levels * face + mipLevel] = new DataRectangle(pointer, (int)CalculatePitch(file, width), size);
 
                                 width /= 2;
                                 height /= 2;
@@ -152,31 +153,38 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
                 //    arrayHandle.Free();
 
                 stream.Close();
+
+                headers.Remove(file);
+                dxt10Headers.Remove(file);
+                ddsHeaders.Remove(file);
             }
         }
 
 
-        private TextureFormat GetTextureFormat()
+        private TextureFormat GetTextureFormat(string file)
         {
-            if (!hasHeaderDXT10 && headerDDS.PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
+            if (!dxt10Headers.ContainsKey(file))
             {
-                //Komprimierte Texturen
-                if (headerDDS.PixelFormat.FourCC == "DXT1")
-                    return TextureFormat.DXT1;
+                if (ddsHeaders.ContainsKey(file) && ddsHeaders[file].PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
+                {
+                    //Komprimierte Texturen
+                    if (ddsHeaders[file].PixelFormat.FourCC == "DXT1")
+                        return TextureFormat.DXT1;
 
-                if (headerDDS.PixelFormat.FourCC == "DXT2")
-                    return TextureFormat.Unknown;
+                    if (ddsHeaders[file].PixelFormat.FourCC == "DXT2")
+                        return TextureFormat.Unknown;
 
-                if (headerDDS.PixelFormat.FourCC == "DXT3")
-                    return TextureFormat.DXT3;
+                    if (ddsHeaders[file].PixelFormat.FourCC == "DXT3")
+                        return TextureFormat.DXT3;
 
-                if (headerDDS.PixelFormat.FourCC == "DXT4")
-                    return TextureFormat.Unknown;
+                    if (ddsHeaders[file].PixelFormat.FourCC == "DXT4")
+                        return TextureFormat.Unknown;
 
-                if (headerDDS.PixelFormat.FourCC == "DXT5")
-                    return TextureFormat.DXT5;
+                    if (ddsHeaders[file].PixelFormat.FourCC == "DXT5")
+                        return TextureFormat.DXT5;
+                }
             }
-            else if (hasHeaderDXT10)
+            else
             {
             }
 
@@ -189,107 +197,100 @@ namespace DotGame.Assets.Importers.DDSTextureImporter
         /// </summary>
         /// <param name="data"></param>
         /// <returns></returns>
-        private Color[] ConvertFormat(byte[] data)
+        private Color[] ConvertFormat(string file, byte[] data)
         {
             Color[] colors = null;
-            if (!hasHeaderDXT10)
+            if (!dxt10Headers.ContainsKey(file) && ddsHeaders.ContainsKey(file) && headers.ContainsKey(file))
             {           
                 //Mit DDS PixelFormat konvertieren
-                if (!headerDDS.PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
+                if (!ddsHeaders[file].PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
                 {
-                    colors = headerDDS.PixelFormat.ToRGBA(data, header.Width, header.Height);
+                    colors = ddsHeaders[file].PixelFormat.ToRGBA(data, headers[file].Width, headers[file].Height);
                 }
             }
 
             return colors;
         }
 
-        private uint GetSize(int width, int height)
+        private uint CalculateSize(string file, int width, int height)
         {
-            if (headerDDS.PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
+            if (ddsHeaders.ContainsKey(file) && ddsHeaders[file].PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
             {
-                if (headerDDS.PixelFormat.FourCC == "DXT1" || headerDDS.PixelFormat.FourCC == "DXT2" || headerDDS.PixelFormat.FourCC == "DXT3" || headerDDS.PixelFormat.FourCC == "DXT4" || headerDDS.PixelFormat.FourCC == "DXT5")
+                if (ddsHeaders[file].PixelFormat.FourCC == "DXT1" || ddsHeaders[file].PixelFormat.FourCC == "DXT2" || ddsHeaders[file].PixelFormat.FourCC == "DXT3" || ddsHeaders[file].PixelFormat.FourCC == "DXT4" || ddsHeaders[file].PixelFormat.FourCC == "DXT5")
                 {
-                    return (uint)(Math.Max(1, (width + 3) / 4) * Math.Max(1, (height + 3) / 4) * BlockSize);
+                    return (uint)(Math.Max(1, (width + 3) / 4) * Math.Max(1, (height + 3) / 4) * GetBlockSize(file));
                 }
             }
 
-            return ((uint)width * headerDDS.PixelFormat.RGBBitCount + 7) / 8 * (uint)height;
+            return ((uint)width * ddsHeaders[file].PixelFormat.RGBBitCount + 7) / 8 * (uint)height;
         }
 
-        private uint GetPitch(int width)
+        private uint CalculatePitch(string file, int width)
         {
-            if (headerDDS.PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
+            if (ddsHeaders.ContainsKey(file) && ddsHeaders[file].PixelFormat.Flags.HasFlag(PixelFormatFlags.FourCC))
             {
-                if (headerDDS.PixelFormat.FourCC == "DXT1" || headerDDS.PixelFormat.FourCC == "DXT2" || headerDDS.PixelFormat.FourCC == "DXT3" || headerDDS.PixelFormat.FourCC == "DXT4" || headerDDS.PixelFormat.FourCC == "DXT5")
+                if (ddsHeaders[file].PixelFormat.FourCC == "DXT1" || ddsHeaders[file].PixelFormat.FourCC == "DXT2" || ddsHeaders[file].PixelFormat.FourCC == "DXT3" || ddsHeaders[file].PixelFormat.FourCC == "DXT4" || ddsHeaders[file].PixelFormat.FourCC == "DXT5")
                 {
-                    return (uint)(Math.Max(1, (width + 3) / 4) * BlockSize);
+                    return (uint)(Math.Max(1, (width + 3) / 4) * GetBlockSize(file));
                 }
             }
 
-            return (uint)(width * headerDDS.PixelFormat.RGBBitCount + 7) / 8;
+            return (uint)(width * ddsHeaders[file].PixelFormat.RGBBitCount + 7) / 8;
         }
 
-        private uint BlockSize
+        private uint GetBlockSize(string file)
         {
-            get
-            {
-                if (headerDDS.PixelFormat.Flags == PixelFormatFlags.FourCC)
+            if (ddsHeaders.ContainsKey(file) && headers.ContainsKey(file) && ddsHeaders[file].PixelFormat.Flags == PixelFormatFlags.FourCC)
                 {
-                    if (headerDDS.PixelFormat.FourCC == "DXT1" || (headerDDS.PixelFormat.FourCC == "DXT10" && (headerDXT10.Format == Format.BC4_SNorm || headerDXT10.Format == Format.BC4_Typeless || headerDXT10.Format == Format.BC4_UNorm)))
+                    if (ddsHeaders[file].PixelFormat.FourCC == "DXT1" || (dxt10Headers.ContainsKey(file) && ddsHeaders[file].PixelFormat.FourCC == "DXT10" && (dxt10Headers[file].Format == Format.BC4_SNorm || dxt10Headers[file].Format == Format.BC4_Typeless || dxt10Headers[file].Format == Format.BC4_UNorm)))
                         return 8;
                     else
                         return 16;
                 }
                 return 1;
-            }
         }
 
-        private uint Depth
+        private uint GetDepth(string file)
         {
-            get
+            uint depth = 1;
+            if (ddsHeaders.ContainsKey(file))
             {
-                uint depth = 1;
-                if (headerDDS.Caps2 == Caps2.CubeMap)
+                if (ddsHeaders[file].Caps2 == Caps2.CubeMap)
                 {
                     depth = 0;
-                    if (headerDDS.Caps2.HasFlag(Caps2.CubeMapPositiveX))
+                    if (ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapPositiveX))
                         depth += 1;
-                    if (headerDDS.Caps2.HasFlag(Caps2.CubeMapPositiveY))
+                    if (ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapPositiveY))
                         depth += 1;
-                    if (headerDDS.Caps2.HasFlag(Caps2.CubeMapNegativeX))
+                    if (ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapNegativeX))
                         depth += 1;
-                    if (headerDDS.Caps2.HasFlag(Caps2.CubeMapNegativeY))
+                    if (ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapNegativeY))
                         depth += 1;
-                    if (headerDDS.Caps2.HasFlag(Caps2.CubeMapPositiveZ))
+                    if (ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapPositiveZ))
                         depth += 1;
-                    if (headerDDS.Caps2.HasFlag(Caps2.CubeMapNegativeZ))
+                    if (ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapNegativeZ))
                         depth += 1;
-                                        
+
                     return depth;
                 }
-                else if (headerDDS.Flags.HasFlag(Flags.Depth) && headerDDS.Caps2.HasFlag(Caps2.Volume))
-                    return headerDDS.Depth;
-
-                return 1;
+                else if (ddsHeaders[file].Flags.HasFlag(Flags.Depth) && ddsHeaders[file].Caps2.HasFlag(Caps2.Volume))
+                    return ddsHeaders[file].Depth;
             }
+
+            return 1;
         }
 
-        private bool IsVolumeTexture
+        private bool GetIsVolumeTexture(string file)
         {
-            get {
-                //headerDDS.Caps.HasFlag(Caps.Complex); is not required
-                return headerDDS.Caps2.HasFlag(Caps2.Volume);
-            }
+            //headerDDS.Caps.HasFlag(Caps.Complex); is not required
+            return ddsHeaders.ContainsKey(file) && ddsHeaders[file].Caps2.HasFlag(Caps2.Volume);
         }
-        private bool IsCubeMap
+        private bool GetIsCubeMap(string file)
         {
-            get {
-                //headerDDS.Caps.HasFlag(Caps.Complex); is not required
+            //headerDDS.Caps.HasFlag(Caps.Complex); is not required
 
-                //DX11 doesn't support partial cubemaps
-                return headerDDS.Caps2.HasFlag(Caps2.CubeMap) && headerDDS.Caps2.HasFlag(Caps2.CubeMapAllFaces);
-            }
+            //DX11 doesn't support partial cubemaps
+            return ddsHeaders.ContainsKey(file) && ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMap) && ddsHeaders[file].Caps2.HasFlag(Caps2.CubeMapAllFaces);
         }
 
         protected override void Dispose(bool isDisposing)

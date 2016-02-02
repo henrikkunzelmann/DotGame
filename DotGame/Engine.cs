@@ -91,7 +91,6 @@ namespace DotGame
         public EngineSettings Settings { get; private set; }
 
         public AssetManager AssetManager { get; private set; }
-        public ShaderManager ShaderManager { get; private set; }
         public RenderStatePool RenderStatePool { get; private set; }
 
         /// <summary>
@@ -191,7 +190,7 @@ namespace DotGame
 
             thread = new Thread(new ThreadStart(Run));
             thread.Start();
-
+            
             // auf Start warten
             onStart.WaitOne();
 
@@ -211,15 +210,14 @@ namespace DotGame
             switch (Settings.AudioAPI)
             {
                 case AudioAPI.OpenAL:
-                    this.AudioDevice = new DotGame.OpenAL.AudioDevice(Settings.AudioDevice);
+                    //this.AudioDevice = new DotGame.OpenAL.AudioDevice(Settings.AudioDevice);
                     break;
             }
 
             AssetManager = new AssetManager(this);
-            ShaderManager = new ShaderManager(this);
             RenderStatePool = new RenderStatePool(this);
 
-            Log.Debug("Got AudioDevice: " + this.AudioDevice.GetType().FullName);
+            //Log.Debug("Got AudioDevice: " + this.AudioDevice.GetType().FullName);
             GraphicsDevice.DetachCurrent();
         }
 
@@ -353,7 +351,7 @@ namespace DotGame
         public void AddComponent(EngineComponent component)
         {
             if (component == null)
-                throw new ArgumentNullException("component");
+                throw new ArgumentNullException("component");            
 
             lock (components)
             {
@@ -388,8 +386,6 @@ namespace DotGame
 
         protected virtual void Dispose(bool isDisposing)
         {
-            if (ShaderManager != null)
-                ShaderManager.Dispose();
             if (RenderStatePool != null)
                 RenderStatePool.Dispose();
             if (GraphicsDevice != null)

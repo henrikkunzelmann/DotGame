@@ -51,9 +51,26 @@ namespace DotGame.OpenGL4
                 else
                     GL.DrawBuffer(DrawBufferMode.None);
 
-                if (description.DepthAttachmentID != -1)
+                if (description.DepthStencilAttachmentID != -1)
                 {
-                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, FramebufferAttachment.DepthAttachment, description.DepthAttachmentID, 0);
+                    FramebufferAttachment attachment;
+                    switch (description.DepthStencilUsage)
+                    {
+                        case DepthStencilAttachmentUsage.Both:
+                            attachment = FramebufferAttachment.DepthStencilAttachment;
+                            break;
+
+                        case DepthStencilAttachmentUsage.Stencil:
+                            attachment = FramebufferAttachment.StencilAttachment;
+                            break;
+
+                        default:
+                        case DepthStencilAttachmentUsage.Depth:
+                            attachment = FramebufferAttachment.DepthAttachment;
+                            break;
+                    }
+
+                    GL.FramebufferTexture(FramebufferTarget.Framebuffer, attachment, description.DepthStencilAttachmentID, 0);
                 }
             }
             else if (graphicsDevice.OpenGLCapabilities.DirectStateAccess == DirectStateAccess.Extension)
@@ -66,6 +83,7 @@ namespace DotGame.OpenGL4
                     {
                         Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.ColorAttachment0 + i, description.ColorAttachmentIDs[i], 0);
                         buffers[i] = OpenTK.Graphics.OpenGL.DrawBufferMode.ColorAttachment0 + i;
+                        
                     }
 
                     if (description.ColorAttachmentIDs.Length == 0)
@@ -76,9 +94,26 @@ namespace DotGame.OpenGL4
                 else
                     GL.DrawBuffer(DrawBufferMode.None);
 
-                if (description.DepthAttachmentID != -1)
+                if (description.DepthStencilAttachmentID != -1)
                 {
-                    Ext.NamedFramebufferTexture(FboID, OpenTK.Graphics.OpenGL.FramebufferAttachment.DepthAttachment, description.DepthAttachmentID, 0);
+                    FramebufferAttachment attachment;
+                    switch (description.DepthStencilUsage)
+                    {
+                        case DepthStencilAttachmentUsage.Both:
+                            attachment = FramebufferAttachment.DepthStencilAttachment;
+                            break;
+
+                        case DepthStencilAttachmentUsage.Stencil:
+                            attachment = FramebufferAttachment.StencilAttachment;
+                            break;
+
+                        default:
+                        case DepthStencilAttachmentUsage.Depth:
+                            attachment = FramebufferAttachment.DepthAttachment;
+                            break;
+                    }
+
+                    Ext.NamedFramebufferTexture(FboID, (OpenTK.Graphics.OpenGL.FramebufferAttachment)attachment, description.DepthStencilAttachmentID, 0);
                 }
             }
         }

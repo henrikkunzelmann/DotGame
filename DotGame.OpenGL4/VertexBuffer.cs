@@ -73,7 +73,7 @@ namespace DotGame.OpenGL4
                 }
             }
 
-            graphicsDevice.CheckGLError("VertexBuffer Constructor");
+            graphicsDevice.CheckGLError();
         }
 
         internal VertexBuffer(GraphicsDevice graphicsDevice, VertexDescription description, ResourceUsage usage, int vertexCount)
@@ -107,7 +107,7 @@ namespace DotGame.OpenGL4
                 OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(VboID, new IntPtr(SizeBytes), IntPtr.Zero, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
             }
 
-            graphicsDevice.CheckGLError("VertexBuffer Constructor");
+            graphicsDevice.CheckGLError();
         }
 
         internal void UpdateData(DataArray data)

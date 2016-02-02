@@ -25,14 +25,15 @@ namespace DotGame.DirectX11
             : base(graphicsDevice, new StackTrace(1))
         {
             this.Info = info;
-
+        
             Handle = new SamplerState(graphicsDevice.Device, new SamplerStateDescription()
             {
                 Filter = EnumConverter.Convert(info.Type, info.MinFilter, info.MagFilter, info.MipFilter),
                 AddressU = EnumConverter.Convert(info.AddressU),
                 AddressV = EnumConverter.Convert(info.AddressV),
                 AddressW = EnumConverter.Convert(info.AddressW),
-                BorderColor = SharpDX.Color.FromRgba(info.BorderColor.ToRgba()),
+
+                BorderColor = new SharpDX.Mathematics.Interop.RawColor4(info.BorderColor.R, info.BorderColor.G, info.BorderColor.B, info.BorderColor.A),
                 ComparisonFunction = EnumConverter.Convert(info.ComparisonFunction),
                 MaximumAnisotropy = info.MaximumAnisotropy,
                 MinimumLod = info.MinimumLod,

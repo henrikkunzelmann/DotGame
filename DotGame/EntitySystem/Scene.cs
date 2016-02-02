@@ -30,7 +30,7 @@ namespace DotGame
         [JsonIgnore]
         private Camera camera;
         
-        public Camera CurrentCamera
+        public Camera Camera
         {
             get
             {
@@ -48,6 +48,20 @@ namespace DotGame
             : base(engine)
         {
             Root = new Entity("root", this, engine);
+        }
+
+        public override void Init()
+        {
+            base.Init();
+
+            Root.Init();
+        }
+
+        public override void Update(GameTime gameTime)
+        {
+            base.Update(gameTime);
+
+            Root.Update(gameTime);
         }
 
         public void SerializeScene()

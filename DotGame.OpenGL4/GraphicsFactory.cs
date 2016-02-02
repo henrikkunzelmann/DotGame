@@ -35,7 +35,7 @@ namespace DotGame.OpenGL4
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, bool generateMipMaps, ResourceUsage usage = ResourceUsage.Normal, DataRectangle data = new DataRectangle())
         {
             AssertCurrent();
-            return Register(new Texture2D(graphicsDevice, width, height, format, generateMipMaps, usage, data));
+            return Register(new Texture2D(graphicsDevice, width, height, format, generateMipMaps, false, usage, data));
         }
 
         public ITexture2D CreateTexture2D(int width, int height, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataRectangle[] data)
@@ -47,7 +47,7 @@ namespace DotGame.OpenGL4
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, bool generateMipMaps, ResourceUsage usage = ResourceUsage.Normal, DataBox data = new DataBox())
         {
             AssertCurrent();
-            return Register(new Texture3D(graphicsDevice, width, height, length, format, generateMipMaps, usage, data));
+            return Register(new Texture3D(graphicsDevice, width, height, length, format, generateMipMaps, false, usage, data));
         }
 
         public ITexture3D CreateTexture3D(int width, int height, int length, TextureFormat format, int mipLevels, ResourceUsage usage = ResourceUsage.Normal, params DataBox[] data)
@@ -80,14 +80,17 @@ namespace DotGame.OpenGL4
 
         public IRenderTarget2D CreateRenderTarget2D(int width, int height, TextureFormat format, bool generateMipMaps)
         {
+            if (width == 0 || height == 0)
+                throw new ArgumentOutOfRangeException("width and height must not be 0.");
+
             AssertCurrent();
-            return (IRenderTarget2D)CreateTexture2D(width, height, format, generateMipMaps);
+            return (IRenderTarget2D)Register(new Texture2D(graphicsDevice, width, height, format, generateMipMaps, true));
         }
 
         public IRenderTarget3D CreateRenderTarget3D(int width, int height, int length, TextureFormat format, bool generateMipMaps)
         {
             AssertCurrent();
-            return (IRenderTarget3D)CreateTexture3D(width, height, length, format, generateMipMaps); ;
+            return (IRenderTarget3D)Register(new Texture3D(graphicsDevice, width, height, length, format, generateMipMaps, true));
         }
 
         public IRenderTarget2DArray CreateRenderTarget2DArray(int width, int height, TextureFormat format, bool generateMipMaps, int arraySize)
@@ -156,7 +159,7 @@ namespace DotGame.OpenGL4
 
         public IIndexBuffer CreateIndexBuffer(int[] data, ResourceUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.Int32, usage);
+            return CreateIndexBuffer(data, IndexFormat.UInt32, usage);
         }
 
         public IIndexBuffer CreateIndexBuffer(uint[] data, ResourceUsage usage)
@@ -166,7 +169,7 @@ namespace DotGame.OpenGL4
 
         public IIndexBuffer CreateIndexBuffer(short[] data, ResourceUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.Short16, usage);
+            return CreateIndexBuffer(data, IndexFormat.UShort16, usage);
         }
 
         public IIndexBuffer CreateIndexBuffer(ushort[] data, ResourceUsage usage)
@@ -196,27 +199,31 @@ namespace DotGame.OpenGL4
             return constantBuffer;
         }
 
-        public IShader CompileShader(string name, ShaderCompileInfo vertex, ShaderCompileInfo pixel)
+        public IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo)
         {
             AssertCurrent();
 
-            if (name == null)
-                throw new ArgumentNullException("name");
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name is empty or whitespace.", "name");
-            
-            if (vertex.File == null)
-                throw new ArgumentException("File of info is null.", "vertex");
-            if (pixel.File == null)
-                throw new ArgumentException("File of info is null.", "pixel");
-            
-            string vertexCode = File.ReadAllText(vertex.File);
-            vertexCode = CheckShaderVersion(name, vertexCode, vertex);
 
-            string pixelCode = File.ReadAllText(pixel.File);
-            pixelCode = CheckShaderVersion(name, pixelCode, pixel);
+            CheckCompileInfo(vertexInfo, "vertexInfo");
+            CheckCompileInfo(pixelInfo, "pixelInfo");
+            
+            string vertexCode = vertexInfo.SouceCode;
+            vertexCode = CheckShaderVersion(name, vertexCode, vertexInfo);
+
+            string pixelCode = pixelInfo.SouceCode;
+            pixelCode = CheckShaderVersion(name, pixelCode, pixelInfo);
 
             return Register(new Shader(graphicsDevice, vertexCode, pixelCode));
+        }
+
+        private void CheckCompileInfo(ShaderCompileInfo info, string parameterName)
+        {
+            if (string.IsNullOrWhiteSpace(info.SouceCode))
+                throw new ArgumentException("Source code of info is null.", parameterName);
+            if (string.IsNullOrWhiteSpace(info.Version))
+                throw new ArgumentException("Version of info is null.", parameterName);
         }
 
         private string CheckShaderVersion(string shaderName, string shaderCode, ShaderCompileInfo info)

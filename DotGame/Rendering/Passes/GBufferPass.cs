@@ -26,38 +26,36 @@ namespace DotGame.Rendering.Passes
             get; private set;
         }
 
-        public GBufferPass(Engine engine, Scene scene)
-            : base(engine, scene)
+        public GBufferPass(Engine engine, Scene scene, AssetManager manager) : base(engine, scene)
         {
             AddShader(new GBufferShader(engine));
 
-            //RenderTargets[0] = Engine.GraphicsDevice.Factory.CreateRenderTarget2D(1280, 720, TextureFormat.RGB32_Float, false);
-            //RenderTargets[1] = Engine.GraphicsDevice.Factory.CreateRenderTarget2D(1280, 720, TextureFormat.RGB32_Float, false);
-            //DepthRenderTarget = Engine.GraphicsDevice.Factory.CreateRenderTarget2D(1280, 720, TextureFormat.Depth16, false);
+            RenderTargets[0] = Engine.GraphicsDevice.Factory.CreateRenderTarget2D(1280, 720, TextureFormat.RGBA8_UIntNorm, false);
+            RenderTargets[1] = Engine.GraphicsDevice.Factory.CreateRenderTarget2D(1280, 720, TextureFormat.RGBA8_UIntNorm, false);
+            DepthRenderTarget = Engine.GraphicsDevice.Factory.CreateRenderTarget2D(1280, 720, TextureFormat.Depth16, false);
         }
 
         public override void Render(GameTime gameTime)
         {
             var models = Scene.Root.GetComponents<StaticModel>(true);
-            var camera = Scene.Root.GetComponents<Camera>(true)?.First();
 
-            if (camera != null && models != null)
+            if (Scene.Camera != null && models != null)
             {
-                if (camera == null || !camera.IsEnabled)
+                if (Scene.Camera == null || !Scene.Camera.IsEnabled)
                     return;
 
                 //GraphicsDevice.RenderContext.SetRenderTargets(DepthRenderTarget, RenderTargets);
 
                 //Scene.CurrentCamera = camera;
-                switch (camera.ClearMode)
+                switch (Scene.Camera.ClearMode)
                 {
                     case CameraClearMode.Nothing:
                         break;
                     case CameraClearMode.Color:
-                        Engine.GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, camera.ClearColor, camera.ClearDepth, 0);
+                        Engine.GraphicsDevice.RenderContext.Clear(ClearOptions.ColorDepth, Scene.Camera.ClearColor, Scene.Camera.ClearDepth, 0);
                         break;
                     case CameraClearMode.Depth:
-                        Engine.GraphicsDevice.RenderContext.Clear(ClearOptions.Depth, Color.Black, camera.ClearDepth, 0);
+                        Engine.GraphicsDevice.RenderContext.Clear(ClearOptions.Depth, Color.Black, Scene.Camera.ClearDepth, 0);
                         break;
                     default:
                         throw new NotImplementedException();
@@ -67,12 +65,12 @@ namespace DotGame.Rendering.Passes
                 {
                     if (model == null || model.Material == null || model.Mesh == null)
                         continue;
-
+                    
                     var materialDescription = model.Material.CreateDescription();
                     SceneShader shader;
                     if ((shader = GetShader(model.Mesh.VertexBufferHandle?.Description, materialDescription)) != null)
                     {
-                        shader.Apply(GraphicsDevice.RenderContext, camera.ViewProjection, model.Material, model.Entity.Transform.Matrix);
+                        shader.Apply(GraphicsDevice.RenderContext, Scene.Camera.ViewProjection, model.Material, model.Entity.Transform.Matrix);
                         model.Mesh.Draw(GraphicsDevice.RenderContext);
                     }
                 }

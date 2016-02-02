@@ -47,7 +47,7 @@ namespace DotGame.OpenGL4
                 }
             }
 
-            graphicsDevice.CheckGLError("Constant Buffer Constructor");
+            graphicsDevice.CheckGLError();
         }
 
         internal ConstantBuffer(GraphicsDevice graphicsDevice, int sizeBytes, ResourceUsage usage)
@@ -73,7 +73,7 @@ namespace DotGame.OpenGL4
                 OpenTK.Graphics.OpenGL.GL.Ext.NamedBufferData(UboId, new IntPtr(SizeBytes), IntPtr.Zero, (OpenTK.Graphics.OpenGL.ExtDirectStateAccess)EnumConverter.Convert(Usage));
             }
 
-            graphicsDevice.CheckGLError("Constant Buffer Constructor");
+            graphicsDevice.CheckGLError();
         }
 
         internal void UpdateData(DataArray data)

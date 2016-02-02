@@ -188,6 +188,7 @@ namespace DotGame.OpenGL4
         {
             if (!sizedInternalFormats.ContainsKey(format))
                 throw new NotSupportedException("format is not supported");
+
             return sizedInternalFormats[format];
         }
         internal static TextureFormat ConvertSizedInternalFormat(SizedInternalFormat format)

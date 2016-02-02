@@ -104,22 +104,16 @@ namespace DotGame.EntitySystem
                 if (parent != null)
                 {
                     lock (parent.children)
-                    {
                         parent.children.Remove(this);
-                    }
                 }
 
                 parent = value;
                 Scene = parent.Scene;
 
                 Transform.MarkDirty();
-
-                if (parent != null)
-                {
-                    parent.children.Add(this);
-                }
             }
         }
+        
 
         [JsonIgnore]
         public Engine Engine
@@ -270,8 +264,9 @@ namespace DotGame.EntitySystem
                         lock (components)
                             list.AddRange(components.Where(c => types.Any(t => t.IsAssignableFrom(c.GetType()))));
                     }
-                    foreach (var child in children)
-                        list.AddRange(child.GetComponents(true, types));
+                    lock(children)
+                        foreach (var child in children)
+                            list.AddRange(child.GetComponents(true, types));
 
                     return list.ToArray();
                 }
@@ -321,7 +316,8 @@ namespace DotGame.EntitySystem
                 lock (children)
                 {
                     List<Entity> entities = new List<Entity>();
-                    children.ForEach(l => entities.Add(l));
+                    lock(children)
+                        children.ForEach(l => entities.Add(l));
                     return entities.AsReadOnly();
                 }
             }
@@ -337,7 +333,8 @@ namespace DotGame.EntitySystem
                 throw new ArgumentNullException("entity");
 
             entity.Parent = this;
-            children.Add(entity);
+            lock(children)
+                children.Add(entity);
         }
 
         /// <summary>
@@ -373,6 +370,10 @@ namespace DotGame.EntitySystem
         public void Init()
         {
             components.ForEach(component => component.Init());
+        }
+        public void Update(GameTime gameTime)
+        {
+            components.ForEach(component => component.Update(gameTime));
         }
 
         public void AfterDeserialize()

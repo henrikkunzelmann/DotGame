@@ -28,19 +28,19 @@ namespace DotGame.EntitySystem.Rendering
             }
         }
 
-        public GBufferShader(Engine engine) : base(engine, "gbuffer")
+        public GBufferShader(Engine engine) : base(engine, "GBuffer", "gbuffer", "vs", "ps", new Version(4,0))
         {
-            sampler = engine.GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
-            constantBuffer = shader.CreateConstantBuffer(ResourceUsage.Dynamic);
+            sampler = Manager.Engine.GraphicsDevice.Factory.CreateSampler(new SamplerInfo(TextureFilter.Linear));
+            constantBuffer = Handle.CreateConstantBuffer(ResourceUsage.Dynamic);
 
-            rasterizerState = engine.GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
+            rasterizerState = Engine.GraphicsDevice.Factory.CreateRasterizerState(new RasterizerStateInfo()
             {
                 CullMode = CullMode.None,
                 FillMode = FillMode.Solid,
                 IsFrontCounterClockwise = false,
             });
 
-            depthStencil = engine.GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
+            depthStencil = Engine.GraphicsDevice.Factory.CreateDepthStencilState(new DepthStencilStateInfo()
             {
                 IsDepthEnabled = true,
                 DepthComparsion = Comparison.LessEqual,
@@ -53,15 +53,15 @@ namespace DotGame.EntitySystem.Rendering
             context.SetState(Engine.RenderStatePool.GetRenderState(new RenderStateInfo()
             {
                 PrimitiveType = Graphics.PrimitiveType.TriangleList,
-                Shader = shader,
+                Shader = Handle,
                 Rasterizer = rasterizerState,
                 DepthStencil = depthStencil
             }));
-            context.SetTexture(shader, "picture", material.Texture.Handle);
+            context.SetTexture(Handle, "picture", material.Texture.Handle);
             if(Engine.Settings.GraphicsAPI == GraphicsAPI.Direct3D11)
-                context.SetSampler(shader, "pictureSampler", sampler);
+                context.SetSampler(Handle, "pictureSampler", sampler);
             else if (Engine.Settings.GraphicsAPI == GraphicsAPI.OpenGL4)
-                context.SetSampler(shader, "picture", sampler);
+                context.SetSampler(Handle, "picture", sampler);
 
             GCHandle handle;
             DataArray dataArray = DataArray.FromObject<Matrix4x4>(Matrix4x4.Transpose(world * viewProjection), out handle);
@@ -73,12 +73,7 @@ namespace DotGame.EntitySystem.Rendering
             {
                 handle.Free();
             }
-            context.SetConstantBuffer(shader, constantBuffer);
-        }
-
-        protected override void Dispose(bool isDisposing)
-        {
-            base.Dispose(isDisposing);
+            context.SetConstantBuffer(Handle, constantBuffer);
         }
     }
 }

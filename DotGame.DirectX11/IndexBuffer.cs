@@ -48,16 +48,12 @@ namespace DotGame.DirectX11
             this.Format = format;
             this.SizeBytes = data.Size;
             this.Usage = usage;
+            
+                        
+            BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(usage),
+                BindFlags.IndexBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
 
-            if (!data.IsNull)
-            {
-                this.SizeBytes = data.Size;
-
-                BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(usage),
-                 BindFlags.IndexBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
-
-                this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, data.Pointer, bufferDescription);
-            }
+            this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, data.Pointer, bufferDescription);
         }
 
         public IndexBuffer(GraphicsDevice graphicsDevice, IndexFormat format, Graphics.ResourceUsage usage, int indexCount)
@@ -71,9 +67,18 @@ namespace DotGame.DirectX11
             this.Format = format;
             this.SizeBytes = indexCount * graphicsDevice.GetSizeOf(format);
             this.Usage = usage;
-            
-            BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(Usage),
-             BindFlags.IndexBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
+
+            BufferDescription bufferDescription = new BufferDescription()
+            {
+                Usage = SharpDX.Direct3D11.ResourceUsage.Default,
+                SizeInBytes = SizeBytes,
+                BindFlags = BindFlags.IndexBuffer,
+                CpuAccessFlags = (CpuAccessFlags)0,
+                OptionFlags = (ResourceOptionFlags)0,
+            };
+
+            //BufferDescription bufferDescription = new BufferDescription(SizeBytes, (SharpDX.Direct3D11.ResourceUsage)EnumConverter.Convert(Usage),
+            // BindFlags.IndexBuffer, EnumConverter.ConvertToAccessFlag(Usage), ResourceOptionFlags.None, 0);
 
             this.Buffer = new SharpDX.Direct3D11.Buffer(graphicsDevice.Device, bufferDescription);
         }

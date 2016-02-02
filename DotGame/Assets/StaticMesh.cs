@@ -9,9 +9,9 @@ namespace DotGame.Assets
 {
     public class StaticMesh : Mesh
     {
-        public StaticMesh(AssetManager manager, string name, AssetType type, IVertexBuffer vertexBuffer) : base(manager, name, type, vertexBuffer)
+        public StaticMesh(Engine engine, string name, AssetType type, IVertexBuffer vertexBuffer) : base(engine, name, type, vertexBuffer)
         { }
-        public StaticMesh(AssetManager manager, string name, AssetType type, IVertexBuffer vertexBuffer, IIndexBuffer indexBuffer) : base(manager, name, type, vertexBuffer, indexBuffer)
+        public StaticMesh(Engine engine, string name, AssetType type, IVertexBuffer vertexBuffer, IIndexBuffer indexBuffer) : base(engine, name, type, vertexBuffer, indexBuffer)
         { }
 
         public override void Draw(IRenderContext context)

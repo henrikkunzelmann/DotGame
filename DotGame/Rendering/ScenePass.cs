@@ -37,8 +37,6 @@ namespace DotGame.Rendering
             return shaders.First(s => s.VertexDescription.EqualsIgnoreOrder(vertexDescription) && s.MaterialDescription.Equals(materialDescription));
         }
 
-
-
         protected override void Dispose(bool isDisposing)
         {
             foreach (var shader in shaders)

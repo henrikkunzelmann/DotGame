@@ -133,7 +133,7 @@ namespace DotGame.DirectX11
 
         public IIndexBuffer CreateIndexBuffer(int[] data, ResourceUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.Int32, usage);
+            return CreateIndexBuffer(data, IndexFormat.UInt32, usage);
         }
 
         public IIndexBuffer CreateIndexBuffer(uint[] data, ResourceUsage usage)
@@ -143,7 +143,7 @@ namespace DotGame.DirectX11
 
         public IIndexBuffer CreateIndexBuffer(short[] data, ResourceUsage usage)
         {
-            return CreateIndexBuffer(data, IndexFormat.Short16, usage);
+            return CreateIndexBuffer(data, IndexFormat.UShort16, usage);
         }
 
         public IIndexBuffer CreateIndexBuffer(ushort[] data, ResourceUsage usage)
@@ -174,29 +174,28 @@ namespace DotGame.DirectX11
         }
 
         public IShader CompileShader(string name, ShaderCompileInfo vertexInfo, ShaderCompileInfo pixelInfo)
-        { 
-            if (name == null)
-                throw new ArgumentNullException("name");
+        {
             if (string.IsNullOrWhiteSpace(name))
                 throw new ArgumentException("Name is empty or whitespace.", "name");
+
             CheckCompileInfo(vertexInfo, "vertexInfo");
             CheckCompileInfo(pixelInfo, "pixelInfo");
 
             ShaderBytecode vertexCode, pixelCode;
-            using (IncludeHandler include = IncludeHandler.CreateForShader(vertexInfo.File))
-                vertexCode = ShaderBytecode.CompileFromFile(vertexInfo.File, vertexInfo.Function, vertexInfo.Version, ShaderFlags.None, EffectFlags.None, null, include);
-            using (IncludeHandler include = IncludeHandler.CreateForShader(pixelInfo.File))
-                pixelCode = ShaderBytecode.CompileFromFile(pixelInfo.File, pixelInfo.Function, pixelInfo.Version, ShaderFlags.None, EffectFlags.None, null, include);
+            //using (IncludeHandler include = IncludeHandler.CreateForShader(vertexInfo.SouceCode))
+                vertexCode = ShaderBytecode.Compile(vertexInfo.SouceCode, vertexInfo.Function, vertexInfo.Version, ShaderFlags.None, EffectFlags.None, null);
+            //using (IncludeHandler include = IncludeHandler.CreateForShader(pixelInfo.SouceCode))
+                pixelCode = ShaderBytecode.Compile(pixelInfo.SouceCode, pixelInfo.Function, pixelInfo.Version, ShaderFlags.None, EffectFlags.None, null);
             return new Shader(graphicsDevice, name, vertexCode, pixelCode);
         }
 
         private void CheckCompileInfo(ShaderCompileInfo info, string parameterName)
         {
-            if (info.File == null)
-                throw new ArgumentException("File of info is null.", parameterName);
-            if (info.Function == null)
+            if (string.IsNullOrWhiteSpace(info.SouceCode))
+                throw new ArgumentException("Source code of info is null.", parameterName);
+            if (string.IsNullOrWhiteSpace(info.Function))
                 throw new ArgumentException("Function of info is null.", parameterName);
-            if (info.Version == null)
+            if (string.IsNullOrWhiteSpace(info.Version))
                 throw new ArgumentException("Version of info is null.", parameterName);
         }
 

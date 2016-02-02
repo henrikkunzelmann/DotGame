@@ -12,9 +12,9 @@ namespace DotGame.Graphics
     public struct ShaderCompileInfo
     {
         /// <summary>
-        /// Gibt die Quellcode-Datei des Shaders an oder setzt diese.
+        /// Gibt den Quellcode des Shaders an oder setzt diesen.
         /// </summary>
-        public string File;
+        public string SouceCode;
 
         /// <summary>
         /// Gibt die Funktion im Quellcode des Shaders an oder setzt diese.
@@ -26,9 +26,9 @@ namespace DotGame.Graphics
         /// </summary>
         public string Version;
 
-        public ShaderCompileInfo(string file, string function, string version)
+        public ShaderCompileInfo(string sourceCode, string function, string version)
         {
-            this.File = file;
+            this.SouceCode = sourceCode;
             this.Function = function;
             this.Version = version;
         }

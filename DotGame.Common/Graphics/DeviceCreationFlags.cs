@@ -5,10 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace DotGame.Graphics
-{
+{    
+    [Flags]
     public enum DeviceCreationFlags
     {
         None = 0,
-        Debug = 1
+        Debug = 1,
+        Reference = 2
     }
 }
