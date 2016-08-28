@@ -170,9 +170,7 @@ namespace DotGame
 
                 GameTime = new GameTime(gameTime.Elapsed, frame, tickCount);
                 Tick(GameTime);
-
-                const int targetFPS = 60;
-                while (frameTime.ElapsedTicks < (1f / targetFPS) * Stopwatch.Frequency) ;
+                 
                 tickCount++;
             }
 
