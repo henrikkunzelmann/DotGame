@@ -1,13 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Graphics;
-using System.Diagnostics;
+﻿using DotGame.Graphics;
 using SharpDX.Direct3D;
 using SharpDX.Direct3D11;
-using DXResourceUsage = SharpDX.Direct3D11.ResourceUsage;
+using System;
+using System.Diagnostics;
 using ResourceUsage = DotGame.Graphics.ResourceUsage;
 
 namespace DotGame.DirectX11

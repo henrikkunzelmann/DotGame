@@ -1,17 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Numerics;
-using DotGame;
-using DotGame.Utils;
-using DotGame.Rendering;
-using DotGame.Assets;
-using DotGame.Geometry;
-
-
-namespace DotGame.Test
+﻿namespace DotGame.Test
 {
     /*
     public class GraphTest : GameComponent

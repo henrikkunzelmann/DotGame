@@ -1,10 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using NVorbis;
+using System;
 using System.Text;
-using System.Threading.Tasks;
-using DotGame.Audio;
-using NVorbis;
 
 namespace DotGame.Audio.SampleSources
 {

@@ -1,11 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Graphics;
-
-namespace DotGame.Graphics
+﻿namespace DotGame.Graphics
 {
     /// <summary>
     /// Ein bestimmer Bereich in dem die Engine zeichnen kann, z.B. ein normales Fenster oder ein Teil davon.

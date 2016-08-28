@@ -1,12 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Assets;
-using DotGame.Graphics;
-using System.Numerics;
-using DotGame.EntitySystem.Components;
+﻿using DotGame.Graphics;
+using System;
 
 namespace DotGame.Rendering
 {

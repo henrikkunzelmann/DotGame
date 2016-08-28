@@ -1,12 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Utils;
-using DotGame.Rendering;
-using DotGame.Graphics;
-using System.Numerics;
+﻿using DotGame.Rendering;
 
 namespace DotGame.Assets
 {

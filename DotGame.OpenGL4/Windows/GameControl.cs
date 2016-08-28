@@ -1,16 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using DotGame.Graphics;
+﻿using DotGame.Graphics;
 using OpenTK;
-using OpenTK.Graphics.OpenGL4;
 using OpenTK.Graphics;
-using Config = OpenTK.Configuration;
-using Utilities = OpenTK.Platform.Utilities;
 using OpenTK.Platform;
+using System;
+using System.Windows.Forms;
+using Utilities = OpenTK.Platform.Utilities;
 
 namespace DotGame.OpenGL4.Windows
 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DotGame.Graphics
+﻿namespace DotGame.Graphics
 {
     /// <summary>
     /// Verwaltet Befehle an das IGraphicsDevice, wie die Befehle über die Pipeline oder Zeichen-Befehle.

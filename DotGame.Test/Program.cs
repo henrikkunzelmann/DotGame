@@ -1,19 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using DotGame.Rendering;
+using System;
 using System.Windows.Forms;
-using System.Numerics;
-using System.Diagnostics;
-using System.Threading;
-using DotGame;
-using DotGame.Utils;
-using DotGame.Rendering;
-using DotGame.Geometry;
-using DotGame.EntitySystem;
-using DotGame.Assets;
-using DotGame.EntitySystem.Components;
-using DotGame.Graphics;
 
 namespace DotGame.Test
 {

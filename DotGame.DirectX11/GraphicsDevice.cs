@@ -1,15 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Graphics;
-using SharpDX.Direct3D11;
-using Device = SharpDX.Direct3D11.Device;
-using System.Windows.Forms;
-using SharpDX.Windows;
-using SharpDX.DXGI;
+﻿using DotGame.Graphics;
 using DotGame.Utils;
+using SharpDX.Direct3D11;
+using SharpDX.DXGI;
+using System;
+using System.Collections.Generic;
+using Device = SharpDX.Direct3D11.Device;
 using DeviceCreationFlags = DotGame.Graphics.DeviceCreationFlags;
 
 namespace DotGame.DirectX11

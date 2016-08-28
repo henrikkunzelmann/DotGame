@@ -1,16 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame;
-using DotGame.Utils;
-using DotGame.Rendering;
-using DotGame.Graphics;
-using DotGame.EntitySystem;
+﻿using DotGame.EntitySystem;
 using DotGame.EntitySystem.Components;
 using Newtonsoft.Json;
 using System.IO;
+using System.Linq;
 
 namespace DotGame
 {

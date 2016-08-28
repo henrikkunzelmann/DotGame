@@ -1,12 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.IO;
-using System.Diagnostics;
+﻿using DotGame.Graphics;
 using SharpDX.D3DCompiler;
-using DotGame.Graphics;
+using System;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 namespace DotGame.DirectX11

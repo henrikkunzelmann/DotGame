@@ -1,9 +1,9 @@
-﻿using System;
-using System.Windows.Forms;
-using DotGame.Graphics;
+﻿using DotGame.Graphics;
 using SharpDX.Direct3D;
-using Device = SharpDX.Direct3D11.Device;
 using SharpDX.DXGI;
+using System;
+using System.Windows.Forms;
+using Device = SharpDX.Direct3D11.Device;
 
 namespace DotGame.DirectX11.Windows
 {

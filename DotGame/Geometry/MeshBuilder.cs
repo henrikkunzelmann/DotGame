@@ -1,10 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using DotGame.Utils;
-using DotGame.Assets;
+﻿using DotGame.Assets;
 using DotGame.Graphics;
+using System;
+using System.Collections.Generic;
 using System.Numerics;
 
 namespace DotGame.Geometry

@@ -1,12 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Audio;
+﻿using DotGame.Audio;
 using OpenTK.Audio.OpenAL;
-using System.Runtime.InteropServices;
+using System;
 using System.Collections.ObjectModel;
+using System.Runtime.InteropServices;
+using System.Text;
 using System.Threading;
 
 namespace DotGame.OpenAL

@@ -1,14 +1,9 @@
 ﻿using DotGame.EntitySystem.Components;
-using DotGame.Graphics;
-using DotGame.Rendering;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Runtime.Serialization;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace DotGame.EntitySystem
 {

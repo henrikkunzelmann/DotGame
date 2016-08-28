@@ -1,17 +1,10 @@
-﻿using System;
+﻿using DotGame.Graphics;
+using SharpDX.D3DCompiler;
+using SharpDX.Direct3D11;
+using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Diagnostics;
 using System.IO;
-using SharpDX;
-using SharpDX.D3DCompiler;
-using SharpDX.DXGI;
-using SharpDX.Direct3D11;
-using DotGame.Graphics;
-using DotGame.Utils;
-using Texture2D = DotGame.DirectX11.Texture2D;
 
 namespace DotGame.DirectX11
 {

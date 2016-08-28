@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DotGame.Graphics
+﻿namespace DotGame.Graphics
 {
     /// <summary>
     /// Stellt den aktuellen Zustand der Pipeline dar. Die States können über den IRenderContext ausgewechselt werden.

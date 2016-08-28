@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DotGame.Rendering
+﻿namespace DotGame.Rendering
 {
     /// <summary>
     /// Speichert die Passes und deren Reihenfolge die für das Rendering benutzt werden soll.

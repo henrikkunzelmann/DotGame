@@ -1,11 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Graphics;
+﻿using DotGame.Graphics;
 using OpenTK.Graphics.OpenGL4;
-using System.Runtime.InteropServices;
+using System;
 using Ext = OpenTK.Graphics.OpenGL.GL.Ext;
 
 namespace DotGame.OpenGL4

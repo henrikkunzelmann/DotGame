@@ -1,13 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using DotGame.Graphics;
+using System;
 using System.Drawing;
 using System.Drawing.Imaging;
-using DotGame.Graphics;
-using Color = DotGame.Graphics.Color;
 using System.Runtime.InteropServices;
+using Color = DotGame.Graphics.Color;
 
 namespace DotGame.Assets.Importers
 {

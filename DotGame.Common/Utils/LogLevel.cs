@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace DotGame.Utils
+﻿namespace DotGame.Utils
 {
     /// <summary>
     /// Gibt die verschiedene Level für die Einträge an.

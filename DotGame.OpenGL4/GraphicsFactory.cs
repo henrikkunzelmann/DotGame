@@ -1,16 +1,9 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using DotGame.Graphics;
-using OpenTK.Graphics.OpenGL4;
-using System.Collections.ObjectModel;
-using System.Diagnostics;
+﻿using DotGame.Graphics;
 using DotGame.Utils;
+using System;
+using System.Collections.Generic;
+using System.Collections.ObjectModel;
 using System.IO;
-using System.Drawing;
-using System.Drawing.Imaging;
 using System.Runtime.InteropServices;
 
 namespace DotGame.OpenGL4

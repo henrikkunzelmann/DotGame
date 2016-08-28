@@ -1,17 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using SharpDX;
-using SharpDX.D3DCompiler;
-using SharpDX.DXGI;
+﻿using DotGame.Graphics;
 using SharpDX.Direct3D11;
-using DotGame.Graphics;
-using DotGame.Utils;
-using Comparison = DotGame.Graphics.Comparison;
-using Color = DotGame.Graphics.Color;
+using System.Diagnostics;
 
 namespace DotGame.DirectX11
 {
