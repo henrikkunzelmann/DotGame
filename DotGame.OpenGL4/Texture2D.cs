@@ -26,7 +26,7 @@ namespace DotGame.OpenGL4
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Height must be positive.");
             if (format == TextureFormat.Unknown)
-                throw new ArgumentException("Format must be not TextureFormat.Unkown.", "format");
+                throw new ArgumentException("Format must not be TextureFormat.Unknown.", "format");
             if (width > graphicsDevice.OpenGLCapabilities.MaxTextureSize)
                 throw new PlatformNotSupportedException("width exceeds the maximum texture size");
             if (height > graphicsDevice.OpenGLCapabilities.MaxTextureSize)
@@ -110,9 +110,9 @@ namespace DotGame.OpenGL4
             if (height <= 0)
                 throw new ArgumentOutOfRangeException("height", "Height must be positive.");
             if (mipLevels < 0)
-                throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must be not negative.");
+                throw new ArgumentOutOfRangeException("mipLevels", "MipLevels must not be negative.");
             if (format == TextureFormat.Unknown)
-                throw new ArgumentException("Format must be not TextureFormat.Unkown.", "format");
+                throw new ArgumentException("Format must not be TextureFormat.Unknown.", "format");
             if (width > graphicsDevice.OpenGLCapabilities.MaxTextureSize)
                 throw new PlatformNotSupportedException("width exceeds the maximum texture size");
             if (height > graphicsDevice.OpenGLCapabilities.MaxTextureSize)

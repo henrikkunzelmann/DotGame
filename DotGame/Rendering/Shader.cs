@@ -13,7 +13,7 @@ namespace DotGame.Rendering
             : base(engine)
         {
             if (string.IsNullOrWhiteSpace(name))
-                throw new ArgumentException("Name must be not null, empty or white-space.", "name");
+                throw new ArgumentException("Name must not be null, empty or white-space.", "name");
 
             this.Name = name;
             this.shader = engine.ShaderManager.CompileShader(name);
