@@ -19,13 +19,6 @@ namespace DotGame
         private static List<GraphicsAPI> supportedGraphicsAPIs;
         private static List<AudioAPI> supportedAudioAPIs;
 
-        [DllImport("kernel32", SetLastError = true)]
-        private static extern IntPtr LoadLibrary(string lpFileName);
-        private static bool CheckLibrary(string fileName)
-        {
-            return LoadLibrary(fileName) != IntPtr.Zero;
-        }
-
         /// <summary>
         /// Prüft, ob die gegebene Grafik-API zur Verfügung steht.
         /// </summary>
@@ -39,13 +32,47 @@ namespace DotGame
             return supportedGraphicsAPIs.Contains(GraphicsAPI);
         }
 
+        [DllImport("kernel32", SetLastError = true)]
+        private static extern IntPtr LoadLibrary(string fileName);
+
+        [DllImport("kernel32", SetLastError = true)]
+        private static extern void FreeLibrary(IntPtr module);
+
+        /// <summary>
+        /// Checks the existence of a windows library.
+        /// </summary>
+        /// <param name="dll"></param>
+        /// <returns></returns>
+        private static bool CheckLibrary(string fileName)
+        {
+            // Check if system is windows
+            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
+                return false;
+
+            try
+            {
+                IntPtr ptr = LoadLibrary(fileName);
+                if (ptr == IntPtr.Zero) // Library not loaded
+                    return false;
+
+                FreeLibrary(ptr);
+                return true;
+            }
+            catch (Exception e)
+            {
+                Log.Error(e);
+            }
+            return false;
+        }
+
+
         private static void InitGraphicsAPIs()
         {
             supportedGraphicsAPIs = new List<GraphicsAPI>();
             // TODO (Joex3): Besseres Überprüfen?
             try
             {
-                if (Environment.OSVersion.Platform == PlatformID.Win32NT && Environment.OSVersion.Version.Major >= 6 && CheckLibrary("d3d11.dll"))
+                if (CheckLibrary("d3d11.dll"))
                     supportedGraphicsAPIs.Add(GraphicsAPI.Direct3D11);
             }
             catch (DllNotFoundException) { }
