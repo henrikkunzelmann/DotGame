@@ -1,12 +1,18 @@
 ﻿namespace DotGame
 {
+    /// <summary>
+    /// Specifies the graphics api to use.
+    /// </summary>
     public enum GraphicsAPI
     {
+        /// <summary>
+        /// Use OpenGL4 api.
+        /// </summary>
         OpenGL4,
-        OpenGLES2,
-        OpenGLES3,
-        Vulkan,
+
+        /// <summary>
+        /// Use the Direct3D 11 api.
+        /// </summary>
         Direct3D11,
-        Direct3D12,
     }
 }
