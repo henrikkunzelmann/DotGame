@@ -6,7 +6,6 @@ using DotGame.Utils;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.Threading;
 using System.Windows.Forms;
 
@@ -14,91 +13,6 @@ namespace DotGame
 {
     public class Engine : IDisposable
     {
-        public static IReadOnlyCollection<GraphicsAPI> SupportedGraphicsAPIs { get { if (supportedGraphicsAPIs == null) InitGraphicsAPIs(); return supportedGraphicsAPIs.AsReadOnly(); } }
-        public static IReadOnlyCollection<AudioAPI> SupportedAudioAPIs { get { if (supportedAudioAPIs == null) InitAudioAPIs(); return supportedAudioAPIs.AsReadOnly(); } }
-        private static List<GraphicsAPI> supportedGraphicsAPIs;
-        private static List<AudioAPI> supportedAudioAPIs;
-
-        /// <summary>
-        /// Prüft, ob die gegebene Grafik-API zur Verfügung steht.
-        /// </summary>
-        /// <param name="GraphicsAPI">Die Grafik-API.</param>
-        /// <returns>True, wenn die Grafik-API zur Verfügung steht, ansonsten false.</returns>
-        public static bool IsAPISupported(GraphicsAPI GraphicsAPI)
-        {
-            if (supportedGraphicsAPIs == null)
-                InitGraphicsAPIs();
-
-            return supportedGraphicsAPIs.Contains(GraphicsAPI);
-        }
-
-        [DllImport("kernel32", SetLastError = true)]
-        private static extern IntPtr LoadLibrary(string fileName);
-
-        [DllImport("kernel32", SetLastError = true)]
-        private static extern void FreeLibrary(IntPtr module);
-
-        /// <summary>
-        /// Checks the existence of a windows library.
-        /// </summary>
-        /// <param name="dll"></param>
-        /// <returns></returns>
-        private static bool CheckLibrary(string fileName)
-        {
-            // Check if system is windows
-            if (Environment.OSVersion.Platform != PlatformID.Win32NT)
-                return false;
-
-            try
-            {
-                IntPtr ptr = LoadLibrary(fileName);
-                if (ptr == IntPtr.Zero) // Library not loaded
-                    return false;
-
-                FreeLibrary(ptr);
-                return true;
-            }
-            catch (Exception e)
-            {
-                Log.Error(e);
-            }
-            return false;
-        }
-
-
-        private static void InitGraphicsAPIs()
-        {
-            supportedGraphicsAPIs = new List<GraphicsAPI>();
-            // TODO (Joex3): Besseres Überprüfen?
-            try
-            {
-                if (CheckLibrary("d3d11.dll"))
-                    supportedGraphicsAPIs.Add(GraphicsAPI.Direct3D11);
-            }
-            catch (DllNotFoundException) { }
-
-            supportedGraphicsAPIs.Add(GraphicsAPI.OpenGL4);
-        }
-
-        /// <summary>
-        /// Prüft, ob die gegebene Audio-API zur Verfügung steht.
-        /// </summary>
-        /// <param name="AudioAPI">Die Audio-API.</param>
-        /// <returns>True, wenn die Audio-API zur Verfügung steht, ansonsten false.</returns>
-        public static bool IsAPISupported(AudioAPI AudioAPI)
-        {
-            if (supportedAudioAPIs == null)
-                InitAudioAPIs();
-
-            return supportedAudioAPIs.Contains(AudioAPI);
-        }
-
-        private static void InitAudioAPIs()
-        {
-            supportedAudioAPIs = new List<AudioAPI>();
-            supportedAudioAPIs.Add(AudioAPI.OpenAL);
-        }
-
         /// <summary>
         /// Das GraphicsDevice welches die Engine nutzt.
         /// </summary>
@@ -173,21 +87,11 @@ namespace DotGame
             Log.Info("===========");
             Log.Info("Engine starting...");
 
-            if (!IsAPISupported(settings.GraphicsAPI))
-            {
-                if (supportedGraphicsAPIs.Count == 0)
-                    throw new PlatformNotSupportedException("No supported GraphicsAPIs found.");
-                settings.GraphicsAPI = supportedGraphicsAPIs[0];
-                Log.Info("Falling back to {0}-rendering backend...", settings.GraphicsAPI);
-            }
+            if (!SystemCapabilities.IsSupported(settings.GraphicsAPI))
+                throw new PlatformNotSupportedException(string.Format("Graphics api \"{0}\" not supported.", settings.GraphicsAPI));
 
-            if (!IsAPISupported(settings.AudioAPI))
-            {
-                if (supportedAudioAPIs.Count == 0)
-                    throw new PlatformNotSupportedException("No supported AudioAPIs found.");
-                settings.AudioAPI = supportedAudioAPIs[0];
-                Log.Info("Falling back to {0}-audio backend...", settings.AudioAPI);
-            }
+            if (!SystemCapabilities.IsSupported(settings.AudioAPI))
+                throw new PlatformNotSupportedException(string.Format("Audio api \"{0}\" not supported.", settings.AudioAPI));
 
             this.Settings = settings;
 
@@ -268,10 +172,6 @@ namespace DotGame
                 Tick(GameTime);
 
                 const int targetFPS = 60;
-                //Thread.Sleep ist viel zu ungenau
-                //int sleepTime = (1000 / targetFPS) - (int)frameTime.ElapsedMilliseconds;
-                //if (sleepTime > 0)
-                //    Thread.Sleep(sleepTime); 
                 while (frameTime.ElapsedTicks < (1f / targetFPS) * Stopwatch.Frequency) ;
                 tickCount++;
             }
