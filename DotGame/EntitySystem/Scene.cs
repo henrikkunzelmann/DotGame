@@ -9,7 +9,7 @@ namespace DotGame
     /// <summary>
     /// Stellt die komplette Welt dar, d.h. SceneNodes und Camera.
     /// </summary>
-    public class Scene : EngineComponent
+    public class Scene : GameComponent
     {
         /// <summary>
         /// Gibt die Root-SceneNode an.

@@ -3,12 +3,12 @@ using Newtonsoft.Json;
 
 namespace DotGame
 {
-    public abstract class EngineComponent : EngineObject
+    public abstract class GameComponent : EngineObject
     {
         [JsonIgnore]
         public IGraphicsDevice GraphicsDevice { get { return Engine.GraphicsDevice; } }
        
-        public EngineComponent(Engine engine) : base(engine)
+        public GameComponent(Engine engine) : base(engine)
         {
         }
 

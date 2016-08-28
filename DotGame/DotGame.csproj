@@ -145,7 +145,6 @@
     <Compile Include="Rendering\ShaderManager.cs" />
     <Compile Include="Rendering\SpriteBatch.cs" />
     <Compile Include="SystemCapabilities.cs" />
-    <Compile Include="TimerUtils.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="App.config" />

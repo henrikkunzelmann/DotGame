@@ -62,9 +62,9 @@ namespace DotGame
         private ManualResetEvent onStart = new ManualResetEvent(false);
 
         // drei Listen erlauben es, dass man Komponenten flexibler hinzufügen bzw. entfernen kann
-        private List<EngineComponent> components = new List<EngineComponent>();
-        private List<EngineComponent> componentsToAdd = new List<EngineComponent>();
-        private List<EngineComponent> componentsToRemove = new List<EngineComponent>();
+        private List<GameComponent> components = new List<GameComponent>();
+        private List<GameComponent> componentsToAdd = new List<GameComponent>();
+        private List<GameComponent> componentsToRemove = new List<GameComponent>();
 
         public Engine()
             : this(new EngineSettings())
@@ -209,7 +209,7 @@ namespace DotGame
 
                 lock (components)
                 {
-                    foreach (EngineComponent component in components)
+                    foreach (GameComponent component in components)
                         component.Unload();
                 }
 
@@ -226,7 +226,7 @@ namespace DotGame
             lock (components)
             {
                 // alle Komponenten die noch nicht hinzugefügt wurden hinzufügen und initialisieren
-                foreach (EngineComponent component in componentsToAdd)
+                foreach (GameComponent component in componentsToAdd)
                     if (!components.Contains(component))
                     {
                         components.Add(component);
@@ -234,19 +234,19 @@ namespace DotGame
                     }
 
                 // alle Komponenten die entfernt werden sollen entfernen und entladen
-                foreach (EngineComponent component in componentsToRemove)
+                foreach (GameComponent component in componentsToRemove)
                 {
                     components.Remove(component);
                     component.Unload();
                 }
 
                 // alle Komponenten aktualisieren
-                foreach (EngineComponent component in components)
+                foreach (GameComponent component in components)
                     if (!componentsToRemove.Contains(component))
                         component.Update(gameTime);
 
                 // alle Komponenten zeichnen
-                foreach (EngineComponent component in components)
+                foreach (GameComponent component in components)
                     if (!componentsToRemove.Contains(component))
                         component.Draw(gameTime);
 
@@ -272,7 +272,7 @@ namespace DotGame
             }
         }
 
-        public void AddComponent(EngineComponent component)
+        public void AddComponent(GameComponent component)
         {
             if (component == null)
                 throw new ArgumentNullException("component");
@@ -286,7 +286,7 @@ namespace DotGame
             }
         }
 
-        public void RemoveComponent(EngineComponent component)
+        public void RemoveComponent(GameComponent component)
         {
             if (component == null)
                 throw new ArgumentNullException("component");
@@ -300,7 +300,7 @@ namespace DotGame
             }
         }
 
-        public IReadOnlyCollection<EngineComponent> Components
+        public IReadOnlyCollection<GameComponent> Components
         {
             get
             {

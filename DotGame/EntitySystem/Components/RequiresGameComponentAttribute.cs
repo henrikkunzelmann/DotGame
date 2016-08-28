@@ -21,7 +21,7 @@ namespace DotGame.EntitySystem.Components
         {
             if (gameComponentType == null)
                 throw new ArgumentNullException("componentType");
-            if (!gameComponentType.IsSubclassOf(typeof(EngineComponent)))
+            if (!gameComponentType.IsSubclassOf(typeof(GameComponent)))
                 throw new ArgumentException("Given type must be a subtype of Component.", "componentType");
 
             this.GameComponentType = gameComponentType;

@@ -7,7 +7,7 @@ namespace DotGame.Rendering
     /// <summary>
     /// Speichert die Passes und deren Reihenfolge die für das Rendering benutzt werden soll.
     /// </summary>
-    public abstract class PassPipeline : EngineComponent
+    public abstract class PassPipeline : GameComponent
     {
         private object locker = new object();
         private Pass[] passes;
