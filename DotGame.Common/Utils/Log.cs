@@ -94,7 +94,7 @@ namespace DotGame.Utils
                         buffer.Append(formattedMessage);
                     }
 
-                    if (!allowBuffer || buffer.Length >= bufferCapacity)
+                    if (!allowBuffer || buffer.Length >= bufferCapacity || level == LogLevel.Error)
                         FlushBuffer();
                 }
             }
@@ -174,6 +174,19 @@ namespace DotGame.Utils
                 throw new ArgumentNullException("message");
 
             Write(LogLevel.Error, message);
+        }
+
+        public static void Error(Exception exception)
+        {
+            if (exception == null)
+                throw new ArgumentNullException("exception");
+
+            Error(exception.Message);
+
+            if (exception.StackTrace != null)
+                Error(exception.StackTrace);
+            else
+                Error("No stacktrace");
         }
 
         /// <summary>
